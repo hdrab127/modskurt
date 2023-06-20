@@ -1,0 +1,99 @@
+---
+title: "getting-started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{getting-started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+if (FALSE) {
+  # library(dplyr)
+  # library(cmdstanr)
+  library(modskurt)
+  # only needs to be run every time package installed or updated
+  # TODO: find better edit dir for testing only:
+  compile_stanmodels(force_recompile = TRUE)
+  
+  # the simplest workflow ----
+  
+  # 0. data and questions
+  # tuangi <-
+  #   readRDS('../macrofauna/cockles-sst.rds') %>%
+  #   select(-id, -ym) %>%
+  #   select(year,
+  #          lon,
+  #          lat,
+  #          count,
+  #          mud_pct,
+  #          tn_conc,
+  #          toc_pct,
+  #          tp_conc,
+  #          sst_min,
+  #          sst_avg,
+  #          sst_max)
+  # usethis::use_data(tuangi, overwrite = TRUE)
+  data(tuangi)
+  tuangi
+  
+  # 1. specify model
+  spec <-
+    modskurt_spec(data = tuangi,
+                  # response and gradients (optional names for tidier outputs)
+                  y = c('Tuangi (count)' = 'count'),
+                  x = c('Mud (%)' = 'mud_pct'),
+                  # distribution of abundance
+                  dist = 'nb',
+                  # shape of dist mean function, see ?modskurt_shape()
+                  shape = 'rdp')
+  str(spec)
+  
+  # 2. check prior specification
+  check_prior(spec)
+  
+  # 3. estimate posterior (and internally validate computation)
+  # set.seed(1234)
+  # modskurt:::modskurt_inits(spec, 6) %>% 
+  #   lapply(as_tibble) %>% 
+  #   bind_rows()
+  fit <-
+    modskurt_fit(spec,
+                 seed = 1234,
+                 # init = NULL,
+                 # max_treedepth = NULL,
+                 # adapt_delta = NULL,
+                 # max_depth = NULL,
+                 iter_warmup = 200L,
+                 iter_sampling = 100L,
+                 chains = 6L,
+                 parallel_chains = 6L)
+  check_computation(fit)
+  
+  # 4. check posterior specification
+  check_posterior(fit)
+  
+  # 5. use model
+  # plot the distribution of abundance along the gradient
+  dist_plot(fit,
+            quantiles = c(0.5, 0.9),
+            include_excess_zeros = FALSE)
+  # assess different range measures of abundance along the gradient
+  abundance_range(fit,
+                  # smallest range with ...
+                  containing = c(
+                    # total abundance >= % of estimated total (most density)
+                    'most_dens',
+                    # mean abundance >= % of max abundance (highest mean)
+                    'highest_mu'
+                  ),
+                  percent = 80)
+}
+```
