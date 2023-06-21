@@ -4,10 +4,12 @@
 \alias{check_computation}
 \title{Check posterior computation is acceptable}
 \usage{
-check_computation(fit)
+check_computation(fit, show_info = TRUE)
 }
 \arguments{
 \item{fit}{modskurt_fit object}
+
+\item{show_info}{print information about model spec and posterior sample}
 }
 \value{
 a list with ...

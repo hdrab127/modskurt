@@ -1,14 +1,34 @@
 #' Check posterior computation is acceptable
 #'
 #' @param fit modskurt_fit object
+#' @param show_info print information about model spec and posterior sample
 #'
 #' @return a list with ...
 #' @export
 #'
-check_computation <- function(fit) {
+check_computation <- function(fit, show_info = TRUE) {
   spec <- attr(fit, 'spec')
+  dist <- attr(spec, 'dist')
+  shape <- attr(spec, 'shape')
+  idx <- attr(fit, 'train')
+  d <- do.call(spec$data, idx)$all
+  niter <- fit$metadata()$iter_sampling
+  nchains <- fit$num_chains()
+  npost <- niter * nchains
+  if (show_info) {
+    cat('spec: ', dist, '[Hms', shape, ']',
+        ' using ', sum(d$set == 'train'),
+        ' obs out of ', nrow(d), ' (', idx$prop * 100, '% sample)',
+        '\n',
+        sep = '')
+    cat('post: ',
+        nchains, ' chains each with ', niter, ' draws',
+        ' (', npost, ' total)',
+        '\n\n',
+        sep = '')
+  }
   summ <- fit$summary(attr(spec, 'pars'))
-  summ$num_samples <- fit$metadata()$iter_sampling * fit$num_chains()
+  summ$num_samples <- npost
   summ$rhat <- format(summ$rhat, digits = 3)
   summ$ess_bulk <- paste0(format(round(summ$ess_bulk)), ' (',
                           format(round(summ$ess_bulk / summ$num_samples, 1),
@@ -17,27 +37,20 @@ check_computation <- function(fit) {
                           format(round(summ$ess_tail / summ$num_samples, 1),
                                  nsmall = 1), ')')
 
-  summ$rhat <- vctrs::new_vctr(summ$rhat,
-                               class = 'rhat',
-                               inherit_base_type = TRUE)
-  summ$ess_bulk <- vctrs::new_vctr(summ$ess_bulk,
-                                   class = 'ess',
-                                   inherit_base_type = TRUE)
-  summ$ess_tail <- vctrs::new_vctr(summ$ess_tail,
-                                   class = 'ess',
-                                   inherit_base_type = TRUE)
+  summ$rhat <- vctrs::new_vctr(summ$rhat, class = 'rhat')
+  summ$ess_bulk <- vctrs::new_vctr(summ$ess_bulk, class = 'ess')
+  summ$ess_tail <- vctrs::new_vctr(summ$ess_tail, class = 'ess')
   summ$num_samples <- NULL
 
-  summ$mean <- NULL
-  summ$sd <- NULL
-  summ$mad <- NULL
+  # summ$mean <- NULL
+  # summ$sd <- NULL
+  # summ$mad <- NULL
 
   diags <-
     cbind(fit$time()$chains,
           fit$diagnostic_summary())
 
-  # list(summary = summ, diagnostics = diags)
-  print(summ)
+  list(summary = summ, diagnostics = diags)
 }
 
 #' @export

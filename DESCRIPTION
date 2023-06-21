@@ -21,6 +21,7 @@ Imports:
     pillar,
     rlang,
     vctrs,
-    crayon
+    crayon,
+    ggplot2
 Remotes: 
     stan-dev/cmdstanr

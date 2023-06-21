@@ -1,6 +1,8 @@
 #' Fit the specified ModSkurt model by sampling its posterior distribution
 #'
-#' @param spec the ModSkurt model specification returned by `modskurt_spec`
+#' @param spec the ModSkurt model specification returned by `mskt_spec`
+#' @param train_prop the proportion of data to train the posterior on
+#' @param train_seed a seed for the training sample of proportion `train_prop`
 #' @param seed a seed for the Stan random number generator
 #' @param init initialisation method, see ?cmdstanr::`model-method-sample`
 #' @param chains the number of Markov chains
@@ -15,18 +17,20 @@
 #' @return A `cmdstanr::CmdStanMCMC` object
 #' @export
 #'
-modskurt_fit <- function(spec,
-                         seed = 1234,
-                         init = NULL,
-                         chains = 6L,
-                         parallel_chains = 6L,
-                         iter_warmup = NULL,
-                         iter_sampling = NULL,
-                         max_treedepth = NULL,
-                         adapt_delta = NULL,
-                         show_messages = TRUE,
-                         show_exceptions = FALSE,
-                         ...) {
+mskt_fit <- function(spec,
+                     train_prop = 1,
+                     train_seed = NULL,
+                     seed = NULL,
+                     init = NULL,
+                     chains = 4,
+                     parallel_chains = getOption('mc.cores', 1),
+                     iter_warmup = 1000,
+                     iter_sampling = 1000,
+                     max_treedepth = NULL,
+                     adapt_delta = NULL,
+                     show_messages = TRUE,
+                     show_exceptions = FALSE,
+                     ...) {
   # retrieve cmdstan_model
   pkgdir <- path.package('modskurt')
   standir <- file.path(pkgdir, 'stan')
@@ -41,18 +45,22 @@ modskurt_fit <- function(spec,
   if (!file.exists(stanexe)) {
     rlang::abort('ModSkurt models not compiled, see `?compile_stanmodels()')
   }
-  csm <-
-    cmdstanr::cmdstan_model(stan_file = file.path(standir, 'discrete.stan'),
-                            exe_file = stanexe,
-                            include_paths = file.path(standir, '/blocks'))
-  if (!is.null(seed)) {
+  suppressMessages({
+    csm <-
+      cmdstanr::cmdstan_model(stan_file = file.path(standir, 'discrete.stan'),
+                              exe_file = stanexe,
+                              include_paths = file.path(standir, '/blocks'))
+  })
+  if (!missing(seed) & !is.null(seed)) {
     set.seed(seed)
   }
   if (is.null(init)) {
-    init <- modskurt_inits(spec, chains)
+    init <- mskt_inits(spec, chains)
   }
+  standata <- c(spec, spec$data(train_prop, train_seed)$train)
+  standata$data <- NULL
   fit <-
-    csm$sample(data = spec,
+    csm$sample(data = standata,
                seed = seed,
                init = init,
                chains = chains,
@@ -65,11 +73,12 @@ modskurt_fit <- function(spec,
                show_exceptions = show_exceptions,
                ...)
   attr(fit, 'spec') <- spec
+  attr(fit, 'train') <- list(prop = train_prop, seed = train_seed)
   fit
 }
 
 # internal only for initialising from prior
-modskurt_inits <- function(spec, chains) {
+mskt_inits <- function(spec, chains) {
   # https://discourse.mc-stan.org/t/undesirable-behavior-in-initial-values-of-hierarchical-model/18961/8?u=hdrab127
   # "Another example is multimodal likelihood functions – priors can suppress
   # extraneous modes but they can’t remove them entirely. Initializations near
