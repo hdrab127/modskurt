@@ -45,7 +45,8 @@ abundance_dist <- function(fit,
                                   breaks = c('train', 'test'),
                                   labels = c('Train', 'Test')) +
       ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(
-        alpha = 0.75
+        alpha = 0.75,
+        order = 2
       )))
   }
   # add summaries
@@ -94,7 +95,8 @@ abundance_dist <- function(fit,
                                    labels = names(qcols)) +
       ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(
         alpha = 0.75,
-        linewidth = 1
+        linewidth = 1,
+        order = 1
       )))
     # labels = parse(text = names(qcols)))
   }
@@ -163,6 +165,8 @@ mskt_predict <- function(fit, ndraws, seed, include_zero_inflation) {
 #' @param plotted plot on the abundance distribution
 #' @param point_alpha opacity of data points, default 0.1 is good for ~ 1000 obs
 #' @param line_alpha opacity of summary lines, default 0.1 is good for ~ 50 draws
+#'
+#' @importFrom stats sd
 #'
 #' @return
 #' @export
@@ -237,12 +241,19 @@ abundance_range <- function(fit,
           alpha = 0.75
         )))
     }
-    mus$name <- based_on
+    dy_nm <- paste0(toupper(substring(based_on, 0, 1)),
+                    substring(based_on, 2))
+    dy_nm <- gsub('^Q(\\d*)$', 'Q[\\1]', dy_nm)
     gg <-
       gg +
-      ggplot2::geom_line(ggplot2::aes(y = dy, group = draw, colour = name),
-                         alpha = line_alpha,
+      ggplot2::geom_line(ggplot2::aes(y = dy, group = draw, colour = dy_nm),
+                         alpha = line_alpha / 2,
                          data = mus)
+
+    cont_nm <- paste0(percent, '% ',
+                      switch(containing,
+                             'high_zone' = 'HAZ',
+                             'most_dens' = 'ADL'))
     xidx <- ranges$name == 'x'
     xavgidx <- row.names(aggs) == 'x.avg'
     gg <-
@@ -250,9 +261,9 @@ abundance_range <- function(fit,
       ggplot2::geom_point(ggplot2::aes(x,
                                        y,
                                        group = group,
-                                       colour = colour),
-                          alpha = point_alpha * 3,
+                                       alpha = leg),
                           size = 2,
+                          colour = 'red',
                           data = data.frame(x = c(ranges$left[xidx],
                                                   # ranges$centre[xidx],
                                                   ranges$right[xidx]),
@@ -261,12 +272,26 @@ abundance_range <- function(fit,
                                                   ranges$right[!xidx]),
                                             group = rep(ranges$draw[xidx],
                                                         2),
-                                            colour = 'range')) +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = x, colour = colour),
+                                            leg = 'Draws')) +
+      ggplot2::geom_vline(ggplot2::aes(xintercept = x,
+                                       alpha = leg),
                           linetype = 'dashed',
+                          linewidth = 1,
+                          colour = 'red',
                           data = data.frame(x = c(aggs$left[xavgidx],
                                                   aggs$right[xavgidx]),
-                                            colour = 'range'))
+                                            leg = 'Average')) +
+      ggplot2::scale_colour_manual(values = 'red') +
+      ggplot2::scale_alpha_manual(cont_nm,
+                                  values = c(point_alpha * 2, 1),
+                                  breaks = c('Draws', 'Average')) +
+      ggplot2::guides(alpha = ggplot2::guide_legend(override.aes = list(
+        linetype = c('blank', 'dashed'),
+        shape = c(19, NA_integer_)
+      ), order = 2), colour = ggplot2::guide_legend(override.aes = list(
+        alpha = 0.75,
+        linewidth = 1
+      ), order = 1))
 
     gg <-
       gg +
@@ -279,6 +304,8 @@ abundance_range <- function(fit,
   aggs
 }
 
+#' @importFrom utils tail
+#' @importFrom stats weighted.mean
 range_most_dens <- function(x, y, pct, region) {
   # the smallest region of x that has cumulative y summary >= some % of total y
   # summary, i.e. highest density interval
@@ -317,6 +344,7 @@ range_most_dens <- function(x, y, pct, region) {
              stringsAsFactors = FALSE)
 }
 
+#' @importFrom stats weighted.mean
 range_high_zone <- function(x, y, pct, region) {
   # the total region that has y summary >= some % of y summary
   # e.g. could be the range of x where mean(y[x]) is at least 50% of max(mean(y))

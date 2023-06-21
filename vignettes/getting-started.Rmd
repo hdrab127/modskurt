@@ -144,7 +144,7 @@ if (FALSE) {
                   percent = 80,
                   containing = 'high_zone',
                   region = 'centre',
-                  based_on = 'median',
+                  based_on = 'q90',
                   include_zero_inflation = FALSE,
                   plotted = TRUE)
 }

@@ -4,16 +4,16 @@
 \alias{dnbinom2}
 \title{The Negative Binomial Probability Mass Function (alternative parameterisation)}
 \usage{
-dnbinom2(x, mu, kap, log = FALSE)
+dnbinom2(x, mu, kappa, log = FALSE)
 }
 \arguments{
 \item{x}{vector of (non-negative integer) quantiles}
 
 \item{mu}{mean}
 
-\item{log}{logical; if TRUE, probabilities p are given as log(p)}
-
 \item{kappa}{dispersion (inverse square root size)}
+
+\item{log}{logical; if TRUE, probabilities p are given as log(p)}
 }
 \value{
 the (log) probability mass at x, given mu and kappa
