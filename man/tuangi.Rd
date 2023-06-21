@@ -22,7 +22,7 @@ A data frame with 764 rows and 11 columns:
 <https://www.saltecology.co.nz/>
 }
 \usage{
-tuangi
+data(tuangi)
 }
 \description{
 Discrete counts of tuangi in intertidal estuaries of New Zealand

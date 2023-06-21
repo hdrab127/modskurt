@@ -15,4 +15,5 @@
 #'   \item{sst_min, sst_avg, sst_max}{Min, mean, and max sea surface temperature (deg C) at the location of sampling over the 12 months preceding}
 #' }
 #' @source <https://www.saltecology.co.nz/>
+#' @usage data(tuangi)
 "tuangi"

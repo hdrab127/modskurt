@@ -1,27 +1,32 @@
 Package: modskurt
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Bayesian Distributions of Species Abundance Along Environmental Gradients
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Authors@R: 
+    c(person("Hayden", "Rabel", , "hayden.rabel@gmail.com",
+             role = c("aut", "cre")),
+      person("Adam", "Smith", role = c("aut")),
+      person("Marti", "Anderson", role = c("aut")),
+      person("the team", "at PRIMER-e", role = c("aut")))
+Description: Enable best practice Bayesian modelling of distributions of species
+    abundance along environmental gradients, for assessing species-environment 
+    relationships and identifying potential responses to change.
 License: file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10)
+    R (>= 4.3.0)
 Imports: 
-    cmdstanr,
-    pillar,
-    rlang,
-    vctrs,
-    crayon,
-    ggplot2
+    cmdstanr (>= 0.5.3),
+    crayon (>= 1.5.2),
+    ggplot2 (>= 3.4.2),
+    pillar (>= 1.9.0),
+    rlang (>= 1.1.1),
+    vctrs (>= 0.6.2)
 Remotes: 
     stan-dev/cmdstanr
+URL: https://hdrab127.github.io/modskurt/

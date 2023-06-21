@@ -123,7 +123,9 @@ qzinb2 <- function(p, mu, kappa, zi, lower.tail = TRUE, log.p = FALSE) {
   q
 }
 
-#' TODO: document
+#' Convert overdispersion kappa to reciprocal dispersion phi
+#'
+#' @param kappa overdispersion parameter
 kappa_to_phi <- function(kappa) {
   # see ...
   1 / kappa ^ 2

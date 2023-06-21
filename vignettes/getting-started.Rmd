@@ -1,5 +1,5 @@
 ---
-title: "getting-started"
+title: "Getting started"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{getting-started}
@@ -12,140 +12,227 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+options(rmarkdown.html_vignette.check_title = FALSE)
+# library(dplyr)
+# tuangi <-
+#   readRDS('../macrofauna/cockles-sst.rds') %>%
+#   select(-id, -ym) %>%
+#   select(year,
+#          lon,
+#          lat,
+#          count,
+#          mud_pct,
+#          tn_conc,
+#          toc_pct,
+#          tp_conc,
+#          sst_min,
+#          sst_avg,
+#          sst_max)
+# usethis::use_data(tuangi, overwrite = TRUE)
 ```
 
+## Overview
+
+This vignette presents a minimal workflow for modelling the distribution of a species abundance along an environmental gradient. See ...
+
+## Setup
+
 ```{r setup}
-if (FALSE) {
-  # library(dplyr)
-  # library(cmdstanr)
-  library(modskurt)
-  library(ggplot2)
-  # only needs to be run every time package installed or updated
-  # TODO: find better edit dir for testing only:
-  compile_stanmodels(force_recompile = TRUE)
-  
-  # the simplest workflow ----
-  
-  # 0. data and questions
-  # tuangi <-
-  #   readRDS('../macrofauna/cockles-sst.rds') %>%
-  #   select(-id, -ym) %>%
-  #   select(year,
-  #          lon,
-  #          lat,
-  #          count,
-  #          mud_pct,
-  #          tn_conc,
-  #          toc_pct,
-  #          tp_conc,
-  #          sst_min,
-  #          sst_avg,
-  #          sst_max)
-  # usethis::use_data(tuangi, overwrite = TRUE)
-  data(tuangi)
-  tuangi
-  
-  # A.1. specify initial model
-  spec <-
-    mskt_spec(data = tuangi,
-              # response and gradients (optional names for tidier outputs)
-              y = c('Tuangi (count)' = 'count'),
-              x = c('Mud (%)' = 'mud_pct'),
-              # distribution of abundance
-              dist = 'nb',
-              # shape of dist mean function, see ?mskt_shape()
-              shape = 'rdp',
-              # make predictions for every 1% of mud content
-              pred_grid = 0:100)
-  str(spec)
-  
-  # B.1. verify prior model specification
-  check_prior_dens(spec) # marginals
-  check_prior_mskt(spec) # preds
-  check_prior_dist(spec) # ymax
-  check_prior_zero(spec) # zi link
-  
-  # OPTIONAL: refine model spec
-  
-  # C.1. fit subset model to "training" data - fail fast
-  fit_train <-
-    mskt_fit(spec,
-             # set the training sample
-             train_prop = 0.3,
-             train_seed = 1234, 
-             seed = 1234,
-             iter_warmup = 200,
-             iter_sampling = 100,
-             chains = 6,
-             parallel_chains = 6)
-  
-  # OPTIONAL: refine model spec or fit parameters
-  
-  # C.2 check convergence (multimodality), sharpness
-  check_computation(fit_train)
-  
-  # OPTIONAL: refine model spec or fit parameters
-  
-  # C.3. verify posterior specification
-  check_post_dens(fit_train)
-  check_post_dist(fit_train)
-  check_post_zero(fit_train)
-  
-  # uses test set for discrete pit
-  check_post_calibration(fit_train)
-  
-  # OPTIONAL: refine model spec or fit parameters
-  
-  # D.1. fit full model
-  fit_full <-
-    mskt_fit(spec,
-             seed = 1234,
-             chains = 4,
-             parallel_chains = 4)
-  
-  # D.2 check convergence (multimodality), sharpness
-  check_computation(fit_full)
-  
-  # OPTIONAL: refine model spec or fit parameters
-  
-  # D.3. verify posterior specification
-  check_post_dens(fit_full)
-  check_post_dist(fit_full)
-  check_post_zero(fit_full)
-  
-  # uses loocv for discrete pit and pareto-k
-  check_post_calibration(fit_train)
-  check_post_influencers(fit_train)
-  
-  # OPTIONAL: refine model spec or fit parameters
-  
-  # E. use the model
-  # plot the distribution of abundance along the gradient
-  abundance_dist(fit_train,
-                 summaries = c('mean', 'median', 'q90'),
-                 # whether to use expectations and quantiles from nb or zinbl
-                 include_zero_inflation = TRUE)
-  
-  # assess different range measures of abundance along the gradient
-  abundance_range(fit_train,
-                  # smallest range with ...
-                  percent = 80,
-                  # mean abundance >= % of max abundance (highest mean)
-                  containing = 'high_zone',
-                  # one-sided threshold or central range
-                  region = 'centre',
-                  # which distribution summary to use
-                  based_on = 'median',
-                  # whether to use expectations and quantiles from nb or zinbl
-                  include_zero_inflation = FALSE)
-  
-  # or plot them as well
-  abundance_range(fit_train,
-                  percent = 80,
-                  containing = 'high_zone',
-                  region = 'centre',
-                  based_on = 'q90',
-                  include_zero_inflation = FALSE,
-                  plotted = TRUE)
-}
+# library(cmdstanr)
+library(ggplot2)
+library(modskurt)
+# only needs to be run every time package installed or updated
+# TODO: find better edit dir for testing only:
+compile_stanmodels()
 ```
+
+## Data and questions
+
+```{r data}
+# A.0. data and questions
+data(tuangi)
+tuangi
+```
+
+## Initial model
+
+```{r model}
+# A.1. specify initial model
+spec <-
+  mskt_spec(data = tuangi,
+            # response and gradients (optional names for tidier outputs)
+            y = c('Tuangi (count)' = 'count'),
+            x = c('Mud (%)' = 'mud_pct'),
+            # distribution of abundance
+            dist = 'nb',
+            # shape of dist mean function, see ?mskt_shape()
+            shape = 'rdp',
+            # make predictions for every 1% of mud content
+            pred_grid = 0:100)
+str(spec)
+```
+
+### Check initial model specification
+
+```{r check-model}
+# B.1. verify prior model specification
+# check_prior_dens(spec) # marginals
+# check_prior_mskt(spec) # preds (cover all possible)
+# check_prior_dist(spec) # ymax (severe tests)
+# check_prior_zero(spec) # zi link
+```
+
+```{r}
+# OPTIONAL: refine model spec
+```
+
+## Fit subset model (fail fast)
+
+```{r fit-subset}
+# C.1. fit subset model to "training" data - fail fast
+fit_train <-
+  mskt_fit(spec,
+           # set the training sample
+           train_prop = 0.3,
+           train_seed = 1234, 
+           seed = 1234,
+           iter_warmup = 200,
+           iter_sampling = 100,
+           chains = 6,
+           parallel_chains = 6)
+
+# OPTIONAL: refine model spec or fit parameters
+
+# C.2 check convergence (multimodality), sharpness
+check_computation(fit_train)
+```
+
+```{r}
+# OPTIONAL: refine model spec or fit parameters
+```
+
+### Check subset model
+
+```{r check-subset-fit}
+# C.3. verify posterior specification
+# check_post_dens(fit_train)
+# check_post_dist(fit_train)
+# check_post_zero(fit_train)
+```
+
+```{r check-subset-fit-calib}
+# uses test set for discrete pit
+# check_post_calibration(fit_train)
+```
+
+```{r}
+# OPTIONAL: refine model spec or fit parameters
+```
+
+## Fit full model
+
+```{r fit-full}
+# D.1. fit full model (accepting defaults, see ?mskt_fit)
+fit_full <-
+  mskt_fit(spec,
+           seed = 1234,
+           chains = 4,
+           parallel_chains = 4)
+
+# D.2 check convergence (multimodality), sharpness
+check_computation(fit_full)
+```
+
+```{r}
+# OPTIONAL: refine model spec or fit parameters
+```
+
+### Check full model
+
+```{r check-full-fit}
+# D.3. verify posterior specification
+# check_post_dens(fit_full)
+# check_post_dist(fit_full)
+# check_post_zero(fit_full)
+```
+
+```{r check-full-fit-calib}
+# uses loocv for discrete pit and pareto-k
+# check_post_calibration(fit_train)
+# check_post_influencers(fit_train)
+```
+
+```{r}
+# OPTIONAL: refine model spec or fit parameters
+```
+
+## Use the model
+
+### Plot summaries of the abundance distribution
+
+```{r use-full-fit-dist}
+# E. use the model
+# plot the distribution of abundance along the gradient
+abundance_dist(fit_full,
+               summaries = c('mean', 'median', 'q90'),
+               # whether to use expectations and quantiles from nb or zinbl
+               include_zero_inflation = TRUE)
+```
+
+### Calculate ranges of x for different percentages of abundance measures
+
+```{r use-full-fit-range}
+# assess different range measures of abundance along the gradient
+abundance_range(fit_full,
+                # smallest range with ...
+                capture_pct = 75,
+                # mean abundance >= % of max abundance (highest mean)
+                using_range = 'high_zone',
+                # which distribution summary to use
+                based_on = 'q90',
+                # one-sided threshold or central range
+                region = 'centre',
+                # whether to use expectations and quantiles from nb or zinbl
+                include_zero_inflation = FALSE)
+```
+
+### Visually display abundance ranges
+
+```{r use-full-fit-range-plot}
+# or plot them as well
+# we'll compare high-zone and most-dens here using patchwork
+library(patchwork)
+(
+  abundance_range(fit_full,
+                  capture_pct = 75,
+                  using_range = 'high_zone',
+                  based_on = 'q90',
+                  region = 'centre',
+                  plotted = TRUE,
+                  range_colour = 'red') +
+    labs(subtitle = '75% Highest Abundance Zone (HAZ)')
+) + (
+  abundance_range(fit_full,
+                  capture_pct = 75,
+                  using_range = 'most_dens',
+                  based_on = 'q90',
+                  region = 'centre',
+                  plotted = TRUE,
+                  range_colour = 'blue') +
+    labs(subtitle = '75% Abundance Density Limit (ADL)')
+) +
+  plot_layout(guides = 'collect')
+# note how HAZ prefers higher relative abundance summaries as opposed to ADL
+# which considers total abundance summaries irrespective of the relative
+# abundance at each x (e.g. tuangi appear quite abundant in low mud %, but
+# their density along the whole gradient is skewed towards slightly higher mud
+# content)
+```
+
+```{r}
+# OPTIONAL (but not advised): refine model spec or fit parameters
+```
+
+## Summary
+
+...

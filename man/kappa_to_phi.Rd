@@ -2,10 +2,13 @@
 % Please edit documentation in R/negative-binomial.R
 \name{kappa_to_phi}
 \alias{kappa_to_phi}
-\title{TODO: document}
+\title{Convert overdispersion kappa to reciprocal dispersion phi}
 \usage{
 kappa_to_phi(kappa)
 }
+\arguments{
+\item{kappa}{overdispersion parameter}
+}
 \description{
-TODO: document
+Convert overdispersion kappa to reciprocal dispersion phi
 }
