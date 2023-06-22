@@ -1,0 +1,33 @@
+---
+title: "Stan code for the discrete model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Stan code for the discrete model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+csm <- readLines('../inst/stan/discrete.stan')
+csm <- unlist(lapply(csm, function(line) {
+  if (grepl('^#', line)) {
+    readLines(gsub('#include ', '../inst/stan/blocks/', line))
+  } else {
+    line
+  }
+}))
+csm <- paste0(csm, collapse = '\n')
+csm <- gsub('<', '&lt;', csm, fixed = TRUE)
+csm <- gsub('>', '&gt;', csm, fixed = TRUE)
+```
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/stan.min.js"></script>
+<script>hljs.highlightAll();</script>
+<pre><code class="language-stan"><code>`r csm`</code></pre>
+

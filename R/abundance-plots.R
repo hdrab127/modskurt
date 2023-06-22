@@ -17,7 +17,7 @@
 abundance_dist <- function(fit,
                            seed = NULL,
                            ndraws = 50,
-                           summaries = c('mean', 'median', 'q90'),
+                           summaries = c('mean', 'q90'),
                            include_zero_inflation = TRUE,
                            point_alpha = 0.2,
                            line_alpha = 0.1) {
@@ -123,13 +123,14 @@ mskt_predict <- function(fit, ndraws, seed, include_zero_inflation) {
   kap <- as.double(fit$draws('kap', format = 'matrix'))
   zis <- fit$draws('zi_rep', format = 'list')
   mus <- do.call(rbind, lapply(seq_along(mus), \(chain) {
+    draw_offset <- (chain - 1) * niter
     do.call(rbind, lapply(seq_along(mus[[chain]]), \(rep) {
       draws <-
         data.frame(chain = chain,
                    x = spec$xrep[[rep]],
                    mu = mus[[chain]][[rep]],
                    zi = zis[[chain]][[rep]])
-      draws$draw <- chain * 1:nrow(draws)
+      draws$draw <- draw_offset + 1:nrow(draws)
       draws
     }))
   }))
@@ -356,13 +357,13 @@ range_most_dens <- function(x, y, prop, region) {
   lidx <- c(tail(which(Fy <= qps[1]), 1), which(Fy > qps[1])[1])
   lwt <- 1 / abs(Fy[lidx] - qps[1])
   lwt[!is.finite(lwt)] <- 1
-  lx <- weighted.mean(x[lidx], 1 / abs(Fy[lidx] - qps[1]), na.rm = TRUE)
-  ly <- weighted.mean(y[lidx], 1 / abs(Fy[lidx] - qps[1]), na.rm = TRUE)
+  lx <- weighted.mean(x[lidx], lwt, na.rm = TRUE)
+  ly <- weighted.mean(y[lidx], lwt, na.rm = TRUE)
   midx <- c(tail(which(Fy <= 0.5), 1), which(Fy > 0.5)[1])
   mwt <- 1 / abs(Fy[midx] - 0.5)
   mwt[!is.finite(mwt)] <- 1
-  mx <- weighted.mean(x[midx], 1 / abs(Fy[midx] - qps[1]), na.rm = TRUE)
-  my <- weighted.mean(y[midx], 1 / abs(Fy[midx] - qps[1]), na.rm = TRUE)
+  mx <- weighted.mean(x[midx], mwt, na.rm = TRUE)
+  my <- weighted.mean(y[midx], mwt, na.rm = TRUE)
   uidx <- c(tail(which(Fy <= qps[2]), 1), which(Fy > qps[2])[1])
   uwt <- 1 / abs(Fy[uidx] - qps[2])
   uwt[!is.finite(uwt)] <- 1

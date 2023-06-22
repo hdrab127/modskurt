@@ -1,32 +1,84 @@
 # modskurt
 
-## this package has five core functions
+Bayesian modelling of species abundance distributions along environmental gradients
 
-[] specify Bayesian modskurt models for discrete abundance data (nb or zinbl)
-[] set and check prior specification
-[] compute and validate fit
-[] check posterior specification
-[] use posterior (visual relationship, thresholds, intervals)
+## Installing `modskurt`
 
-## getting started
+The `modskurt` package utilises the Stan Bayesian modelling software implemented in R through the `cmdstanr` package.
 
-- Install `cmdstanr` (instructions here)
-- Install `modskurt`:
+First, install the `cmdstanr` interface (if not already) by running
 
 ```
-# install development version of package from github
-remotes::install_github('modskurt')
+install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos')))
+```
 
-# one-off compilation of stan files for Bayesian modskurt models
-# optionally edit path...
-modskurt::compile_stanmodels()
+Then to install `cmdstan` itself, try
 
-# test the basics work
+```
+library(cmdstanr)
+check_cmdstan_toolchain(fix = TRUE)
+install_cmdstan(cores = 2)
+```
+
+For any hiccups in the above, see https://mc-stan.org/cmdstanr/articles/cmdstanr.html.
+
+Now to install `modskurt` (currently beta version on github only), try running
+
+```
+# install.packages('pak')
+pak::pkg_install('hdrab/modskurt')
+```
+
+And finally, to compile the `modskurt` Stan models specifically for your computer run
+
+```
 library(modskurt)
-fit <-
-  fit_modskurt(data = data.frame(x = rnorm(50),
-                                 y = rnbinom(50, mu = 5, size = 2)),
-               shape = 'rdp',
-               dist = 'nb')
-pp_check(fit)
+# only needs running after new package install or package update
+compile_stanmodels()
 ```
+
+## Fitting a model
+
+To check the installation worked, try fitting a simple Negative Binomial regression with assymetric modskurt mean
+
+```
+# model specification with fake data
+spec <-
+  mskt_spec(data = mskt_sim_nb(x = 0:50, 
+                               H = 100,
+                               m = 35,
+                               s = 40,
+                               r = 0.9,
+                               kappa = 0.5),
+            y = c('Abundance (count)' = 'y'),
+            x = c('Env gradient' = 'x'),
+            dist = 'nb')
+# fit a minimal model (with less than optimal iterations)
+fit <- mskt_fit(spec,
+                iter_warmup = 200,
+                iter_sampling = 100)
+
+# check the posterior summary and computation diagnostics
+check_computation(fit)
+
+# plot the abundance distribution
+abundance_dist(fit)
+```
+
+## How to use the `modskurt` package
+
+Statistical modelling is more than computing algorithms, see [Getting started](./articles/getting-started.html) for a recommended workflow that takes species-environment data through a Bayesian workflow for incorporating ecological knowledge and instilling trust in results.
+
+## Roadmap and contribution
+
+The current development version of this `modskurt` package is very much in its infancy. Planned additions in a vague order of priority are:
+
+[] More vignettes and examples
+[] Model comparison (e.g. between nb and zinbl)
+[] Continuous abundance (like biomass)
+[] Binary package for Cran or drat
+[] Random effects
+[] Temporal effects
+[] Multiple gradients (2d modskurts)
+[] Multiple species
+[] ...

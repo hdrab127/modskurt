@@ -79,15 +79,12 @@ str(spec)
 # check_prior_mskt(spec) # preds (cover all possible)
 # check_prior_dist(spec) # ymax (severe tests)
 # check_prior_zero(spec) # zi link
-```
-
-```{r}
 # OPTIONAL: refine model spec
 ```
 
 ## Fit subset model (fail fast)
 
-```{r fit-subset}
+```{r fit-subset, results='hide'}
 # C.1. fit subset model to "training" data - fail fast
 fit_train <-
   mskt_fit(spec,
@@ -99,14 +96,12 @@ fit_train <-
            iter_sampling = 100,
            chains = 6,
            parallel_chains = 6)
-
 # OPTIONAL: refine model spec or fit parameters
-
-# C.2 check convergence (multimodality), sharpness
-check_computation(fit_train)
 ```
 
-```{r}
+```{r fit-subset-check}
+# C.2 check convergence (multimodality), sharpness
+check_computation(fit_train)
 # OPTIONAL: refine model spec or fit parameters
 ```
 
@@ -117,32 +112,25 @@ check_computation(fit_train)
 # check_post_dens(fit_train)
 # check_post_dist(fit_train)
 # check_post_zero(fit_train)
-```
-
-```{r check-subset-fit-calib}
 # uses test set for discrete pit
 # check_post_calibration(fit_train)
-```
-
-```{r}
 # OPTIONAL: refine model spec or fit parameters
 ```
 
 ## Fit full model
 
-```{r fit-full}
+```{r fit-full, results='hide'}
 # D.1. fit full model (accepting defaults, see ?mskt_fit)
 fit_full <-
   mskt_fit(spec,
            seed = 1234,
            chains = 4,
            parallel_chains = 4)
-
-# D.2 check convergence (multimodality), sharpness
-check_computation(fit_full)
 ```
 
-```{r}
+```{r fit-full-check}
+# D.2 check convergence (multimodality), sharpness
+check_computation(fit_full)
 # OPTIONAL: refine model spec or fit parameters
 ```
 
@@ -153,15 +141,9 @@ check_computation(fit_full)
 # check_post_dens(fit_full)
 # check_post_dist(fit_full)
 # check_post_zero(fit_full)
-```
-
-```{r check-full-fit-calib}
 # uses loocv for discrete pit and pareto-k
 # check_post_calibration(fit_train)
 # check_post_influencers(fit_train)
-```
-
-```{r}
 # OPTIONAL: refine model spec or fit parameters
 ```
 
@@ -226,9 +208,6 @@ library(patchwork)
 # abundance at each x (e.g. tuangi appear quite abundant in low mud %, but
 # their density along the whole gradient is skewed towards slightly higher mud
 # content)
-```
-
-```{r}
 # OPTIONAL (but not advised): refine model spec or fit parameters
 ```
 

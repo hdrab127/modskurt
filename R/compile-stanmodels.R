@@ -27,5 +27,5 @@ compile_stanmodels <- function(force_recompile = FALSE) {
       force_recompile = FALSE
     )
   })
-  csms
+  invisible(csms)
 }

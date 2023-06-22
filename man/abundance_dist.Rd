@@ -8,7 +8,7 @@ abundance_dist(
   fit,
   seed = NULL,
   ndraws = 50,
-  summaries = c("mean", "median", "q90"),
+  summaries = c("mean", "q90"),
   include_zero_inflation = TRUE,
   point_alpha = 0.2,
   line_alpha = 0.1

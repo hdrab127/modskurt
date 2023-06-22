@@ -42,6 +42,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/getting-started.html">Getting started</a>
+    <a class="dropdown-item" href="../articles/prior-specification.html">Prior Specification</a>
   </div>
 </li>
       </ul>
@@ -87,8 +88,7 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co"># only needs to be run every time package installed or updated</span></span>
 <span><span class="co"># TODO: find better edit dir for testing only:</span></span>
 <span><span class="fu"><a href="../reference/compile_stanmodels.html">compile_stanmodels</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Compiling C:/Users/hdrab/AppData/Local/R/win-library/4.3/modskurt/stan/discrete.stan"</span></span>
-<span><span class="co">#&gt; [1] "C:/Users/hdrab/AppData/Local/R/win-library/4.3/modskurt/stan/discrete.stan"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Compiling C:/Users/hdrab/AppData/Local/R/win-library/4.3/modskurt/stan/discrete.stan"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data-and-questions">Data and questions<a class="anchor" aria-label="anchor" href="#data-and-questions"></a>
@@ -152,8 +152,8 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co">#&gt;  $ Nrep        : int 101</span></span>
 <span><span class="co">#&gt;  $ xrep        : int [1:101] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
 <span><span class="co">#&gt;  $ data        :function (prop = 1, seed = NULL)  </span></span>
-<span><span class="co">#&gt;   ..- attr(*, "srcref")= 'srcref' int [1:8] 97 16 130 3 16 3 728 761</span></span>
-<span><span class="co">#&gt;   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x00000220c729ef40&gt; </span></span>
+<span><span class="co">#&gt;   ..- attr(*, "srcref")= 'srcref' int [1:8] 97 16 130 3 16 3 772 805</span></span>
+<span><span class="co">#&gt;   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000020fb830c448&gt; </span></span>
 <span><span class="co">#&gt;  - attr(*, "pars")= chr [1:7] "H" "m" "s" "r" ...</span></span>
 <span><span class="co">#&gt;  - attr(*, "nms")=List of 2</span></span>
 <span><span class="co">#&gt;   ..$ y: chr "Tuangi (count)"</span></span>
@@ -169,15 +169,14 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co"># check_prior_dens(spec) # marginals</span></span>
 <span><span class="co"># check_prior_mskt(spec) # preds (cover all possible)</span></span>
 <span><span class="co"># check_prior_dist(spec) # ymax (severe tests)</span></span>
-<span><span class="co"># check_prior_zero(spec) # zi link</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec</span></span></code></pre></div>
+<span><span class="co"># check_prior_zero(spec) # zi link</span></span>
+<span><span class="co"># OPTIONAL: refine model spec</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="fit-subset-model-fail-fast">Fit subset model (fail fast)<a class="anchor" aria-label="anchor" href="#fit-subset-model-fail-fast"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># C.1. fit subset model to "training" data - fail fast</span></span>
 <span><span class="va">fit_train</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
@@ -189,55 +188,11 @@ distribution of a species abundance along an environmental gradient. See
 <span>           iter_sampling <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>           chains <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Running MCMC with 6 parallel chains...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:   1 / 300 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:   1 / 300 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:   1 / 300 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:   1 / 300 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 5 Iteration:   1 / 300 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 6 Iteration:   1 / 300 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 100 / 300 [ 33%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 100 / 300 [ 33%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 5 Iteration: 100 / 300 [ 33%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 100 / 300 [ 33%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 100 / 300 [ 33%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 6 Iteration: 100 / 300 [ 33%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 200 / 300 [ 66%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 201 / 300 [ 67%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 5 Iteration: 200 / 300 [ 66%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 200 / 300 [ 66%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 200 / 300 [ 66%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 5 Iteration: 201 / 300 [ 67%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 201 / 300 [ 67%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 201 / 300 [ 67%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 6 Iteration: 200 / 300 [ 66%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 200 / 300 [ 66%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 6 Iteration: 201 / 300 [ 67%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 201 / 300 [ 67%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 300 / 300 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 2.0 seconds.</span></span>
-<span><span class="co">#&gt; Chain 5 Iteration: 300 / 300 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 300 / 300 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 finished in 0.0 seconds.</span></span>
-<span><span class="co">#&gt; Chain 5 finished in 2.2 seconds.</span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 300 / 300 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 finished in 2.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 3 finished in 2.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 6 Iteration: 300 / 300 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 6 finished in 2.4 seconds.</span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 300 / 300 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 finished in 2.6 seconds.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; All 6 chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 2.3 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 2.9 seconds.</span></span>
 <span><span class="co">#&gt; Warning: 4 of 600 (1.0%) transitions ended with a divergence.</span></span>
 <span><span class="co">#&gt; See https://mc-stan.org/misc/warnings for details.</span></span>
-<span></span>
-<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span>
-<span></span>
-<span><span class="co"># C.2 check convergence (multimodality), sharpness</span></span>
+<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># C.2 check convergence (multimodality), sharpness</span></span>
 <span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_train</span><span class="op">)</span></span>
 <span><span class="co">#&gt; spec: nb[Hmsrdp] using 229 obs out of 762 (30% sample)</span></span>
 <span><span class="co">#&gt; post: 6 chains each with 100 draws (600 total)</span></span>
@@ -257,141 +212,40 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $diagnostics</span></span>
 <span><span class="co">#&gt;   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">#&gt; 1        1  1.340    0.641 1.981             0                 0 0.9459639</span></span>
-<span><span class="co">#&gt; 2        2  1.543    0.738 2.281             2                 0 1.1395318</span></span>
-<span><span class="co">#&gt; 3        3  1.577    0.769 2.346             0                 0 0.9004653</span></span>
-<span><span class="co">#&gt; 4        4  1.725    0.922 2.647             0                 0 0.6519676</span></span>
-<span><span class="co">#&gt; 5        5  1.393    0.825 2.218             2                 0 1.4106605</span></span>
-<span><span class="co">#&gt; 6        6  1.630    0.739 2.369             0                 0 1.0062564</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co">#&gt; 1        1  1.343    0.673 2.016             0                 0 0.9459639</span></span>
+<span><span class="co">#&gt; 2        2  1.617    0.727 2.344             2                 0 1.1395318</span></span>
+<span><span class="co">#&gt; 3        3  1.638    0.746 2.384             0                 0 0.9004653</span></span>
+<span><span class="co">#&gt; 4        4  1.712    0.944 2.656             0                 0 0.6519676</span></span>
+<span><span class="co">#&gt; 5        5  1.447    0.784 2.231             2                 0 1.4106605</span></span>
+<span><span class="co">#&gt; 6        6  1.683    0.702 2.385             0                 0 1.0062564</span></span>
+<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># C.3. verify posterior specification</span></span>
 <span><span class="co"># check_post_dens(fit_train)</span></span>
 <span><span class="co"># check_post_dist(fit_train)</span></span>
-<span><span class="co"># check_post_zero(fit_train)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># uses test set for discrete pit</span></span>
-<span><span class="co"># check_post_calibration(fit_train)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co"># check_post_zero(fit_train)</span></span>
+<span><span class="co"># uses test set for discrete pit</span></span>
+<span><span class="co"># check_post_calibration(fit_train)</span></span>
+<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="fit-full-model">Fit full model<a class="anchor" aria-label="anchor" href="#fit-full-model"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># D.1. fit full model (accepting defaults, see ?mskt_fit)</span></span>
 <span><span class="va">fit_full</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
 <span>           seed <span class="op">=</span> <span class="fl">1234</span>,</span>
 <span>           chains <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Running MCMC with 4 parallel chains...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 4 finished in 41.1 seconds.</span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 3 finished in 50.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 52.2 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) </span></span>
-<span><span class="co">#&gt; Chain 2 finished in 52.6 seconds.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; All 4 chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 49.1 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 52.7 seconds.</span></span>
 <span><span class="co">#&gt; Warning: 3 of 4000 (0.0%) transitions ended with a divergence.</span></span>
-<span><span class="co">#&gt; See https://mc-stan.org/misc/warnings for details.</span></span>
-<span></span>
-<span><span class="co"># D.2 check convergence (multimodality), sharpness</span></span>
+<span><span class="co">#&gt; See https://mc-stan.org/misc/warnings for details.</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># D.2 check convergence (multimodality), sharpness</span></span>
 <span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span>
 <span><span class="co">#&gt; spec: nb[Hmsrdp] using 762 obs out of 762 (100% sample)</span></span>
 <span><span class="co">#&gt; post: 4 chains each with 1000 draws (4000 total)</span></span>
@@ -411,26 +265,23 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $diagnostics</span></span>
 <span><span class="co">#&gt;   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">#&gt; 1        1 21.321   30.899 52.220             0                 0 0.8139661</span></span>
-<span><span class="co">#&gt; 2        2 21.733   30.887 52.620             0                 0 0.8724087</span></span>
-<span><span class="co">#&gt; 3        3 22.036   28.276 50.312             0                 0 0.9130063</span></span>
-<span><span class="co">#&gt; 4        4 21.625   19.489 41.114             3                 0 0.9986825</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co">#&gt; 1        1 21.602   33.161 54.763             0                 0 0.8139661</span></span>
+<span><span class="co">#&gt; 2        2 21.947   33.272 55.219             0                 0 0.8724087</span></span>
+<span><span class="co">#&gt; 3        3 22.645   30.704 53.349             0                 0 0.9130063</span></span>
+<span><span class="co">#&gt; 4        4 22.015   20.994 43.009             3                 0 0.9986825</span></span>
+<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># D.3. verify posterior specification</span></span>
 <span><span class="co"># check_post_dens(fit_full)</span></span>
 <span><span class="co"># check_post_dist(fit_full)</span></span>
-<span><span class="co"># check_post_zero(fit_full)</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># uses loocv for discrete pit and pareto-k</span></span>
+<span><span class="co"># check_post_zero(fit_full)</span></span>
+<span><span class="co"># uses loocv for discrete pit and pareto-k</span></span>
 <span><span class="co"># check_post_calibration(fit_train)</span></span>
-<span><span class="co"># check_post_influencers(fit_train)</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co"># check_post_influencers(fit_train)</span></span>
+<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -439,7 +290,7 @@ distribution of a species abundance along an environmental gradient. See
 <div class="section level3">
 <h3 id="plot-summaries-of-the-abundance-distribution">Plot summaries of the abundance distribution<a class="anchor" aria-label="anchor" href="#plot-summaries-of-the-abundance-distribution"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># E. use the model</span></span>
 <span><span class="co"># plot the distribution of abundance along the gradient</span></span>
 <span><span class="fu"><a href="../reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
@@ -452,7 +303,7 @@ distribution of a species abundance along an environmental gradient. See
 <h3 id="calculate-ranges-of-x-for-different-percentages-of-abundance-measures">Calculate ranges of x for different percentages of abundance
 measures<a class="anchor" aria-label="anchor" href="#calculate-ranges-of-x-for-different-percentages-of-abundance-measures"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># assess different range measures of abundance along the gradient</span></span>
 <span><span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
 <span>                <span class="co"># smallest range with ...</span></span>
@@ -468,15 +319,15 @@ measures<a class="anchor" aria-label="anchor" href="#calculate-ranges-of-x-for-d
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Species range (see x.avg row) calculated as the region of x where the 90 prob. quantile of abundance (Q[90]) is within 75% of the highest value of Q[90] along x (averaged across posterior draws):</span></span>
 <span><span class="co">#&gt;               left     centre       right</span></span>
-<span><span class="co">#&gt; q90.avg 11.5483871 21.4516129  5.31013610</span></span>
-<span><span class="co">#&gt; q90.se   0.3465303  0.3035231  0.09545843</span></span>
-<span><span class="co">#&gt; x.avg    0.0000000 14.7589769 64.35970750</span></span>
-<span><span class="co">#&gt; x.se     0.0000000  0.3995637  0.61658070</span></span></code></pre></div>
+<span><span class="co">#&gt; q90.avg 11.4800000 21.3400000  5.20907537</span></span>
+<span><span class="co">#&gt; q90.se   0.2931044  0.2704645  0.08305061</span></span>
+<span><span class="co">#&gt; x.avg    0.0000000 14.7117686 64.37092463</span></span>
+<span><span class="co">#&gt; x.se     0.0000000  0.3036880  0.53911312</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visually-display-abundance-ranges">Visually display abundance ranges<a class="anchor" aria-label="anchor" href="#visually-display-abundance-ranges"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># or plot them as well</span></span>
 <span><span class="co"># we'll compare high-zone and most-dens here using patchwork</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
@@ -502,27 +353,26 @@ measures<a class="anchor" aria-label="anchor" href="#calculate-ranges-of-x-for-d
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Species range (see x.avg row) calculated as the region of x where the 90 prob. quantile of abundance (Q[90]) is within 75% of the highest value of Q[90] along x (averaged across posterior draws):</span></span>
-<span><span class="co">#&gt;               left     centre       right</span></span>
-<span><span class="co">#&gt; q90.avg 10.7500000 21.6666667  5.25479798</span></span>
-<span><span class="co">#&gt; q90.se   0.3958572  0.2669383  0.08733024</span></span>
-<span><span class="co">#&gt; x.avg    0.0000000 14.5460984 64.56489899</span></span>
-<span><span class="co">#&gt; x.se     0.0000000  0.6947652  0.51008166</span></span>
+<span><span class="co">#&gt;               left     centre      right</span></span>
+<span><span class="co">#&gt; q90.avg 11.3000000 20.8600000  5.0505672</span></span>
+<span><span class="co">#&gt; q90.se   0.2945075  0.2571587  0.0761786</span></span>
+<span><span class="co">#&gt; x.avg    0.0000000 14.8488886 65.3094328</span></span>
+<span><span class="co">#&gt; x.se     0.0000000  0.4118830  0.4918386</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Species range (see x.avg row) calculated as the smallest region of x where the density of 90 prob. quantile of abundance (Q[90]) is equal to 75% of the total density of Q[90] along x (averaged across posterior draws):</span></span>
 <span><span class="co">#&gt;               left     centre      right</span></span>
-<span><span class="co">#&gt; q90.avg 19.1941995 18.3502066  6.9286182</span></span>
-<span><span class="co">#&gt; q90.se   0.2598815  0.2499261  0.1511909</span></span>
-<span><span class="co">#&gt; x.avg    7.3586975 26.6738178 58.1226551</span></span>
-<span><span class="co">#&gt; x.se     0.1137862  0.2028184  0.4025957</span></span></code></pre></div>
+<span><span class="co">#&gt; q90.avg 19.5308660 18.6377613  7.0772619</span></span>
+<span><span class="co">#&gt; q90.se   0.2123656  0.2329494  0.1185084</span></span>
+<span><span class="co">#&gt; x.avg    7.2099685 26.3862568 57.5941739</span></span>
+<span><span class="co">#&gt; x.se     0.1003869  0.1848287  0.3092660</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/use-full-fit-range-plot-1.png" width="700"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># note how HAZ prefers higher relative abundance summaries as opposed to ADL</span></span>
 <span><span class="co"># which considers total abundance summaries irrespective of the relative</span></span>
 <span><span class="co"># abundance at each x (e.g. tuangi appear quite abundant in low mud %, but</span></span>
 <span><span class="co"># their density along the whole gradient is skewed towards slightly higher mud</span></span>
-<span><span class="co"># content)</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL (but not advised): refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co"># content)</span></span>
+<span><span class="co"># OPTIONAL (but not advised): refine model spec or fit parameters</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

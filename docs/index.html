@@ -63,33 +63,63 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="modskurt">modskurt<a class="anchor" aria-label="anchor" href="#modskurt"></a>
 </h1></div>
+<p>Bayesian modelling of species abundance distributions along environmental gradients</p>
 <div class="section level2">
-<h2 id="this-package-has-five-core-functions">this package has five core functions<a class="anchor" aria-label="anchor" href="#this-package-has-five-core-functions"></a>
+<h2 id="installing-modskurt">Installing <code>modskurt</code>
+<a class="anchor" aria-label="anchor" href="#installing-modskurt"></a>
 </h2>
-<p>[] specify Bayesian modskurt models for discrete abundance data (nb or zinbl) [] set and check prior specification [] compute and validate fit [] check posterior specification [] use posterior (visual relationship, thresholds, intervals)</p>
+<p>The <code>modskurt</code> package utilises the Stan Bayesian modelling software implemented in R through the <code>cmdstanr</code> package.</p>
+<p>First, install the <code>cmdstanr</code> interface (if not already) by running</p>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'cmdstanr'</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://mc-stan.org/r-packages/'</span>, <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">'repos'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<p>Then to install <code>cmdstan</code> itself, try</p>
+<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/cmdstanr/" class="external-link">cmdstanr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/install_cmdstan.html" class="external-link">check_cmdstan_toolchain</a></span><span class="op">(</span>fix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/install_cmdstan.html" class="external-link">install_cmdstan</a></span><span class="op">(</span>cores <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
+<p>For any hiccups in the above, see <a href="https://mc-stan.org/cmdstanr/articles/cmdstanr.html" class="external-link uri">https://mc-stan.org/cmdstanr/articles/cmdstanr.html</a>.</p>
+<p>Now to install <code>modskurt</code> (currently beta version on github only), try running</p>
+<pre><code><span><span class="co"># install.packages('pak')</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="http://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">'hdrab/modskurt'</span><span class="op">)</span></span></code></pre>
+<p>And finally, to compile the <code>modskurt</code> Stan models specifically for your computer run</p>
+<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hdrab127.github.io/modskurt/">modskurt</a></span><span class="op">)</span></span>
+<span><span class="co"># only needs running after new package install or package update</span></span>
+<span><span class="fu"><a href="reference/compile_stanmodels.html">compile_stanmodels</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="getting-started">getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
+<h2 id="fitting-a-model">Fitting a model<a class="anchor" aria-label="anchor" href="#fitting-a-model"></a>
 </h2>
-<ul>
-<li>Install <code>cmdstanr</code> (instructions here)</li>
-<li>Install <code>modskurt</code>:</li>
-</ul>
-<pre><code><span><span class="co"># install development version of package from github</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'modskurt'</span><span class="op">)</span></span>
+<p>To check the installation worked, try fitting a simple Negative Binomial regression with assymetric modskurt mean</p>
+<pre><code><span><span class="co"># model specification with fake data</span></span>
+<span><span class="va">spec</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="reference/mskt_spec.html">mskt_spec</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="reference/mskt_sim_nb.html">mskt_sim_nb</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">50</span>, </span>
+<span>                               H <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>                               m <span class="op">=</span> <span class="fl">35</span>,</span>
+<span>                               s <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>                               r <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>                               kappa <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>            y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Abundance (count)'</span> <span class="op">=</span> <span class="st">'y'</span><span class="op">)</span>,</span>
+<span>            x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Env gradient'</span> <span class="op">=</span> <span class="st">'x'</span><span class="op">)</span>,</span>
+<span>            dist <span class="op">=</span> <span class="st">'nb'</span><span class="op">)</span></span>
+<span><span class="co"># fit a minimal model (with less than optimal iterations)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
+<span>                iter_warmup <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>                iter_sampling <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># one-off compilation of stan files for Bayesian modskurt models</span></span>
-<span><span class="co"># optionally edit path...</span></span>
-<span><span class="fu">modskurt</span><span class="fu">::</span><span class="fu"><a href="reference/compile_stanmodels.html">compile_stanmodels</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># check the posterior summary and computation diagnostics</span></span>
+<span><span class="fu"><a href="reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># test the basics work</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hdrab127.github.io/modskurt/">modskurt</a></span><span class="op">)</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">fit_modskurt</span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span>,</span>
-<span>                                 y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="fl">50</span>, mu <span class="op">=</span> <span class="fl">5</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>               shape <span class="op">=</span> <span class="st">'rdp'</span>,</span>
-<span>               dist <span class="op">=</span> <span class="st">'nb'</span><span class="op">)</span></span>
-<span><span class="fu">pp_check</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre>
+<span><span class="co"># plot the abundance distribution</span></span>
+<span><span class="fu"><a href="reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="how-to-use-the-modskurt-package">How to use the <code>modskurt</code> package<a class="anchor" aria-label="anchor" href="#how-to-use-the-modskurt-package"></a>
+</h2>
+<p>Statistical modelling is more than computing algorithms, see <a href="./articles/getting-started.html">Getting started</a> for a recommended workflow that takes species-environment data through a Bayesian workflow for incorporating ecological knowledge and instilling trust in results.</p>
+</div>
+<div class="section level2">
+<h2 id="roadmap-and-contribution">Roadmap and contribution<a class="anchor" aria-label="anchor" href="#roadmap-and-contribution"></a>
+</h2>
+<p>The current development version of this <code>modskurt</code> package is very much in its infancy. Planned additions in a vague order of priority are:</p>
+<p>[] More vignettes [] Model comparison (e.g. between nb and zinbl) [] Continuous abundance (like biomass) [] Binary package for Cran or drat [] Random effects [] Temporal effects [] Multiple gradients (2d modskurts) [] Multiple species [] …</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
