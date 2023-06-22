@@ -73,7 +73,12 @@
     
     
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/stan.min.js"></script><script>hljs.highlightAll();</script><pre><code class="language-stan"><code>functions {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/stan.min.js"></script><script>hljs.highlightAll();</script><p>The following code in the Stan probabilistic programming language
+defines a model where the discrete species abundance, <span class="math inline">\(y\)</span>, follows a zero-inflated negative
+binomial distribution with probability of excess-zero and mean abundance
+both linked to the data through <code>modskurt</code> mean functions of
+the environmental gradient, <span class="math inline">\(x\)</span>.</p>
+<pre><code class="language-stan"><code>functions {
   /*
   ln-modskurt mean function with args ...
   */

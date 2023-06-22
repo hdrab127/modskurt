@@ -29,5 +29,8 @@ csm <- gsub('>', '&gt;', csm, fixed = TRUE)
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/stan.min.js"></script>
 <script>hljs.highlightAll();</script>
+
+The following code in the Stan probabilistic programming language defines a model where the discrete species abundance, $y$, follows a zero-inflated negative binomial distribution with probability of excess-zero and mean abundance both linked to the data through `modskurt` mean functions of the environmental gradient, $x$.
+
 <pre><code class="language-stan"><code>`r csm`</code></pre>
 
