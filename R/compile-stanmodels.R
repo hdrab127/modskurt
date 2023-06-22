@@ -5,7 +5,7 @@
 #' @export
 #'
 compile_stanmodels <- function(force_recompile = FALSE) {
-  check <- cmdstanr::check_cmdstan_toolchain(quiet = TRUE)
+  check <- cmdstanr::check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
   pkgdir <- path.package('modskurt')
   standir <- file.path(pkgdir, 'stan')
   # TODO: remove this from testing
