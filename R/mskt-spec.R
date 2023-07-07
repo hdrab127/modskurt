@@ -1,4 +1,4 @@
-#' Specify ModSkurt model for the distribution of `y` over `x`
+#' Specify modskurt model for the distribution of `y` over `x`
 #'
 #' @param data data.frame or tibble
 #' @param y species count, optionally named - see details
@@ -70,7 +70,7 @@ mskt_spec <- function(data,
          hp_s = hp$s %||% c(-2.0, 0.6), # ~ log_normal(mu, sd)
          hp_r = hp$r %||% c( 1.2, 1.2), # ~ beta(a, b)
          hp_d = hp$d %||% c( 0.5, 1.0), # ~ log_normal(mu, sd)
-         hp_p = hp$p %||% c( 2.0, 3.0), # ~ beta(a, b)
+         hp_p = hp$p %||% c( 1.2, 1.2), # ~ beta(a, b)
          # use or set fixed "off" positions
          use_r = as.integer(grepl('r', shape)),
          fix_r = 0.5,

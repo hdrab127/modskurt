@@ -2,7 +2,7 @@
 % Please edit documentation in R/compile-stanmodels.R
 \name{compile_stanmodels}
 \alias{compile_stanmodels}
-\title{Compile ModSkurt Stan Models}
+\title{Compile modskurt Stan Models}
 \usage{
 compile_stanmodels(force_recompile = FALSE)
 }
@@ -10,5 +10,5 @@ compile_stanmodels(force_recompile = FALSE)
 \item{force_recompile}{whether to recompile even if nothing has changed}
 }
 \description{
-Compile ModSkurt Stan Models
+Compile modskurt Stan Models
 }

@@ -32,7 +32,7 @@
     if (use_p > 0) {
       real pr_zp = beta_rng(hp_p[1], hp_p[2]);
       log_prior += beta_lpdf(pr_zp | hp_p[1], hp_p[2]);
-      pr_p = fma(2.95, pr_zp, 0.05);
+      pr_p = fma(1.95, pr_zp, 0.05);
     } else {
       pr_p = fix_p;
     }

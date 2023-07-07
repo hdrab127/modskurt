@@ -2,7 +2,7 @@
 % Please edit documentation in R/mskt-spec.R
 \name{mskt_spec}
 \alias{mskt_spec}
-\title{Specify ModSkurt model for the distribution of `y` over `x`}
+\title{Specify modskurt model for the distribution of `y` over `x`}
 \usage{
 mskt_spec(
   data,
@@ -36,7 +36,7 @@ mskt_spec(
 list of standata for prior verification and posterior estimation
 }
 \description{
-Specify ModSkurt model for the distribution of `y` over `x`
+Specify modskurt model for the distribution of `y` over `x`
 }
 \details{
 ## Forms of the discrete (count) data distribution

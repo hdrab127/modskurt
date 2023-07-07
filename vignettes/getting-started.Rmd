@@ -9,9 +9,20 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+  # collapse = TRUE,
+  # comment = "#>",
+  message = FALSE, 
+  warning = FALSE, 
+  # eval = identical(Sys.getenv("NOT_CRAN"), "true"),
+  dev = "png",
+  dpi = 120,
+  fig.asp = 0.4,
+  fig.width = 10,
+  out.width = "100%",
+  fig.align = "center"
 )
+options(crayon.enabled = TRUE)
+options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
 # library(dplyr)
 # tuangi <-
 #   readRDS('../macrofauna/cockles-sst.rds') %>%
@@ -34,29 +45,38 @@ knitr::opts_chunk$set(
 
 This vignette presents a minimal workflow for modelling the distribution of a species abundance along an environmental gradient. See ...
 
-## Setup
+Define y, x, mu, ....
 
-```{r setup}
-# library(cmdstanr)
-library(ggplot2)
-library(modskurt)
-# only needs to be run every time package installed or updated
-# TODO: find better edit dir for testing only:
-compile_stanmodels()
+```{r, echo=FALSE, out.height="100%", fig.cap=paste0('Blah balha')}
+htmltools::tags$img(src = '../../docs/workflow.JPG')
 ```
 
-## Data and questions
+The rest of this vignette proceeds as follows ...
+
+## Load packages and stan files
+
+```{r setup}
+library(modskurt)
+library(ggplot2)
+# only needs to be run every time package installed or updated
+compile_stanmodels()
+
+# for reproducibility
+set.seed(123456)
+```
+
+## Case study - Tuangi vs. mud
+
+The NZ cockle vs sediment mud content.
 
 ```{r data}
-# A.0. data and questions
 data(tuangi)
 tuangi
 ```
 
-## Initial model
+## A. Specify initial model
 
 ```{r model}
-# A.1. specify initial model
 spec <-
   mskt_spec(data = tuangi,
             # response and gradients (optional names for tidier outputs)
@@ -71,36 +91,33 @@ spec <-
 str(spec)
 ```
 
-### Check initial model specification
+## B. Verify initial model specification
 
 ```{r check-model}
-# B.1. verify prior model specification
-# check_prior_dens(spec) # marginals
+check_prior_dens(spec)
 # check_prior_mskt(spec) # preds (cover all possible)
 # check_prior_dist(spec) # ymax (severe tests)
 # check_prior_zero(spec) # zi link
 # OPTIONAL: refine model spec
 ```
 
-## Fit subset model (fail fast)
+## C. Fit subset model
 
 ```{r fit-subset, results='hide'}
-# C.1. fit subset model to "training" data - fail fast
 fit_train <-
   mskt_fit(spec,
            # set the training sample
            train_prop = 0.3,
-           train_seed = 1234, 
-           seed = 1234,
            iter_warmup = 200,
            iter_sampling = 100,
            chains = 6,
-           parallel_chains = 6)
+           parallel_chains = 6,
+           # for testing
+           show_messages = TRUE, show_exceptions = TRUE)
 # OPTIONAL: refine model spec or fit parameters
 ```
 
 ```{r fit-subset-check}
-# C.2 check convergence (multimodality), sharpness
 check_computation(fit_train)
 # OPTIONAL: refine model spec or fit parameters
 ```
@@ -108,7 +125,6 @@ check_computation(fit_train)
 ### Check subset model
 
 ```{r check-subset-fit}
-# C.3. verify posterior specification
 # check_post_dens(fit_train)
 # check_post_dist(fit_train)
 # check_post_zero(fit_train)
@@ -117,19 +133,18 @@ check_computation(fit_train)
 # OPTIONAL: refine model spec or fit parameters
 ```
 
-## Fit full model
+## D. Fit full model
 
 ```{r fit-full, results='hide'}
-# D.1. fit full model (accepting defaults, see ?mskt_fit)
 fit_full <-
   mskt_fit(spec,
-           seed = 1234,
            chains = 4,
-           parallel_chains = 4)
+           parallel_chains = 4,
+           # for testing
+           show_messages = TRUE, show_exceptions = TRUE)
 ```
 
 ```{r fit-full-check}
-# D.2 check convergence (multimodality), sharpness
 check_computation(fit_full)
 # OPTIONAL: refine model spec or fit parameters
 ```
@@ -137,7 +152,6 @@ check_computation(fit_full)
 ### Check full model
 
 ```{r check-full-fit}
-# D.3. verify posterior specification
 # check_post_dens(fit_full)
 # check_post_dist(fit_full)
 # check_post_zero(fit_full)
@@ -147,12 +161,11 @@ check_computation(fit_full)
 # OPTIONAL: refine model spec or fit parameters
 ```
 
-## Use the model
+## E. Use the model
 
 ### Plot summaries of the abundance distribution
 
 ```{r use-full-fit-dist}
-# E. use the model
 # plot the distribution of abundance along the gradient
 abundance_dist(fit_full,
                summaries = c('mean', 'median', 'q90'),
@@ -200,7 +213,7 @@ library(patchwork)
                   region = 'centre',
                   plotted = TRUE,
                   range_colour = 'blue') +
-    labs(subtitle = '75% Abundance Density Limit (ADL)')
+    labs(y = NULL, subtitle = '75% Abundance Density Limit (ADL)')
 ) +
   plot_layout(guides = 'collect')
 # note how HAZ prefers higher relative abundance summaries as opposed to ADL

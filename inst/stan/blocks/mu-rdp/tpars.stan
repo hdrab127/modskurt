@@ -21,7 +21,7 @@
 
   real p;
   if (use_p > 0) {
-    p = fma(2.95, zp[1], + 0.05);
+    p = fma(1.95, zp[1], + 0.05);
   } else {
     p = fix_p;
   }

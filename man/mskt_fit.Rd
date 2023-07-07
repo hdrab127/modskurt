@@ -2,7 +2,7 @@
 % Please edit documentation in R/mskt-fit.R
 \name{mskt_fit}
 \alias{mskt_fit}
-\title{Fit the specified ModSkurt model by sampling its posterior distribution}
+\title{Fit the specified modskurt model by sampling its posterior distribution}
 \usage{
 mskt_fit(
   spec,
@@ -22,7 +22,7 @@ mskt_fit(
 )
 }
 \arguments{
-\item{spec}{the ModSkurt model specification returned by `mskt_spec`}
+\item{spec}{the modskurt model specification returned by `mskt_spec`}
 
 \item{train_prop}{the proportion of data to train the posterior on}
 
@@ -52,5 +52,5 @@ mskt_fit(
 A `cmdstanr::CmdStanMCMC` object
 }
 \description{
-Fit the specified ModSkurt model by sampling its posterior distribution
+Fit the specified modskurt model by sampling its posterior distribution
 }

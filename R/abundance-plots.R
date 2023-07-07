@@ -237,7 +237,7 @@ abundance_range <- function(fit,
   dy_nm <- gsub('^Q(\\d*)$', 'Q[\\1]', dy_nm)
   if (grepl('^Q', dy_nm)) {
     dy_console <-
-      paste0(gsub('[^0-9]*', '', dy_nm), ' prob. quantile of')
+      paste0(as.double(gsub('[^0-9]*', '', dy_nm)) / 100, ' prob. quantile of')
   }
   cat('\nSpecies range (see x.avg row) calculated as the ',
       switch(using_range,

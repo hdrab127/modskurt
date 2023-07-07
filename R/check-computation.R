@@ -45,7 +45,7 @@ check_computation <- function(fit, show_info = TRUE) {
   # summ$mean <- NULL
   # summ$sd <- NULL
   # summ$mad <- NULL
-
+  # TODO: if one chain fails then below errs
   diags <-
     cbind(fit$time()$chains,
           fit$diagnostic_summary())

@@ -25,14 +25,8 @@ mskt_sim_nb <- function(x,
                         g0 = 0,
                         g1 = 0) {
   N <- length(x)
-  xms <- (x - m) / s
   yreps <-
-    data.frame(x = x,
-               mu = exp(log(H) - p * log(
-                 r * exp((xms / r - d) / p) +
-                   (1 - r) * exp(- (xms / (1 - r) + d) / p) -
-                   exp(- d / p) + 1
-               )))
+    data.frame(x = x, mu = mskt(x, H, m, s, r, d, p))
   yreps$zi <- stats::plogis(stats::qlogis(g0) - g1 * yreps$mu)
   yreps$y <- as.integer(stats::rnbinom(N,
                                        mu = yreps$mu,
@@ -40,3 +34,39 @@ mskt_sim_nb <- function(x,
   yreps$y[stats::runif(N) < yreps$zi] <- 0L
   yreps
 }
+
+
+#' Log-Modskurt (mskt) unimodal mean function
+#'
+#' @param x predictor variable (real number vector)
+#' @param H height of curve at mode (real number > 0)
+#' @param m mode (real number)
+#' @param s scale (real number > 0)
+#' @param r asymmetry (real number in (0, 1))
+#' @param d flatness (real number >= 0)
+#' @param p tail exaggeration (real number in (0, 2))
+#' @return vector of log-scale mean values (real number vector)
+mskt <- function(x, H, m, s, r = 0.5, d = 0, p = 1) {
+  xms <- (x - m) / s
+  # this underflows to -inf on log then 0 on natural
+  # mu <- log(H) - p * log(
+  #   r * exp((xms / r - d) / p) +
+  #     (1 - r) * exp(- (xms / (1 - r) + d) / p) -
+  #     exp(- d / p) + 1
+  # )
+  # exp(mu)
+  # this version doesn't underflow and matches stan
+  invp <- 1 / p
+  mdop <- - d * invp
+  lmu <- log(fma(H,
+                 pow(fma(r,
+                         exp(fma(invp, xms / r, mdop)),
+                         fma(1 - r,
+                             exp(fma(-invp, xms / (1 - r), mdop)),
+                             exp(- mdop) + 1)),
+                     -p),
+                 .Machine$double.eps))
+  exp(lmu)
+}
+fma <- function(a, b, c) a * b + c
+pow <- function(a, b) a ^ b

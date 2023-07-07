@@ -15,14 +15,17 @@ transformed data {
 parameters {
 #include mu-rdp/pars.stan
 #include zi-logistic-reg/pars-zi.stan
-  real<lower=0> kap;
+  // hopefully that upper bound restricts phi >= eps and avoids
+  // underflow complaints MH tries kap -> inf
+  real<lower=0,upper=1/sqrt(machine_precision())> kap;
 }
 transformed parameters {
 #include mu-rdp/tpars.stan
   vector[N] lmu = leff + lmskt((x - m) / s, H, r, d, p);
+  // apparently this is more numerically stable than pow(kap, -2)?
+  real phi = 1 / square(kap);
 #include zi-logistic-reg/tpars-zi.stan
-  real phi = pow(kap, -2);
-} 
+}
 model {
 #include mu-rdp/model.stan 
   target += exponential_lupdf(kap | hp_kap);
@@ -36,7 +39,7 @@ model {
     }
     target += bernoulli_lupmf(0 | zi[Nzp:N]) +
               neg_binomial_2_log_lupmf(y[Nzp:N] | lmu[Nzp:N], phi);
-  } else {
+  } else { 
     target += neg_binomial_2_log_lupmf(y | lmu, phi);
   }
 }

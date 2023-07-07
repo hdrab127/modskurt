@@ -1,4 +1,66 @@
 url: https://hdrab127.github.io/modskurt/
 template:
   bootstrap: 5
-
+  bootswatch: cosmo
+  bslib:
+    headings-font-weight: 300
+    nav-link-font-weight: 300
+    dark: "#222222"
+    primary: "#222222"
+navbar:
+  bg: dark
+  structure:
+    left: [intro, Vignettes, Functions, News, OtherPackages, Stan]
+    right: [search, github]
+  components:
+    intro:
+      icon: fa-home
+      href: index.html
+      aria-label: msktr
+    Vignettes:
+      text: "Vignettes"
+      menu:
+        - text: 'How to use `modskurt`'
+          href: articles/getting-started.html
+        - text: 'Prior specification'
+          href: articles/prior-specification.html
+        - text: 'Stan discrete model'
+          href: articles/discrete-stan.html
+        - text: 'Examples'
+          href: articles/examples.html
+    Functions:
+      text: 'Functions'
+      href: reference/index.html
+    News:
+      text: 'News'
+      href: news/index.html
+    OtherPackages:
+      text: 'Other packages'
+      menu:
+        - text: "bayesplot"
+          href: https://mc-stan.org/bayesplot/
+        - text: "brms"
+          href: http://paul-buerkner.github.io/brms/index.html
+        - text: "cmdstanr"
+          href: https://mc-stan.org/cmdstanr
+        - text: "loo"
+          href: https://mc-stan.org/loo
+        - text: "posterior"
+          href: https://mc-stan.org/posterior
+        - text: "projpred"
+          href: https://mc-stan.org/projpred
+        - text: "rstan"
+          href: https://mc-stan.org/rstan
+        - text: "rstanarm"
+          href: https://mc-stan.org/rstanarm
+        - text: "rstantools"
+          href: https://mc-stan.org/rstantools
+        - text: "shinystan"
+          href: https://mc-stan.org/shinystan
+    Stan:
+      text: "Stan"
+      href: https://mc-stan.org
+    github:
+      icon: fa-github
+      href: https://github.com/hdrab127/modskurt
+      aria-label: Github

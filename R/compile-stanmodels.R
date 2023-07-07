@@ -1,4 +1,4 @@
-#' Compile ModSkurt Stan Models
+#' Compile modskurt Stan Models
 #'
 #' @param force_recompile whether to recompile even if nothing has changed
 #'
@@ -18,13 +18,18 @@ compile_stanmodels <- function(force_recompile = FALSE) {
   }
   csms <- dir(standir, '.stan$', full.names = TRUE)
   lapply(csms, function(nm) {
-    print(paste('Compiling', nm))
+    short <- gsub('^.*/', '', nm)
+    if (!file.exists(gsub('stan$', 'exe', nm)) | force_recompile) {
+      print(paste('Compiling now:', short))
+    } else {
+      print(paste('Already compiled:', short))
+    }
     cmdstanr::cmdstan_model(
       stan_file = nm,
       include_paths = normalizePath(paste0(standir, '/blocks/')),
       stanc_options = list('O1'),
       pedantic = is_local,
-      force_recompile = FALSE
+      force_recompile = force_recompile
     )
   })
   invisible(csms)

@@ -22,7 +22,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">modskurt</a>
 
@@ -36,21 +36,57 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
+  <a class="nav-link" href="../index.html" aria-label="msktr">
+    <span class="fa fa-home"></span>
+     
+  </a>
 </li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/getting-started.html">Getting started</a>
-    <a class="dropdown-item" href="../articles/prior-specification.html">Prior Specification</a>
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-vignettes">Vignettes</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+    <a class="dropdown-item" href="../articles/getting-started.html">How to use `modskurt`</a>
+    <a class="dropdown-item" href="../articles/prior-specification.html">Prior specification</a>
+    <a class="dropdown-item" href="../articles/stan-model.html">Stan model</a>
+    <a class="dropdown-item" href="../articles/examples.html">Examples</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../reference/index.html">Functions</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">News</a>
+</li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-other-packages">Other packages</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-other-packages">
+    <a class="external-link dropdown-item" href="https://mc-stan.org/bayesplot/">bayesplot</a>
+    <a class="external-link dropdown-item" href="http://paul-buerkner.github.io/brms/index.html">brms</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/cmdstanr">cmdstanr</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/loo">loo</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/posterior">posterior</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/projpred">projpred</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/rstan">rstan</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/rstanarm">rstanarm</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/rstantools">rstantools</a>
+    <a class="external-link dropdown-item" href="https://mc-stan.org/shinystan">shinystan</a>
+  </div>
+</li>
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://mc-stan.org">Stan</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/hdrab127/modskurt" aria-label="Github">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -90,14 +126,14 @@ relationship we wish to model.</p>
 <p>Two interactive pages have been created to help encode information
 into the priors for these modskurt models, with some “severe” tests to
 check for misspecification:</p>
-<p>The <strong>ModSkurt mean function</strong> that describes the shape
+<p>The <strong>modskurt mean function</strong> that describes the shape
 of average abundance along the gradient in question:</p>
 <ul>
 <li><a href="https://salt-ecology.shinyapps.io/modskurt-prior-specs/" class="external-link uri">https://salt-ecology.shinyapps.io/modskurt-prior-specs/</a></li>
 </ul>
 <p>The negative binomial-based <strong>abundance distributions</strong>
 that describe the probability of observing different species counts and
-excess-zeros given the ModSkurt mean:</p>
+excess-zeros given the modskurt mean:</p>
 <ul>
 <li><a href="https://salt-ecology.shinyapps.io/nb-zinbl-prior-specs/" class="external-link uri">https://salt-ecology.shinyapps.io/nb-zinbl-prior-specs/</a></li>
 </ul>
