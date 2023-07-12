@@ -184,9 +184,11 @@ Severe tests for the specified distribution of $y$, idea is to check that the co
 check_prior_dist(spec)
 ```
 
-TODO: change these to remove the observed line? Or change the text to use more eco terms.
+TODO: change these to remove the observed lines by default?
 
-Looks maybe overshooting overdispersion slightly? E.g. quite high zero proportions for these data and very small inter-quartile ranges. Lets tweak the rate hyperparameter for the exponentially distribution overdispersion parameter, $\kappa \sim \text{Exp}[\lambda = \text{hp_kap}]$.
+Looks maybe a little too many zeros for these data? Tuangi are pretty common and it'd be highly unlikely to not find a few somewhere along the mud gradient. The maximum count predictions are quite high as well, counting more than 1500 tuangi in a single 250g core would be quite a feat (unless all tiny juveniles?).
+
+Lets tweak the rate hyperparameter for the exponentially distributed overdispersion parameter, $\kappa \sim \text{Exp}[\lambda = \text{hp_kap}]$, slightly to encourage smaller values of overdispersion:
 
 ```{r, fig.asp=0.6}
 spec$hp_kap <- 1

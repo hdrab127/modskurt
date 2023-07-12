@@ -416,13 +416,16 @@ and capture zero proportions or higher counts.</li>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/check-prior-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p>TODO: change these to remove the observed line? Or change the text to
-use more eco terms.</p>
-<p>Looks maybe overshooting overdispersion slightly? E.g. quite high
-zero proportions for these data and very small inter-quartile ranges.
-Lets tweak the rate hyperparameter for the exponentially distribution
+<p>TODO: change these to remove the observed lines by default?</p>
+<p>Looks maybe a little too many zeros for these data? Tuangi are pretty
+common and it’d be highly unlikely to not find a few somewhere along the
+mud gradient. The maximum count predictions are quite high as well,
+counting more than 1500 tuangi in a single 250g core would be quite a
+feat (unless all tiny juveniles?).</p>
+<p>Lets tweak the rate hyperparameter for the exponentially distributed
 overdispersion parameter, <span class="math inline">\(\kappa \sim
-\text{Exp}[\lambda = \text{hp_kap}]\)</span>.</p>
+\text{Exp}[\lambda = \text{hp_kap}]\)</span>, slightly to encourage
+smaller values of overdispersion:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span><span class="op">$</span><span class="va">hp_kap</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
 <span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span>, <span class="st">'kap'</span><span class="op">)</span> <span class="op">+</span> </span>
@@ -476,12 +479,12 @@ the posterior for the subset of data, and ….</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  1.966    1.061 3.027             1                 0 0.7410424</span></span>
-<span><span class="co">## 2        2  1.934    1.295 3.229             0                 0 0.6850410</span></span>
-<span><span class="co">## 3        3  2.197    0.971 3.168             0                 0 0.9556187</span></span>
-<span><span class="co">## 4        4  1.927    1.228 3.155             0                 0 0.9347321</span></span>
-<span><span class="co">## 5        5  2.674    1.249 3.923             0                 0 0.4587924</span></span>
-<span><span class="co">## 6        6  2.329    0.997 3.326             0                 0 1.1240496</span></span></code></pre>
+<span><span class="co">## 1        1  1.868    1.105 2.973             1                 0 0.7410424</span></span>
+<span><span class="co">## 2        2  1.746    1.258 3.004             0                 0 0.6850410</span></span>
+<span><span class="co">## 3        3  1.947    0.985 2.932             0                 0 0.9556187</span></span>
+<span><span class="co">## 4        4  1.756    1.257 3.013             0                 0 0.9347321</span></span>
+<span><span class="co">## 5        5  2.571    1.154 3.725             0                 0 0.4587924</span></span>
+<span><span class="co">## 6        6  2.215    0.953 3.168             0                 0 1.1240496</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -529,10 +532,10 @@ number of posterior samples.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 26.247   31.744 57.991             0                 0 1.0474322</span></span>
-<span><span class="co">## 2        2 24.049   30.874 54.923             0                 0 0.9202813</span></span>
-<span><span class="co">## 3        3 24.345   33.597 57.942             0                 0 0.8693720</span></span>
-<span><span class="co">## 4        4 25.982   26.066 52.048             0                 0 0.8829889</span></span></code></pre>
+<span><span class="co">## 1        1 27.739   31.163 58.902             0                 0 1.0474322</span></span>
+<span><span class="co">## 2        2 25.456   30.055 55.511             0                 0 0.9202813</span></span>
+<span><span class="co">## 3        3 25.609   32.660 58.269             0                 0 0.8693720</span></span>
+<span><span class="co">## 4        4 27.288   25.286 52.574             0                 0 0.8829889</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
