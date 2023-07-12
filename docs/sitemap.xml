@@ -4,6 +4,9 @@
     <loc>https://hdrab127.github.io/modskurt/404.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/articles/discrete-stan.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/articles/getting-started.html</loc>
   </url>
   <url>
@@ -37,6 +40,9 @@
     <loc>https://hdrab127.github.io/modskurt/reference/check_computation.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_prior_dens.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/reference/compile_stanmodels.html</loc>
   </url>
   <url>
@@ -52,7 +58,13 @@
     <loc>https://hdrab127.github.io/modskurt/reference/kappa_to_phi.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/mskt.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/reference/mskt_fit.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/mskt_inits.html</loc>
   </url>
   <url>
     <loc>https://hdrab127.github.io/modskurt/reference/mskt_sim_nb.html</loc>

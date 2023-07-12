@@ -6,8 +6,8 @@
 \usage{
 check_prior_dens(
   spec,
-  train_prop = 1,
-  train_seed = NULL,
+  pars = attr(spec, "pars"),
+  use_subset = TRUE,
   prob_inner = 0.5,
   prob_outer = 0.99
 )
@@ -15,9 +15,9 @@ check_prior_dens(
 \arguments{
 \item{spec}{the modskurt model specification returned by `mskt_spec`}
 
-\item{train_prop}{the proportion of data to train the posterior on}
+\item{pars}{parameters to plot densities for, default is all}
 
-\item{train_seed}{a seed for the training sample of proportion `train_prop`}
+\item{use_subset}{whether to use specified subset or all data}
 
 \item{prob_inner}{inner probability (high density interval) to highlight}
 

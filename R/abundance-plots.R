@@ -29,13 +29,18 @@ abundance_dist <- function(fit,
   spec <- attr(fit, 'spec')
   nms <- attr(spec, 'nms')
   dist <- attr(spec, 'dist')
-  d <- do.call(spec$data, attr(fit, 'train'))$all
+  is_subset <- attr(fit, 'is_subset')
+  if (is_subset) {
+    d <- spec$subset()$all
+  } else {
+    d <- spec$full()$all
+  }
   mus <- mskt_predict(fit, ndraws, seed, include_zero_inflation)
 
   # TODO: plot cpue instead?
   gg <-
     ggplot2::ggplot(d, ggplot2::aes(.data$x, .data$y))
-  if (attr(fit, 'train')$prop == 1) {
+  if (!is_subset) {
     gg <-
       gg +
       ggplot2::geom_point(alpha = point_alpha)
@@ -112,7 +117,8 @@ abundance_dist <- function(fit,
                                       list(distnm = toupper(dist))))
 }
 
-mskt_predict <- function(fit, ndraws, seed, include_zero_inflation) {
+#' @keywords internal
+mskt_predict <- function(fit, ndraws = NULL, seed = NULL, include_zero_inflation = TRUE) {
   spec <- attr(fit, 'spec')
   dist <- attr(spec, 'dist')
   niter <- fit$metadata()$iter_sampling
@@ -138,13 +144,15 @@ mskt_predict <- function(fit, ndraws, seed, include_zero_inflation) {
     mus$zi <- 0
   }
   mus$kap <- kap
+  mus <- mus[, c('chain', 'draw', 'x', 'mu', 'kap', 'zi')]
 
   # subset draws if needed
   if (!missing(seed) & !is.null(seed)) {
     set.seed(seed)
   }
-  mus <- mus[mus$draw %in% sample(npost, ndraws),
-             c('chain', 'draw', 'x', 'mu', 'kap', 'zi')]
+  if (!is.null(ndraws)) {
+    mus <- mus[mus$draw %in% sample(npost, ndraws), ]
+  }
   mus <- mus[order(mus$x), ]
   mus$name <- 'mu'
   mus
@@ -158,9 +166,8 @@ mskt_predict <- function(fit, ndraws, seed, include_zero_inflation) {
 #' @param capture_pct percent of total abundance density (most_dens) or percent
 #'   tolerance from highest abundance summary (high_zone), based on "based_on"
 #'   summary of abundance
-#' @param using_range "most_dens" for range of highest abundance density, or
-#'   "high_zone" for range of x with abundance summary within highest possible,
-#'   see details
+#' @param using_range "ADL" for highest abundance density limit, or
+#'   "HAZ" for highest abundance zone, see details
 #' @param based_on which distribution summary to use for density or high zone,
 #'   one of "mean", "median", or any quantile proportion as "q" + pecentage
 #'   (e.g. "q90" = 90\% quantile)
@@ -184,7 +191,7 @@ abundance_range <- function(fit,
                             seed = NULL,
                             ndraws = 50,
                             capture_pct = 80,
-                            using_range = 'high_zone',
+                            using_range = 'HAZ',
                             based_on = 'median',
                             region = 'centre',
                             include_zero_inflation = FALSE,
@@ -197,7 +204,12 @@ abundance_range <- function(fit,
   nms <- attr(spec, 'nms')
   dist <- attr(spec, 'dist')
   prop <- capture_pct / 100
-  d <- do.call(spec$data, attr(fit, 'train'))$all
+  is_subset <- attr(fit, 'is_subset')
+  if (is_subset) {
+    d <- spec$subset()$all
+  } else {
+    d <- spec$full()$all
+  }
   mus <- mskt_predict(fit, ndraws, seed, include_zero_inflation)
   agg <- based_on
   if (agg == 'median') {
@@ -235,6 +247,7 @@ abundance_range <- function(fit,
   dy_nm <- paste0(toupper(substring(based_on, 0, 1)),
                   substring(based_on, 2))
   dy_nm <- gsub('^Q(\\d*)$', 'Q[\\1]', dy_nm)
+    dy_console <- dy_nm
   if (grepl('^Q', dy_nm)) {
     dy_console <-
       paste0(as.double(gsub('[^0-9]*', '', dy_nm)) / 100, ' prob. quantile of')
@@ -256,7 +269,7 @@ abundance_range <- function(fit,
   if (plotted) {
     gg <-
       ggplot2::ggplot(d, ggplot2::aes(.data$x, .data$y))
-    if (attr(fit, 'train')$prop == 1) {
+    if (!is_subset) {
       gg <-
         gg +
         ggplot2::geom_point(alpha = point_alpha)
@@ -286,6 +299,33 @@ abundance_range <- function(fit,
                              'most_dens' = 'ADL'))
     xidx <- ranges$name == 'x'
     xavgidx <- row.names(aggs) == 'x.avg'
+    if (region == 'centre') {
+      range_vlines <-
+        data.frame(x = c(aggs$left[xavgidx], aggs$right[xavgidx]),
+                   leg = 'Average')
+      # ranges$centre[xidx],
+      range_points <-
+        data.frame(x = c(ranges$left[xidx], ranges$right[xidx]),
+                   y = c(ranges$left[!xidx], ranges$right[!xidx]),
+                   group = rep(ranges$draw[xidx], 2),
+                   leg = 'Draws')
+    } else if (region == 'left') {
+      range_vlines <-
+        data.frame(x = c(aggs$right[xavgidx]), leg = 'Average')
+      range_points <-
+        data.frame(x = c(ranges$right[xidx]),
+                   y = c(ranges$right[!xidx]),
+                   group = ranges$draw[xidx],
+                   leg = 'Draws')
+    } else if (region == 'right') {
+      range_vlines <-
+        data.frame(x = c(aggs$left[xavgidx]), leg = 'Average')
+      range_points <-
+        data.frame(x = c(ranges$left[xidx]),
+                   y = c(ranges$left[!xidx]),
+                   group = ranges$draw[xidx],
+                   leg = 'Draws')
+    }
     gg <-
       gg +
       ggplot2::geom_point(ggplot2::aes(.data$x,
@@ -294,23 +334,13 @@ abundance_range <- function(fit,
                                        alpha = .data$leg),
                           size = 2,
                           colour = range_colour,
-                          data = data.frame(x = c(ranges$left[xidx],
-                                                  # ranges$centre[xidx],
-                                                  ranges$right[xidx]),
-                                            y = c(ranges$left[!xidx],
-                                                  # ranges$centre[!xidx],
-                                                  ranges$right[!xidx]),
-                                            group = rep(ranges$draw[xidx],
-                                                        2),
-                                            leg = 'Draws')) +
+                          data = range_points) +
       ggplot2::geom_vline(ggplot2::aes(xintercept = .data$x,
                                        alpha = .data$leg),
                           linetype = 'dashed',
                           linewidth = 1,
                           colour = range_colour,
-                          data = data.frame(x = c(aggs$left[xavgidx],
-                                                  aggs$right[xavgidx]),
-                                            leg = 'Average')) +
+                          data = range_vlines) +
       ggplot2::scale_colour_manual(values = range_colour) +
       ggplot2::scale_alpha_manual(cont_nm,
                                   values = c(point_alpha * 2, 1),
@@ -338,7 +368,8 @@ abundance_range <- function(fit,
 
 #' @importFrom utils tail
 #' @importFrom stats weighted.mean
-range_most_dens <- function(x, y, prop, region) {
+#' @keywords internal
+range_ADL <- function(x, y, prop, region) {
   # the smallest region of x that has cumulative y summary >= some % of total y
   # summary, i.e. highest density interval
   # calc the cumulative sum of y along x then find quantiles
@@ -377,7 +408,8 @@ range_most_dens <- function(x, y, prop, region) {
 }
 
 #' @importFrom stats weighted.mean
-range_high_zone <- function(x, y, prop, region) {
+#' @keywords internal
+range_HAZ <- function(x, y, prop, region) {
   # the total region that has y summary >= some % of y summary
   # e.g. could be the range of x where mean(y[x]) is at least 50% of max(mean(y))
   b <- range(which(y >= max(y) * (1 - prop)))

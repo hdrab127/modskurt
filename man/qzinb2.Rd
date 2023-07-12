@@ -7,7 +7,7 @@
 qzinb2(p, mu, kappa, zi, lower.tail = TRUE, log.p = FALSE)
 }
 \arguments{
-\item{p}{vector of quantiles}
+\item{p}{vector of quantile probabilities}
 
 \item{mu}{mean of the distribution}
 
@@ -25,3 +25,4 @@ A vector of quantiles, each of which coincide with the respective probability in
 \description{
 Zero-inflated Negative Binomial Quantile Function
 }
+\keyword{internal}

@@ -1,9 +1,9 @@
 functions {
-#include mu-rdp/lmskt.stan
+#include mu-rdp/mskt.stan
 }
 data {
 #include mu-rdp/data.stan
-  // base distribution
+  // fixed data type
   array[N] int<lower=0> y;
   real<lower=0> hp_kap;
 
@@ -17,19 +17,17 @@ parameters {
 #include zi-logistic-reg/pars-zi.stan
   // hopefully that upper bound restricts phi >= eps and avoids
   // underflow complaints MH tries kap -> inf
-  real<lower=0,upper=1/sqrt(machine_precision())> kap;
+  real<lower=machine_precision(),upper=1/sqrt(machine_precision())> kap;
 }
 transformed parameters {
 #include mu-rdp/tpars.stan
-  vector[N] lmu = leff + lmskt((x - m) / s, H, r, d, p);
-  // apparently this is more numerically stable than pow(kap, -2)?
+  // this is more numerically stable than pow(kap, -2)?
   real phi = 1 / square(kap);
 #include zi-logistic-reg/tpars-zi.stan
 }
 model {
-#include mu-rdp/model.stan 
+#include mu-rdp/model.stan
   target += exponential_lupdf(kap | hp_kap);
-
   if (use_zi) {
 #include zi-logistic-reg/model-zi.stan
     if (Nz > 0) {
@@ -39,7 +37,7 @@ model {
     }
     target += bernoulli_lupmf(0 | zi[Nzp:N]) +
               neg_binomial_2_log_lupmf(y[Nzp:N] | lmu[Nzp:N], phi);
-  } else { 
+  } else {
     target += neg_binomial_2_log_lupmf(y | lmu, phi);
   }
 }
@@ -53,7 +51,7 @@ generated quantities {
   real pr_phi;
 
   if (sample_prior < 2) {
-    mu_rep = exp(lmskt((xrep - m) / s, H, r, d, p));
+    mu_rep = mskt((xrep - m) / s, H, r, d, p);
     // calc log lik and yreps
     if (use_zi) {
 #include zi-logistic-reg/genq-zi-rep.stan
@@ -85,7 +83,7 @@ generated quantities {
   }
 
   if (sample_prior > 0) {
-    // calcs log_prior for mean pars now 
+    // calcs log_prior for mean pars now
 #include mu-rdp/genq-pr-mu.stan
 #include zi-logistic-reg/genq-pr-zi.stan
     pr_kap = exponential_rng(hp_kap);

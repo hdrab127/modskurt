@@ -23,3 +23,4 @@ A vector of quantiles, each of which correspond to a probability in p
 \description{
 The Negative Binomial Quantile Function (alternative parameterisation)
 }
+\keyword{internal}

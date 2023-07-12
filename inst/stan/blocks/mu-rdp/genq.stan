@@ -1,4 +1,3 @@
-  vector[N] mu = exp(lmu);
   vector[N] log_lik;
   vector[Nrep] mu_rep;
   vector[Nrep] pr_mu_rep;

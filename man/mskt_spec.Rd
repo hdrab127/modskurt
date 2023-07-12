@@ -12,7 +12,9 @@ mskt_spec(
   dist = "nb",
   shape = "rdp",
   hyperparams = list(),
-  pred_grid = NULL
+  pred_grid = NULL,
+  subset_prop = 1,
+  subset_seed = NULL
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ mskt_spec(
 \item{hyperparams}{list of hyper-parameters to adjust in-built priors}
 
 \item{pred_grid}{vector of x values to make y predictions over}
+
+\item{subset_prop}{proportion of data to use for early model checks}
+
+\item{subset_seed}{a seed for the subset sample proportion}
 }
 \value{
 list of standata for prior verification and posterior estimation

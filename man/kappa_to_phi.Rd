@@ -12,3 +12,4 @@ kappa_to_phi(kappa)
 \description{
 Convert overdispersion kappa to reciprocal dispersion phi
 }
+\keyword{internal}

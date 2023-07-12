@@ -117,29 +117,55 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>This vignette presents a minimal workflow for modelling the
-distribution of a species abundance along an environmental gradient. See
-…</p>
-<p>Define y, x, mu, ….</p>
-<img src="../../docs/workflow.JPG"><p>The rest of this vignette proceeds as follows …</p>
+<p>This vignette presents a minimal Bayesian workflow for modelling the
+distribution of discrete <strong>species abundance</strong>, <span class="math inline">\(y\)</span>, along an <strong>environmental
+gradient</strong>, <span class="math inline">\(x\)</span>, using the
+<strong>modskurt</strong> function to predict mean abundance, <span class="math inline">\(\mu\)</span>. The diagram below outlines key steps
+for an informative and trustworthy analysis using the
+<code>modskurt</code> package, and also provides a layout for the rest
+of this vignette. If at any stage you find yourself needing more
+information, please check out the references and other resources on this
+web page.</p>
+<img src="../../docs/workflow.JPG">
 </div>
 <div class="section level2">
 <h2 id="load-packages-and-stan-files">Load packages and stan files<a class="anchor" aria-label="anchor" href="#load-packages-and-stan-files"></a>
 </h2>
+<p>This section assumes you’ve already got <code>modskurt</code>
+installed and running, if not, jump over to this packages’ <a href="./index.html">home page</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hdrab127.github.io/modskurt/">modskurt</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="co"># only needs to be run every time package installed or updated</span></span>
+<code class="sourceCode R"><span><span class="co"># compile_stanmodels only runs when needed, so it doesn't hurt to keep these</span></span>
+<span><span class="co"># lines together in any analysis</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hdrab127.github.io/modskurt/">modskurt</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/compile_stanmodels.html">compile_stanmodels</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "Already compiled: discrete.stan"</span></span></code></pre>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># for reproducibility</span></span>
+<code class="sourceCode R"><span><span class="co"># everyone loves a good graph</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123456</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="case-study---tuangi-vs--mud">Case study - Tuangi vs. mud<a class="anchor" aria-label="anchor" href="#case-study---tuangi-vs--mud"></a>
 </h2>
-<p>The NZ cockle vs sediment mud content.</p>
+<p>To illustrate the <code>modskurt</code> workflow, we’ll analyse the
+distribution of tuangi (<em>Austrovenus stutchburyi</em>, the New
+Zealand cockle - <a href="https://niwa.co.nz/te-kuwaha/tuangi" class="external-link">more
+info</a>) counts along a gradient of estuarine sediment mud
+concentrations (from 0% no muddy sediment to 100% completely mud
+dominated - <a href="https://www.lawa.org.nz/learn/factsheets/estuaries/mud-content-in-estuaries/" class="external-link">more
+info</a>). Key variables are:</p>
+<ul>
+<li>
+<code>count</code> the number of individual tuangi recorded in a
+250g composite sediment core.</li>
+<li>
+<code>mud_pct</code> the percentage of sediment particles in the
+core that are less than 0.063mm in diameter</li>
+</ul>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">tuangi</span><span class="op">)</span></span>
 <span><span class="va">tuangi</span></span></code></pre></div>
@@ -158,10 +184,100 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co">## <span style="color: #BCBCBC;">10</span> 2018   175. -<span style="color: #BB0000;">40.5</span>     <span style="color: #949494;">0</span>    34.8     250    <span style="color: #949494;">0.</span>34     390    12.9    15.6</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 754 more rows</span></span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 1 more variable: </span><span style="color: #949494; font-weight: bold;">sst_max</span><span style="color: #949494;"> &lt;dbl&gt;</span></span></span></code></pre>
+<p>For attribution and technical details of how these data are
+collected, please contact <a href="https://www.saltecology.co.nz/contact" class="external-link">Salt Ecology</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="a--specify-initial-model">A. Specify initial model<a class="anchor" aria-label="anchor" href="#a--specify-initial-model"></a>
 </h2>
+<p>The first step in the analysis of a species’ abundance over an
+environmental gradient is to specify the distribution model. In general
+for discrete abundance data like these, we recommend first trying a
+<strong>negative binomial</strong> (NB) regression, however there may be
+some cases, particularly for rare and hard to sample species, where it
+might be worth going straight for a <strong>zero-inflated negative
+binomial linked</strong> (ZINBL) extension – see <a href="for%20an%20example">TODO……..</a>.</p>
+<p>Given the negative binomial distribution of abundance, <span class="math inline">\(y\)</span>, the <code>modskurt</code> package
+specifies that the mean of the negative binomial distribution (or
+expected abundance <span class="math inline">\(\mu =
+\text{E}[y]\)</span>) is a non-linear function, <span class="math inline">\(f\)</span> of the environmental gradient, <span class="math inline">\(x\)</span>, mud content in this case. Yielding the
+following generalised non-linear regression model (GNLM):</p>
+<p><span class="math display">\[
+y_n \sim \text{NegativeBinomial}\left[\mu_n = f(x_n), \kappa\right]
+\]</span></p>
+<p>where subscript, <span class="math inline">\(n\)</span>, denotes the
+<span class="math inline">\(n\)</span>th sample of abundance and
+environmental gradient, and <span class="math inline">\(kappa\)</span>
+is an overdispersion parameter that models the variation of abundance
+relative to mean abundance.</p>
+<p>The modskurt function, <span class="math inline">\(f\)</span>, is
+visually unappealing, but (believe us!) it produces appealing and
+realistic shapes of mean abundance along environmental gradients:</p>
+<p><span class="math display">\[
+f(x_n) =
+  H \bigg[r \exp\left(\frac{1}{p}\left[\frac{x_n-m}{sr} -
+d\right]\right) +
+  (1 - r) \exp\left(\frac{1}{p}\left[d - \frac{x_n-m}{s\left(1 -
+r\right)}\right]\right) - \exp\left(-\frac{d}{p}\right) + 1\bigg] ^
+{-p},
+\]</span></p>
+<p>with parameters:</p>
+<ul>
+<li>
+<span class="math inline">\(H \in \mathbb{R}_{&gt;0}\)</span>: the
+strictly positive maximum height of the curve; the peak in mean
+abundance along the environmental gradient.</li>
+<li>
+<span class="math inline">\(m \in \mathbb{R}\)</span>: the
+environmental location of peak mean abundance.</li>
+<li>
+<span class="math inline">\(s \in \mathbb{R}_{&gt;0}\)</span>:
+scales the width of the curve, describing how abundance decreases away
+from <span class="math inline">\(m\)</span>.</li>
+<li>
+<span class="math inline">\(r \in (0, 1)\)</span>: accounts for
+asymmetry, with <span class="math inline">\(r=0.5\)</span> indicating
+equal abundance in environmental conditions either side of <span class="math inline">\(m\)</span>, <span class="math inline">\(r\)</span>
+below <span class="math inline">\(0.5\)</span> indicating more abundance
+below <span class="math inline">\(m\)</span>, and <span class="math inline">\(r\)</span> above <span class="math inline">\(0.5\)</span> indicating more abundance above <span class="math inline">\(m\)</span>.</li>
+<li>
+<span class="math inline">\(d \in \mathbb{R}\)</span>: controls the
+peakedness (<span class="math inline">\(d &lt; 0\)</span>) or broadness
+(<span class="math inline">\(d &gt; 0\)</span>, e.g. plateau-like shape)
+of the peak in mean abundance around <span class="math inline">\(m\)</span>.</li>
+<li>
+<span class="math inline">\(p &gt; 0\)</span>: persists
+higher-levels of abundance in relatively extreme conditions; this is a
+similar effect to increasing the tail weight of a distribution
+function.</li>
+</ul>
+<p>The effect of each parameter is best described visually, so please
+check out this <a href="">Observable</a> if you haven’t already and
+toggle through different parameter values. Not all of these parameters
+are necessary for every analysis, but that discussion is best
+illustrated in a <a href="">separate example</a>.</p>
+<p>Being a Bayesian model, we get to determine what values of each
+parameter are realistic given the relationship we wish to model, rather
+than whatever potentially unrealistic value fits the data best. This is
+a huge benefit of Bayesian modelling, but also a huge hurdle when
+dealing with complex parameter spaces like that of the model above. To
+make life easier, the <code>modskurt</code> package suggests some
+default priors that <em>should</em> just work 🤞:</p>
+<p><span class="math display">\[
+\begin{align}
+  H &amp;\sim \text{Beta}(2, 3) \cdot \max y \\
+  m &amp;\sim \text{Beta}(1, 1) \cdot \text{range}~ x + \min x \\
+  \log s &amp;\sim \text{Normal}(-2, 0.6) + \log \text{range}~ x \\
+  r &amp;\sim \text{Beta}(1.2, 1.2) \\
+  \log d &amp;\sim \text{Normal}(0.5, 1) \\
+  p &amp;\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05, \\
+\end{align}
+\]</span></p>
+<p>However, we still need to check these in each and every model and
+will be provide guidance on how to do this in section B. See … for
+technical details.</p>
+<p>Now finally, to specify this model in <code>R</code>, we use the <a href="../reference/mskt_spec.html"><code>mskt_spec</code></a>
+function:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_spec.html">mskt_spec</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">tuangi</span>,</span>
@@ -170,14 +286,23 @@ distribution of a species abundance along an environmental gradient. See
 <span>            x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Mud (%)'</span> <span class="op">=</span> <span class="st">'mud_pct'</span><span class="op">)</span>,</span>
 <span>            <span class="co"># distribution of abundance</span></span>
 <span>            dist <span class="op">=</span> <span class="st">'nb'</span>,</span>
-<span>            <span class="co"># shape of dist mean function, see ?mskt_shape()</span></span>
+<span>            <span class="co"># additional mean shape parameters to model, Hms are always required</span></span>
 <span>            shape <span class="op">=</span> <span class="st">'rdp'</span>,</span>
 <span>            <span class="co"># make predictions for every 1% of mud content</span></span>
-<span>            pred_grid <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## List of 20</span></span>
+<span>            pred_grid <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">100</span>,</span>
+<span>            <span class="co"># check prior and initial fit on a subset of data</span></span>
+<span>            subset_prop <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></code></pre></div>
+<p>The last argument, <code>subset_prop = 0.3</code>, defines the
+proportion of data that will be used for the subset “fail fast” model in
+section C later on.</p>
+<p>We can print the model spec and defaults for interest,
+<code>hp_</code> refers to the hyperparameter values that define the
+priors above.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## List of 21</span></span>
 <span><span class="co">##  $ sample_prior: int 0</span></span>
-<span><span class="co">##  $ hp_H        : num [1:2] 1.5 5</span></span>
+<span><span class="co">##  $ hp_H        : num [1:2] 2 3</span></span>
 <span><span class="co">##  $ hp_m        : num [1:2] 1 1</span></span>
 <span><span class="co">##  $ hp_s        : num [1:2] -2 0.6</span></span>
 <span><span class="co">##  $ hp_r        : num [1:2] 1.2 1.2</span></span>
@@ -195,13 +320,17 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co">##  $ hp_g1       : num 3</span></span>
 <span><span class="co">##  $ Nrep        : int 101</span></span>
 <span><span class="co">##  $ xrep        : int [1:101] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
-<span><span class="co">##  $ data        :function (prop = 1, seed = NULL)  </span></span>
-<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 97 16 130 3 16 3 1104 1137</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000024e2ef48f18&gt; </span></span>
+<span><span class="co">##  $ subset      :function ()  </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 135 18 135 68 18 68 1603 1603</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000020d75115b78&gt; </span></span>
+<span><span class="co">##  $ full        :function (prop = 1, seed = NULL)  </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 101 17 134 3 17 3 1569 1602</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000020d75115b78&gt; </span></span>
 <span><span class="co">##  - attr(*, "pars")= chr [1:7] "H" "m" "s" "r" ...</span></span>
-<span><span class="co">##  - attr(*, "nms")=List of 2</span></span>
-<span><span class="co">##   ..$ y: chr "Tuangi (count)"</span></span>
-<span><span class="co">##   ..$ x: chr "Mud (%)"</span></span>
+<span><span class="co">##  - attr(*, "nms")=List of 3</span></span>
+<span><span class="co">##   ..$ y  : chr "Tuangi (count)"</span></span>
+<span><span class="co">##   ..$ x  : chr "Mud (%)"</span></span>
+<span><span class="co">##   ..$ eff: NULL</span></span>
 <span><span class="co">##  - attr(*, "dist")= chr "nb"</span></span>
 <span><span class="co">##  - attr(*, "shape")= chr "rdp"</span></span>
 <span><span class="co">##  - attr(*, "class")= chr [1:2] "mskt-spec" "list"</span></span></code></pre>
@@ -209,79 +338,184 @@ distribution of a species abundance along an environmental gradient. See
 <div class="section level2">
 <h2 id="b--verify-initial-model-specification">B. Verify initial model specification<a class="anchor" aria-label="anchor" href="#b--verify-initial-model-specification"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/check-model-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>This step helps in a few key ways</p>
+<ol style="list-style-type: decimal">
+<li>Provide greater transparency on the model assumptions and greater
+understanding of the model mechanics,</li>
+<li>Verify that the model <strong>only</strong> predicts results that
+make sense to the best of our ecological knowledge, i.e. we give no
+weight to illogical parameter values, and thus estimate better measures
+of uncertainty.</li>
+<li>Verify that the model predicts <strong>all</strong> results that
+might make sense, i.e. the prior distributions are not overly
+constraining the parameter space and biasing results/uncertainty away
+from potentially realistic outcomes.</li>
+</ol>
+<p>The <code>modskurt</code> provides four checking functions:</p>
+<ul>
+<li>
+<a href="../reference/check_prior_dens.html"><code>check_prior_dens</code></a>:
+Plot the marginal prior densities and check their probabilities align
+with reasonable values.</li>
+<li>
+<a href="../reference/check_prior_mskt.html"><code>check_prior_mskt</code></a>:
+Randomly sample from the joint prior and check that predictions for the
+mean, <span class="math inline">\(\mu\)</span>, contain all possible
+shapes and sizes.</li>
+<li>
+<a href="../reference/check_prior_dist.html"><code>check_prior_dist</code></a>:
+Simulate <span class="math inline">\(y\)</span> replicates from the
+joint prior model and plot “severe tests” to check for overdispersion
+misspecification.</li>
+<li>
+<a href="../reference/check_prior_zero.html"><code>check_prior_zero</code></a>:
+Predict rates of zero-inflation given the mean and check for believable
+relationships – more on this <a href="">here - TODO: ZINBL vig</a>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="prior-probabilities-of-parameter-values">Prior probabilities of parameter values<a class="anchor" aria-label="anchor" href="#prior-probabilities-of-parameter-values"></a>
+</h3>
+<p>If you tweaked the default hyperparameters above, then you’ll want to
+check they produce the correct marginal prior here:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># check_prior_mskt(spec) # preds (cover all possible)</span></span>
-<span><span class="co"># check_prior_dist(spec) # ymax (severe tests)</span></span>
-<span><span class="co"># check_prior_zero(spec) # zi link</span></span>
-<span><span class="co"># OPTIONAL: refine model spec</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="getting-started_files/figure-html/check-prior-dens-1.png" alt="TODO: add legend for median, 50%HDI and 99% line!" width="100%"><p class="caption">
+TODO: add legend for median, 50%HDI and 99% line!
+</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="prior-predictions-for-the-modskurt-mean">Prior predictions for the <code>modskurt</code> mean<a class="anchor" aria-label="anchor" href="#prior-predictions-for-the-modskurt-mean"></a>
+</h3>
+<p>The default looks like a pile of spaghetti, if you have information
+on any of the mean shapes you might expect, then check they are
+reasonably covered here and that impossible shapes are excluded, or at
+leasted weighted very heavily away from:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_mskt.html">check_prior_mskt</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="getting-started_files/figure-html/check-prior-mskt-1.png" alt="TODO: add legend for alpha!" width="100%"><p class="caption">
+TODO: add legend for alpha!
+</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="prior-predictions-for-summary-statistics-of-y">Prior predictions for summary statistics of <code>y</code><a class="anchor" aria-label="anchor" href="#prior-predictions-for-summary-statistics-of-y"></a>
+</h3>
+<p>Severe tests for the specified distribution of <span class="math inline">\(y\)</span>, idea is to check that the combination
+of mean shapes and overdisperion parameter, kappa, for</p>
+<ul>
+<li>Maximum observable counts: too much dispersion can produce counts
+that might be unrealistic or even impossible given the sampling
+design.</li>
+<li>Proportions of zeros: too much dispersion can also inflate the
+proportion of zeros beyond what might be credible, and cause
+underestimation of mean counts.</li>
+<li>Variation of abundance: too little dispersion (the Poisson effect)
+can restrict the model into overestimating mean counts in order to try
+and capture zero proportions or higher counts.</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/check-prior-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>TODO: change these to remove the observed line? Or change the text to
+use more eco terms.</p>
+<p>Looks maybe overshooting overdispersion slightly? E.g. quite high
+zero proportions for these data and very small inter-quartile ranges.
+Lets tweak the rate hyperparameter for the exponentially distribution
+overdispersion parameter, <span class="math inline">\(\kappa \sim
+\text{Exp}[\lambda = \text{hp_kap}]\)</span>.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span><span class="op">$</span><span class="va">hp_kap</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span>, <span class="st">'kap'</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>design <span class="op">=</span> <span class="st">'A##</span></span>
+<span><span class="st">              BBB'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/unnamed-chunk-1-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>A little better, and a little is fine, remember the prior model
+should fit knowledge of the tuangi-mud relationship, not specific data
+realisations of it.</p>
+<p><em>OPTIONAL</em>: refine model spec further</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="c--fit-subset-model">C. Fit subset model<a class="anchor" aria-label="anchor" href="#c--fit-subset-model"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_train</span> <span class="op">&lt;-</span></span>
+<p>The prior model looks okay, so let’s look at a posterior. The idea of
+the subset model is to “fail fast”. That is, if we missed any model
+misspecifications above, then instead of wasting your time and computer
+resources fitting a full model right off the bat, we can first fit a
+very quick approximate model that uses a subset of the data and minimal
+posterior samples over maximal chains. Each chain will roughly estimate
+the posterior for the subset of data, and ….</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_subset</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
-<span>           <span class="co"># set the training sample</span></span>
-<span>           train_prop <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>           <span class="co"># use the subset only</span></span>
+<span>           use_subset <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>           iter_warmup <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>           iter_sampling <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>           chains <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>           <span class="co"># for testing</span></span>
-<span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_train</span><span class="op">)</span></span></code></pre></div>
+<span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Check computation.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## spec: nb[Hmsrdp] using 229 obs out of 762 (30% sample)</span></span>
 <span><span class="co">## post: 6 chains each with 100 draws (600 total)</span></span></code></pre>
 <pre><code><span><span class="co">## $summary</span></span>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 7 × 10</span></span></span>
 <span><span class="co">##   <span style="font-weight: bold;">variable</span>   <span style="font-weight: bold;">mean</span> <span style="font-weight: bold;">median</span>     <span style="font-weight: bold;">sd</span>    <span style="font-weight: bold;">mad</span>     <span style="font-weight: bold;">q5</span>    <span style="font-weight: bold;">q95</span>   <span style="font-weight: bold;">rhat</span>  <span style="font-weight: bold;">ess_bulk</span>  <span style="font-weight: bold;">ess_tail</span></span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        22.2   21.2   7.21   8.35   12.7   34.9     1.02 276 (0.5) 285 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        13.7   13.4   5.41   4.36    5.87  22.9     1.04 231 (0.4) 134 (0.2)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        23.0   22.1   5.26   4.29   16.2   32.9     1.01 242 (0.4) 297 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>727  <span style="color: #949494;">0.</span>757 <span style="color: #949494;">0.</span>143  <span style="color: #949494;">0.</span>124   <span style="color: #949494;">0.</span>430  <span style="color: #949494;">0.</span>903   1.02 203 (0.3) 259 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         <span style="color: #949494;">0.</span>600  <span style="color: #949494;">0.</span>561 <span style="color: #949494;">0.</span>300  <span style="color: #949494;">0.</span>303   <span style="color: #949494;">0.</span>181  1.19    1.00 380 (0.6) 295 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         <span style="color: #949494;">0.</span>731  <span style="color: #949494;">0.</span>733 <span style="color: #949494;">0.</span>328  <span style="color: #949494;">0.</span>373   <span style="color: #949494;">0.</span>196  1.27    1.02 273 (0.5) 400 (0.7)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.13   1.13  <span style="color: #949494;">0.0</span>65<span style="text-decoration: underline;">6</span> <span style="color: #949494;">0.0</span>63<span style="text-decoration: underline;">6</span>  1.03   1.24    1.01 339 (0.6) 398 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H         9.31   9.12  1.46   1.45    7.36  12.1     1.01 312 (0.5) 395 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        16.1   16.4   6.26   5.96    4.89  25.9     <span style="color: #FF00FF;">1.05</span> 162 (0.3) <span style="color: #FF00FF;"> 57 (0.1)</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        22.2   21.1   7.41   6.77   12.4   35.7     1.02 216 (0.4) 305 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>683  <span style="color: #949494;">0.</span>710 <span style="color: #949494;">0.</span>165  <span style="color: #949494;">0.</span>162   <span style="color: #949494;">0.</span>358  <span style="color: #949494;">0.</span>899   1.04 244 (0.4) 325 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         2.06   1.78  1.37   1.27    <span style="color: #949494;">0.</span>433  4.83    1.01 239 (0.4) 295 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         1.22   1.30  <span style="color: #949494;">0.</span>486  <span style="color: #949494;">0.</span>563   <span style="color: #949494;">0.</span>322  1.89    1.02 406 (0.7) 351 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.26   1.26  <span style="color: #949494;">0.0</span>69<span style="text-decoration: underline;">9</span> <span style="color: #949494;">0.0</span>71<span style="text-decoration: underline;">4</span>  1.14   1.37    1.02 287 (0.5) 426 (0.7)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  1.483    0.702 2.185             0                 0 1.0103225</span></span>
-<span><span class="co">## 2        2  1.691    0.842 2.533             0                 0 0.9241363</span></span>
-<span><span class="co">## 3        3  1.455    0.835 2.290             0                 0 0.8571377</span></span>
-<span><span class="co">## 4        4  1.416    0.682 2.098             0                 0 1.1684455</span></span>
-<span><span class="co">## 5        5  1.386    0.672 2.058             1                 0 1.0338997</span></span>
-<span><span class="co">## 6        6  1.504    0.878 2.382             0                 0 0.9378795</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co">## 1        1  1.806    1.109 2.915             1                 0 0.7410424</span></span>
+<span><span class="co">## 2        2  1.634    1.184 2.818             0                 0 0.6850410</span></span>
+<span><span class="co">## 3        3  1.911    0.893 2.804             0                 0 0.9556187</span></span>
+<span><span class="co">## 4        4  1.730    1.182 2.912             0                 0 0.9347321</span></span>
+<span><span class="co">## 5        5  2.600    1.142 3.742             0                 0 0.4587924</span></span>
+<span><span class="co">## 6        6  2.177    0.872 3.049             0                 0 1.1240496</span></span></code></pre>
+<p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># check_post_dens(fit_train)</span></span>
-<span><span class="co"># check_post_dist(fit_train)</span></span>
-<span><span class="co"># check_post_zero(fit_train)</span></span>
-<span><span class="co"># uses test set for discrete pit</span></span>
-<span><span class="co"># check_post_calibration(fit_train)</span></span>
-<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<p>Computation valid, check posterior.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># visual display of chain mixing and prior-data conflicts</span></span>
+<span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_subset</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/check-post-dens-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># uses test set for discrete pit</span></span>
+<span><span class="fu"><a href="../reference/check_post_calibration.html">check_post_calibration</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/check-post-calibration-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="d--fit-full-model">D. Fit full model<a class="anchor" aria-label="anchor" href="#d--fit-full-model"></a>
 </h2>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>Time for comprehensive inference, using the full dataset and a large
+number of posterior samples.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_full</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
 <span>           chains <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>           <span class="co"># for testing</span></span>
 <span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<p>Check again, slightly better.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## spec: nb[Hmsrdp] using 762 obs out of 762 (100% sample)</span></span>
 <span><span class="co">## post: 4 chains each with 1000 draws (4000 total)</span></span></code></pre>
@@ -289,129 +523,172 @@ distribution of a species abundance along an environmental gradient. See
 <span><span class="co">## <span style="color: #949494;"># A tibble: 7 × 10</span></span></span>
 <span><span class="co">##   <span style="font-weight: bold;">variable</span>   <span style="font-weight: bold;">mean</span> <span style="font-weight: bold;">median</span>     <span style="font-weight: bold;">sd</span>    <span style="font-weight: bold;">mad</span>     <span style="font-weight: bold;">q5</span>    <span style="font-weight: bold;">q95</span>  <span style="font-weight: bold;">rhat</span>   <span style="font-weight: bold;">ess_bulk</span>   <span style="font-weight: bold;">ess_tail</span></span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rha&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        22.0   21.1   6.78   7.27   12.8   34.4    1.00 1487 (0.4) 2029 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        13.4   13.2   2.91   2.79    8.93  18.3    1.00 1880 (0.5) 1401 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        22.7   22.1   3.96   3.43   17.5   30.0    1.01 1305 (0.3) 1752 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>765  <span style="color: #949494;">0.</span>779 <span style="color: #949494;">0.0</span>88<span style="text-decoration: underline;">5</span> <span style="color: #949494;">0.0</span>79<span style="text-decoration: underline;">6</span>  <span style="color: #949494;">0.</span>596  <span style="color: #949494;">0.</span>881  1.00 1609 (0.4) 1925 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         <span style="color: #949494;">0.</span>534  <span style="color: #949494;">0.</span>508 <span style="color: #949494;">0.</span>246  <span style="color: #949494;">0.</span>244   <span style="color: #949494;">0.</span>178  <span style="color: #949494;">0.</span>986  1.00 1817 (0.5) 1537 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         <span style="color: #949494;">0.</span>753  <span style="color: #949494;">0.</span>766 <span style="color: #949494;">0.</span>302  <span style="color: #949494;">0.</span>325   <span style="color: #949494;">0.</span>240  1.23   1.00 1633 (0.4) 1674 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.19   1.19  <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">7</span> <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">4</span>  1.13   1.25   1.00 2881 (0.7) 2220 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H         8.23   8.19  <span style="color: #949494;">0.</span>660  <span style="color: #949494;">0.</span>637   7.19   9.37      1 2623 (0.7) 2679 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        14.2   14.0   2.83   2.76    9.82  19.1       1 1746 (0.4) 2232 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        22.6   22.0   5.55   5.47   14.5   32.3       1 1143 (0.3) 1666 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>772  <span style="color: #949494;">0.</span>792 <span style="color: #949494;">0.0</span>96<span style="text-decoration: underline;">4</span> <span style="color: #949494;">0.0</span>80<span style="text-decoration: underline;">6</span>  <span style="color: #949494;">0.</span>576  <span style="color: #949494;">0.</span>888     1 1596 (0.4) 1691 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         1.57   1.41  <span style="color: #949494;">0.</span>901  <span style="color: #949494;">0.</span>855   <span style="color: #949494;">0.</span>448  3.36      1 1219 (0.3) 1618 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         1.22   1.26  <span style="color: #949494;">0.</span>472  <span style="color: #949494;">0.</span>547   <span style="color: #949494;">0.</span>368  1.90      1 2115 (0.5) 1784 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.19   1.19  <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">4</span> <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">7</span>  1.13   1.25      1 2936 (0.7) 2485 (0.6)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 20.594   26.395 46.989             0                 0 0.9800329</span></span>
-<span><span class="co">## 2        2 20.067   27.341 47.408             0                 0 0.8176009</span></span>
-<span><span class="co">## 3        3 20.415   29.373 49.788             0                 0 0.9935090</span></span>
-<span><span class="co">## 4        4 20.179   27.728 47.907             0                 0 0.8122649</span></span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<span><span class="co">## 1        1 23.743   30.687 54.430             0                 0 1.0474322</span></span>
+<span><span class="co">## 2        2 21.903   29.809 51.712             0                 0 0.9202813</span></span>
+<span><span class="co">## 3        3 21.875   32.330 54.205             0                 0 0.8693720</span></span>
+<span><span class="co">## 4        4 23.448   24.614 48.062             0                 0 0.8829889</span></span></code></pre>
+<p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
 </h3>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># check_post_dens(fit_full)</span></span>
-<span><span class="co"># check_post_dist(fit_full)</span></span>
-<span><span class="co"># check_post_zero(fit_full)</span></span>
-<span><span class="co"># uses loocv for discrete pit and pareto-k</span></span>
-<span><span class="co"># check_post_calibration(fit_train)</span></span>
-<span><span class="co"># check_post_influencers(fit_train)</span></span>
-<span><span class="co"># OPTIONAL: refine model spec or fit parameters</span></span></code></pre></div>
+<p>Given the subset model appeared to be adequately specified, and the
+computation diagnostics of the full model improved, we shouldn’t need to
+do too many more checks here. To be thorough it wouldn’t hurt to run
+through <a href="../reference/check_post_dens.html"><code>check_post_dens</code></a>,
+<a href="../reference/check_post_dist.html"><code>check_post_dist</code></a>,
+<a href="../reference/check_post_zero.html"><code>check_post_zero</code></a>,
+<a href="../reference/check_post_calibration.html"><code>check_post_calibration</code></a>,
+but for this getting started vignette we will just show one additional
+check.</p>
+<p>Now that our posterior is estimated over the entire data set, we want
+to make sure that the subset of data used earlier was a reasonable
+representation of our full dataset. A useful check for this is to
+consider the influence each data point has on the posterior. This is
+somewhat similar to checking a linear regression residual plot, are
+there data points that the model couldn’t predict very well, and is it
+because those data points are really unusual, or because our model is
+misspecified and the subset model checks didn’t pick it up.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_post_influencers.html">check_post_influencers</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##              pareto_khat Tuangi (count) Mud (%)</span></span>
+<span><span class="co">## log_lik[757]        0.54              2      32</span></span></code></pre>
+<p><img src="getting-started_files/figure-html/check-post-influencers-full-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>The model only struggled to predict one point, and the console
+printout shows that there was nothing unusual about that point (count =
+2, mud % = 31.8) so it is safe to ignore. Later plots suggest that maybe
+around 30-34% mud content the data is not as dispersed as the rest, and
+would likely clear up as more data is collected.</p>
+<p><em>OPTIONAL</em>: refine model spec or fit parameters.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="e--use-the-model">E. Use the model<a class="anchor" aria-label="anchor" href="#e--use-the-model"></a>
 </h2>
+<p>Now we can look at some predictions of specific interest:</p>
+<ul>
+<li>What does the distribution of tuangi over mud concentrations look
+like, and</li>
+<li>What ranges of mud concentrations correlate with higher abundances
+of tuangi.</li>
+</ul>
 <div class="section level3">
 <h3 id="plot-summaries-of-the-abundance-distribution">Plot summaries of the abundance distribution<a class="anchor" aria-label="anchor" href="#plot-summaries-of-the-abundance-distribution"></a>
 </h3>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<p>This is the complete distribution, choose any summaries that are the
+most informative.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot the distribution of abundance along the gradient</span></span>
-<span><span class="fu"><a href="../reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
-<span>               summaries <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'mean'</span>, <span class="st">'median'</span>, <span class="st">'q90'</span><span class="op">)</span>,</span>
-<span>               <span class="co"># whether to use expectations and quantiles from nb or zinbl</span></span>
-<span>               include_zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit_full</span>, summaries <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'mean'</span>, <span class="st">'median'</span>, <span class="st">'q90'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/use-full-fit-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="calculate-ranges-of-x-for-different-percentages-of-abundance-measures">Calculate ranges of x for different percentages of abundance
 measures<a class="anchor" aria-label="anchor" href="#calculate-ranges-of-x-for-different-percentages-of-abundance-measures"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># assess different range measures of abundance along the gradient</span></span>
-<span><span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
-<span>                <span class="co"># smallest range with ...</span></span>
-<span>                capture_pct <span class="op">=</span> <span class="fl">75</span>,</span>
-<span>                <span class="co"># mean abundance &gt;= % of max abundance (highest mean)</span></span>
-<span>                using_range <span class="op">=</span> <span class="st">'high_zone'</span>,</span>
-<span>                <span class="co"># which distribution summary to use</span></span>
-<span>                based_on <span class="op">=</span> <span class="st">'q90'</span>,</span>
-<span>                <span class="co"># one-sided threshold or central range</span></span>
-<span>                region <span class="op">=</span> <span class="st">'centre'</span>,</span>
-<span>                <span class="co"># whether to use expectations and quantiles from nb or zinbl</span></span>
-<span>                include_zero_inflation <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## </span></span>
-<span><span class="co">## Species range (see x.avg row) calculated as the region of x where the 0.9 prob. quantile of abundance (Q[90]) is within 75% of the highest value of Q[90] along x (averaged across posterior draws):</span></span></code></pre>
-<pre><code><span><span class="co">##               left     centre      right</span></span>
-<span><span class="co">## q90.avg 11.2200000 20.6600000  5.0505672</span></span>
-<span><span class="co">## q90.se   0.3548958  0.2224355  0.0761786</span></span>
-<span><span class="co">## x.avg    0.0000000 14.0831218 64.7894328</span></span>
-<span><span class="co">## x.se     0.0000000  0.3161532  0.5070136</span></span></code></pre>
-</div>
-<div class="section level3">
-<h3 id="visually-display-abundance-ranges">Visually display abundance ranges<a class="anchor" aria-label="anchor" href="#visually-display-abundance-ranges"></a>
-</h3>
+<p>Going back to our original question, what ranges of mud
+concentrations are tuangi most abundant in? There’s two useful ways to
+look at this, we could:</p>
+<ol style="list-style-type: decimal">
+<li>Calculate a range of mud concentrations that correspond to the
+highest levels of predicted tuangi abundance (high-abundance-zone, HAZ),
+or</li>
+<li>Determine a limit of mud concentration beyond which less than a
+certain level of predicted total tuangi abundance resides
+(abundance-density-limit, ADL).</li>
+</ol>
+<p>Loosely speaking we could interpret these ranges as,</p>
+<ol style="list-style-type: decimal">
+<li>HAZ: mud concentrations that are more optimal for tuangi (or
+correspond to other optimal environmental conditions)</li>
+<li>ADL: a line in the sand (or mud) where we expect to find a
+proportion of the total population being sampled.</li>
+</ol>
+<p>Other important arguments are <code>capture_pct</code> and
+<code>based_on</code>, where we decide what percent of abundance (high
+zone or density) the range will capture, and which distribution summary
+the range and percent are based on. For example</p>
+<ul>
+<li>
+<code>based_on = 'mean'</code> use the predicted modskurt mean
+abundance.</li>
+<li>
+<code>based_on = 'q90'</code> use the 0.9 probability quantile of
+predicted abundance.</li>
+</ul>
+<p>The choice of summary and capture percentages will depend on the
+question being answered. For these data we might start by looking at the
+range of mud concentrations where we expect to find 50% of the highest
+average tuangi counts, so <code>capture_pct = 50</code>%
+<code>using_range = 'HAZ'</code> <code>based_on = 'mean'</code> tuangi
+counts (the left hand red plot). And the upper limit of mud
+concentrations beyond which there is less than
+<code>capture_pct = 10</code>% of predicted tuangi density
+(<code>using_range = 'ADL'</code>) <code>based_on = 'mean'</code>
+predicted counts.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># or plot them as well</span></span>
-<span><span class="co"># we'll compare high-zone and most-dens here using patchwork</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
-<span>                  capture_pct <span class="op">=</span> <span class="fl">75</span>,</span>
-<span>                  using_range <span class="op">=</span> <span class="st">'high_zone'</span>,</span>
-<span>                  based_on <span class="op">=</span> <span class="st">'q90'</span>,</span>
-<span>                  region <span class="op">=</span> <span class="st">'centre'</span>,</span>
-<span>                  plotted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                  range_colour <span class="op">=</span> <span class="st">'red'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">'75% Highest Abundance Zone (HAZ)'</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span></span>
-<span>  <span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
-<span>                  capture_pct <span class="op">=</span> <span class="fl">75</span>,</span>
-<span>                  using_range <span class="op">=</span> <span class="st">'most_dens'</span>,</span>
-<span>                  based_on <span class="op">=</span> <span class="st">'q90'</span>,</span>
-<span>                  region <span class="op">=</span> <span class="st">'centre'</span>,</span>
-<span>                  plotted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                  range_colour <span class="op">=</span> <span class="st">'blue'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="st">'75% Abundance Density Limit (ADL)'</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="co"># compose in row using patchwork</span></span>
+<span><span class="op">(</span><span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
+<span>                 capture_pct <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>                 using_range <span class="op">=</span> <span class="st">'HAZ'</span>,</span>
+<span>                 based_on <span class="op">=</span> <span class="st">'mean'</span>,</span>
+<span>                 plotted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                 range_colour <span class="op">=</span> <span class="st">'red'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">'50% of highest mean counts'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="op">(</span><span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
+<span>                   capture_pct <span class="op">=</span> <span class="fl">90</span>,</span>
+<span>                   using_range <span class="op">=</span> <span class="st">'ADL'</span>,</span>
+<span>                   based_on <span class="op">=</span> <span class="st">'mean'</span>,</span>
+<span>                   <span class="co"># specify left or right side limit</span></span>
+<span>                   region <span class="op">=</span> <span class="st">'left'</span>,</span>
+<span>                   plotted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                   range_colour <span class="op">=</span> <span class="st">'blue'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="st">'90% limit of mean count density'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## Species range (see x.avg row) calculated as the region of x where the 0.9 prob. quantile of abundance (Q[90]) is within 75% of the highest value of Q[90] along x (averaged across posterior draws):</span></span>
-<span><span class="co">##               left    centre       right</span></span>
-<span><span class="co">## q90.avg 11.7000000 20.160000  4.89212121</span></span>
-<span><span class="co">## q90.se   0.3223004  0.188138  0.06698912</span></span>
-<span><span class="co">## x.avg    0.0000000 14.560896 65.44787879</span></span>
-<span><span class="co">## x.se     0.0000000  0.360336  0.41358159</span></span>
+<span><span class="co">## Species range (see x.avg row) calculated as the  (averaged across posterior draws):</span></span>
+<span><span class="co">##                left     centre       right</span></span>
+<span><span class="co">## mean.avg 4.59787623  8.2926662  4.13267989</span></span>
+<span><span class="co">## mean.se  0.07816153  0.0788315  0.03941794</span></span>
+<span><span class="co">## x.avg    0.37513231 14.9600000 46.09046989</span></span>
+<span><span class="co">## x.se     0.07906539  0.3368037  0.47635208</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Species range (see x.avg row) calculated as the smallest region of x where the density of 0.9 prob. quantile of abundance (Q[90]) is equal to 75% of the total density of Q[90] along x (averaged across posterior draws):</span></span>
-<span><span class="co">##                left     centre      right</span></span>
-<span><span class="co">## q90.avg 19.26674426 18.3419449  7.1911905</span></span>
-<span><span class="co">## q90.se   0.21566991  0.1904811  0.1089447</span></span>
-<span><span class="co">## x.avg    7.21018728 26.8650867 57.4174603</span></span>
-<span><span class="co">## x.se     0.06742754  0.1587907  0.2889340</span></span></code></pre>
+<span><span class="co">## Species range (see x.avg row) calculated as the  (averaged across posterior draws):</span></span>
+<span><span class="co">##              left      centre       right</span></span>
+<span><span class="co">## mean.avg 4.463646  7.05821738  2.28642380</span></span>
+<span><span class="co">## mean.se  0.127262  0.08010073  0.03393153</span></span>
+<span><span class="co">## x.avg    0.000000 26.04171608 60.60901225</span></span>
+<span><span class="co">## x.se     0.000000  0.17090597  0.34676628</span></span></code></pre>
 <p><img src="getting-started_files/figure-html/use-full-fit-range-plot-1.png" width="100%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># note how HAZ prefers higher relative abundance summaries as opposed to ADL</span></span>
-<span><span class="co"># which considers total abundance summaries irrespective of the relative</span></span>
-<span><span class="co"># abundance at each x (e.g. tuangi appear quite abundant in low mud %, but</span></span>
-<span><span class="co"># their density along the whole gradient is skewed towards slightly higher mud</span></span>
-<span><span class="co"># content)</span></span>
-<span><span class="co"># OPTIONAL (but not advised): refine model spec or fit parameters</span></span></code></pre></div>
+<p>The console printout shows that sediment with between about 0% and
+46% mud content has average tuangi counts within half (50%) of their
+peak average counts.</p>
+<p>Compare those numbers with the abundance density limit that suggest
+90% of predicted total mean tuangi abundance is found in sediment with
+less than 60.7% mud content.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>…</p>
+<p>This case study lightly stepped through the core steps in the
+<code>modskurt</code> analysis of species abundance over environmental
+gradients. There are many more checks that can be performed throughout,
+and a whole raft of troubleshooting exercises for when your data doesn’t
+play as nicely as these tuangi abundances did.</p>
+<ul>
+<li>List of more articles</li>
+<li>And resources</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

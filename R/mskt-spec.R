@@ -8,6 +8,8 @@
 #' @param shape shape of distribution mean - see ?mskt_shape()
 #' @param hyperparams list of hyper-parameters to adjust in-built priors
 #' @param pred_grid vector of x values to make y predictions over
+#' @param subset_prop proportion of data to use for early model checks
+#' @param subset_seed a seed for the subset sample proportion
 #'
 #' @details
 #'
@@ -40,16 +42,18 @@ mskt_spec <- function(data,
                       dist = 'nb',
                       shape = 'rdp',
                       hyperparams = list(),
-                      pred_grid = NULL) {
+                      pred_grid = NULL,
+                      subset_prop = 1,
+                      subset_seed = NULL) {
   # only discrete data currently
   d_all <- data.frame(y = as.integer(data[[y]]),
                       x = data[[x]],
-                      leff = 0)
+                      eff = 1)
   if (!is.null(effort)) {
     # this just affects rate, not offset
     # https://discourse.mc-stan.org/t/
     # scaling-of-the-overdispersion-in-negative-binomial-models/15581
-    d_all$leff <- log(data[[effort]])
+    d_all$eff <- data[[effort]]
   }
 
   # check missing
@@ -65,7 +69,7 @@ mskt_spec <- function(data,
     #    # dont sample prior in fit mode
     list(sample_prior = 0L,
          # mean function
-         hp_H = hp$H %||% c( 1.5, 5.0), # ~ beta(a, b)
+         hp_H = hp$H %||% c( 2.0, 3.0), # ~ beta(a, b)
          hp_m = hp$m %||% c( 1.0, 1.0), # ~ beta(a, b)
          hp_s = hp$s %||% c(-2.0, 0.6), # ~ log_normal(mu, sd)
          hp_r = hp$r %||% c( 1.2, 1.2), # ~ beta(a, b)
@@ -94,7 +98,7 @@ mskt_spec <- function(data,
   }
 
   # standardise y, x over prop of data set
-  spec$data <- function(prop = 1, seed = NULL) {
+  get_subset <- function(prop = 1, seed = NULL) {
     # optionally sample a proportion of training data
     if (!missing(seed) & !is.null(seed)) {
       set.seed(seed)
@@ -110,7 +114,7 @@ mskt_spec <- function(data,
     train <- as.list(train)
     train <- list(y = train$y,
                   x = train$x,
-                  leff = train$leff,
+                  eff = train$eff,
                   N = length(train$y),
                   Nz = sum(train$y == 0),
                   x_range = diff(range(train$x)),
@@ -126,15 +130,19 @@ mskt_spec <- function(data,
       rlang::warn(paste0(round(prop_zero * 100, 1), '% of y are zero. ',
                          'Check if you can reduce the range of x at all?'))
     }
-    list(train = train, all = d)
+    list(train = train, all = d, prop = prop, seed = seed)
   }
+  spec$subset <- function() { get_subset(subset_prop, subset_seed) }
+  spec$full <- get_subset
 
   pars <- c('H', 'm', 's', strsplit(shape, '')[[1]], 'kap')
   if (spec$use_zi) {
     pars <- c(pars, 'g0', 'g1')
   }
   attr(spec, 'pars') <- pars
-  attr(spec, 'nms') <- list(y = names(y) %||% y, x = names(x) %||% x)
+  attr(spec, 'nms') <- list(y = names(y) %||% y,
+                            x = names(x) %||% x,
+                            eff = names(effort) %||% effort)
   attr(spec, 'dist') <- dist
   attr(spec, 'shape') <- shape
   class(spec) <- c('mskt-spec', class(spec))

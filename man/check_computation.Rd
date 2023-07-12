@@ -7,7 +7,7 @@
 check_computation(fit, show_info = TRUE)
 }
 \arguments{
-\item{fit}{modskurt_fit object}
+\item{fit}{fitted model object from `mskt_fit`}
 
 \item{show_info}{print information about model spec and posterior sample}
 }

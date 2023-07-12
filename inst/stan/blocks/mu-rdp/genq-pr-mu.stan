@@ -38,5 +38,5 @@
     }
     
     // maybe we can just calc this and derive the evenly gridded versions after?
-    pr_mu = exp(leff + lmskt((x - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p));
-    pr_mu_rep = exp(lmskt((xrep - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p));
+    pr_mu = eff .* mskt((x - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p);
+    pr_mu_rep = mskt((xrep - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p);

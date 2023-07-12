@@ -6,7 +6,7 @@
 #' @param log logical; if TRUE, probabilities p are given as log(p)
 #'
 #' @return the (log) probability mass at x, given mu and kappa
-#' @export
+#' @keywords internal
 dnbinom2 <- function(x, mu, kappa, log = FALSE) {
   if (length(log) != 1) {
     stop("log should be length 1.")
@@ -24,7 +24,7 @@ dnbinom2 <- function(x, mu, kappa, log = FALSE) {
 #' @param log.p logical; if TRUE, probabilities are given as log(p)
 #'
 #' @return A vector of quantiles, each of which correspond to a probability in p
-#' @export
+#' @keywords internal
 qnbinom2 <- function(p, mu, kappa, lower.tail = TRUE, log.p = FALSE) {
   if (length(lower.tail) != 1) {
     stop("lower.tail should be length 1.")
@@ -50,7 +50,7 @@ qnbinom2 <- function(p, mu, kappa, lower.tail = TRUE, log.p = FALSE) {
 #' @param log logical; if TRUE, probabilities, p, are given as log(p)
 #'
 #' @return The (log) probability mass at x, given mu, kappa and zi
-#' @export
+#' @keywords internal
 dzinb2 <- function(x, mu, kappa, zi, log = FALSE) {
   if (length(log) != 1) {
     stop("log should be length 1.")
@@ -70,7 +70,7 @@ dzinb2 <- function(x, mu, kappa, zi, log = FALSE) {
 
 #' Zero-inflated Negative Binomial Quantile Function
 #'
-#' @param p vector of quantiles
+#' @param p vector of quantile probabilities
 #' @param mu mean of the distribution
 #' @param kappa dispersion (inverse square root size)
 #' @param zi vector of (in \eqn{[0, 1]}) zero-inflation parameters
@@ -78,7 +78,7 @@ dzinb2 <- function(x, mu, kappa, zi, log = FALSE) {
 #' @param log.p logical; if TRUE, probabilities p. This doesn't affect zi
 #'
 #' @return A vector of quantiles, each of which coincide with the respective probability in p
-#' @export
+#' @keywords internal
 qzinb2 <- function(p, mu, kappa, zi, lower.tail = TRUE, log.p = FALSE) {
   if (length(lower.tail) != 1) {
     stop("lower.tail should be length 1.")
@@ -123,9 +123,22 @@ qzinb2 <- function(p, mu, kappa, zi, lower.tail = TRUE, log.p = FALSE) {
   q
 }
 
+#' Zero-inflated Negative Binomial Distribution Function
+#'
+#' @param q vector of quantiles
+#' @param mu mean of the distribution
+#' @param kappa dispersion (inverse square root size)
+#' @param zi vector of (in \eqn{[0, 1]}) zero-inflation parameters
+#' @keywords internal
+pzinb2 <- function(q, mu, kap, zi) {
+  phi <- kappa_to_phi(kap)
+  zi + (1 - zi) * stats::pnbinom(q, mu = mu, size = phi)
+}
+
 #' Convert overdispersion kappa to reciprocal dispersion phi
 #'
 #' @param kappa overdispersion parameter
+#' @keywords internal
 kappa_to_phi <- function(kappa) {
   # see ...
   1 / kappa ^ 2

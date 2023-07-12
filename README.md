@@ -49,7 +49,7 @@ spec <-
                                m = 35,
                                s = 40,
                                r = 0.9,
-                               kappa = 0.5),
+                               kap = 0.5),
             y = c('Abundance (count)' = 'y'),
             x = c('Env gradient' = 'x'),
             dist = 'nb')

@@ -6,8 +6,7 @@
 \usage{
 mskt_fit(
   spec,
-  train_prop = 1,
-  train_seed = NULL,
+  use_subset = FALSE,
   seed = NULL,
   init = NULL,
   chains = 4,
@@ -24,9 +23,7 @@ mskt_fit(
 \arguments{
 \item{spec}{the modskurt model specification returned by `mskt_spec`}
 
-\item{train_prop}{the proportion of data to train the posterior on}
-
-\item{train_seed}{a seed for the training sample of proportion `train_prop`}
+\item{use_subset}{whether to use specified subset or all data}
 
 \item{seed}{a seed for the Stan random number generator}
 

@@ -4,10 +4,24 @@
 \alias{mskt_sim_nb}
 \title{Simulate negative binomial data with a modskurt mean curve}
 \usage{
-mskt_sim_nb(x, H, m, s, r = 0.5, d = 0, p = 1, kappa, g0 = 0, g1 = 0)
+mskt_sim_nb(
+  x,
+  n_per_x = 1,
+  H,
+  m,
+  s,
+  r = 0.5,
+  d = 0,
+  p = 1,
+  kap,
+  g0 = 0,
+  g1 = 0
+)
 }
 \arguments{
 \item{x}{vector of environmental gradient values}
+
+\item{n_per_x}{number of y replicates to simulate for each x value}
 
 \item{H}{height}
 
@@ -21,7 +35,7 @@ mskt_sim_nb(x, H, m, s, r = 0.5, d = 0, p = 1, kappa, g0 = 0, g1 = 0)
 
 \item{p}{persistence}
 
-\item{kappa}{negative binomial dispersion}
+\item{kap}{negative binomial dispersion}
 
 \item{g0}{constant rate of zero-inflation}
 

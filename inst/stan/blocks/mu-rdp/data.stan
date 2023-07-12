@@ -2,8 +2,8 @@
   int<lower=1> Nz;
   vector[N] x;
 
-  // log effort (can be 0 if no offset required)
-  vector[N] leff;
+  // effort (can be 1 if no offset required)
+  vector[N] eff;
 
   // make predictions over grid
   int Nrep;

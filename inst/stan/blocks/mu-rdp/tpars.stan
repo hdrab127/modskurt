@@ -25,3 +25,6 @@
   } else {
     p = fix_p;
   }
+
+  vector[N] mu = eff .* mskt((x - m) / s, H, r, d, p);
+  vector[N] lmu = log(mu);

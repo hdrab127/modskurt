@@ -122,19 +122,37 @@ both linked to the data through <code>modskurt</code> mean functions of
 the environmental gradient, <span class="math inline">\(x\)</span>.</p>
 <pre><code class="language-stan"><code>functions {
   /*
-  ln-modskurt mean function with args ...
+  Log of the "mskt" unimodal mean function
+  @param x predictor variable (real number vector)
+  @param H height of curve at mode (real number &gt; 0)
+  @param m mode (real number)
+  @param s scale (real number &gt; 0)
+  @param r asymmetry (real number in (0, 1))
+  @param d flatness (real number &gt;= 0)
+  @param p tail exaggeration (real number in (0, 2))
+  @return vector of mean values (real number vector &gt; 0)
   */
-  vector lmskt(vector zms, real H, real r, real d, real p) {
-    return log(H) - lmultiply(p, fma(
-      r,
-      exp( (zms ./ r - d) / p ),
-      fma(
-        1 - r,
-        exp( -(zms ./ (1 - r) + d) / p ),
-        - exp( -d / p ) + 1  
-      )
-    ));
+  vector lmskt(vector xms, real H, real r, real d, real p) {
+    real invp = 1 / p;
+    real mdop = - d * invp;
+    return log(fma(H,
+                 pow(fma(r,
+                         exp(fma(invp, xms / r, mdop)),
+                         fma(1 - r,
+                             exp(fma(-invp, xms / (1 - r), mdop)),
+                             exp(- mdop) + 1)),
+                     -p),
+                 machine_precision()));
   }
+  // return log(H) - lmultiply(p, fma(
+  //   r,
+  //   exp( (xms ./ r - d) / p ),
+  //   fma(
+  //     1 - r,
+  //     exp( -(xms ./ (1 - r) + d) / p ),
+  //     - exp( -d / p ) + 1  
+  //   )
+  // ));
   real std_halfnormal_rng() {
     real u = uniform_rng(0.5, 1);
     real y = inv_Phi(u);
@@ -189,24 +207,20 @@ data {
 transformed data {
   // data type specific perhaps
   int Nzp = Nz + 1;
-
-  // standardise
-  // real z_min = x_min / x_sd;
-  // real z_range = x_range / x_sd;
-  // vector[N] z = x / x_sd;
-  // vector[Nrep] zrep = xrep / x_sd;
 }
 parameters {
   // standard-normal rvs for non-centred par
   real&lt;lower=0,upper=1&gt; zH;
   real&lt;lower=0,upper=1&gt; zm;
   real zs;
-  array[use_r] real&lt;lower=0,upper=1&gt; zr;
+  array[use_r] real&lt;lower=machine_precision(),upper=1-machine_precision()&gt; zr;
   array[use_d] real                  zd;
   array[use_p] real&lt;lower=0,upper=1&gt; zp;
-  array[use_zi] real&lt;lower=0,upper=1&gt; g0;
+  array[use_zi] real zg0;
   array[use_zi] real&lt;lower=0&gt; zg1;
-  real&lt;lower=0&gt; kap;
+  // hopefully that upper bound restricts phi &gt;= eps and avoids
+  // underflow complaints MH tries kap -&gt; inf
+  real&lt;lower=0,upper=1/sqrt(machine_precision())&gt; kap;
 }
 transformed parameters {
   // extract z rv's and get on desired scale
@@ -232,20 +246,23 @@ transformed parameters {
 
   real p;
   if (use_p &gt; 0) {
-    p = fma(2.95, zp[1], + 0.05);
+    p = fma(1.95, zp[1], + 0.05);
   } else {
     p = fix_p;
   }
   vector[N] lmu = leff + lmskt((x - m) / s, H, r, d, p);
+  // apparently this is more numerically stable than pow(kap, -2)?
+  real phi = 1 / square(kap);
+  array[use_zi] real g0;
   array[use_zi] real g1;
   vector[N] zi;
   if (use_zi) {
     // logistic function of the relative mean
+    g0[1] = fma(hp_g0[2], zg0[1], hp_g0[1]);
     g1[1] = hp_g1[1] * zg1[1];
-    zi = inv_logit(fma(-g1[1] / H, exp(lmu), logit(g0[1])));
+    zi = inv_logit(fma(-g1[1] / H, exp(lmu), g0[1]));
   }
-  real phi = pow(kap, -2);
-} 
+}
 model {
   target += beta_lupdf(zH | hp_H[1], hp_H[2]);
   target += beta_lupdf(zm | hp_m[1], hp_m[2]);
@@ -262,7 +279,7 @@ model {
   target += exponential_lupdf(kap | hp_kap);
 
   if (use_zi) {
-    target += beta_lupdf(g0[1] | hp_g0[1], hp_g0[2]);
+    target += std_normal_lupdf(g0[1]);
     target += std_normal_lupdf(g1[1]);
     if (Nz &gt; 0) {
       target += log_sum_exp(bernoulli_lupmf(1 | zi[1:Nz]),
@@ -271,7 +288,7 @@ model {
     }
     target += bernoulli_lupmf(0 | zi[Nzp:N]) +
               neg_binomial_2_log_lupmf(y[Nzp:N] | lmu[Nzp:N], phi);
-  } else {
+  } else { 
     target += neg_binomial_2_log_lupmf(y | lmu, phi);
   }
 }
@@ -304,7 +321,7 @@ generated quantities {
     mu_rep = exp(lmskt((xrep - m) / s, H, r, d, p));
     // calc log lik and yreps
     if (use_zi) {
-      zi_rep = inv_logit(fma(-g1[1] / H, mu_rep, logit(g0[1])));
+      zi_rep = inv_logit(fma(-g1[1] / H, mu_rep, g0[1]));
       for (n in 1:N) {
         if (n &lt; Nzp) {
           log_lik[n] = log_sum_exp(bernoulli_lpmf(1 | zi[n]),
@@ -368,7 +385,7 @@ generated quantities {
     if (use_p &gt; 0) {
       real pr_zp = beta_rng(hp_p[1], hp_p[2]);
       log_prior += beta_lpdf(pr_zp | hp_p[1], hp_p[2]);
-      pr_p = fma(2.95, pr_zp, 0.05);
+      pr_p = fma(1.95, pr_zp, 0.05);
     } else {
       pr_p = fix_p;
     }
@@ -379,10 +396,10 @@ generated quantities {
     // calc zi &amp; yreps
     vector[N] pr_zi;
     if (use_zi) {
-      pr_g0 = beta_rng(hp_g0[1], hp_g0[2]);
+      pr_g0 = fma(hp_g0[2], std_normal_rng(), hp_g0[1]);
       pr_g1 = hp_g1[1] * std_halfnormal_rng();
-      pr_zi = inv_logit(fma(-pr_g1 / pr_H, pr_mu, logit(pr_g0)));
-      pr_zi_rep = inv_logit(fma(-pr_g1 / pr_H, pr_mu_rep, logit(pr_g0)));
+      pr_zi = inv_logit(fma(-pr_g1 / pr_H, pr_mu, pr_g0));
+      pr_zi_rep = inv_logit(fma(-pr_g1 / pr_H, pr_mu_rep, pr_g0));
     }
     pr_kap = exponential_rng(hp_kap);
     pr_phi = pow(pr_kap, -2);

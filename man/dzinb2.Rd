@@ -23,3 +23,4 @@ The (log) probability mass at x, given mu, kappa and zi
 \description{
 Zero-inflated Negative Binomial Probability Mass
 }
+\keyword{internal}

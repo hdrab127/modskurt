@@ -9,7 +9,7 @@ abundance_range(
   seed = NULL,
   ndraws = 50,
   capture_pct = 80,
-  using_range = "high_zone",
+  using_range = "HAZ",
   based_on = "median",
   region = "centre",
   include_zero_inflation = FALSE,
@@ -30,9 +30,8 @@ abundance_range(
 tolerance from highest abundance summary (high_zone), based on "based_on"
 summary of abundance}
 
-\item{using_range}{"most_dens" for range of highest abundance density, or
-"high_zone" for range of x with abundance summary within highest possible,
-see details}
+\item{using_range}{"ADL" for highest abundance density limit, or
+"HAZ" for highest abundance zone, see details}
 
 \item{based_on}{which distribution summary to use for density or high zone,
 one of "mean", "median", or any quantile proportion as "q" + pecentage

@@ -1,6 +1,6 @@
 #' Check posterior computation is acceptable
 #'
-#' @param fit modskurt_fit object
+#' @param fit fitted model object from `mskt_fit`
 #' @param show_info print information about model spec and posterior sample
 #'
 #' @return a list with ...
@@ -10,15 +10,18 @@ check_computation <- function(fit, show_info = TRUE) {
   spec <- attr(fit, 'spec')
   dist <- attr(spec, 'dist')
   shape <- attr(spec, 'shape')
-  idx <- attr(fit, 'train')
-  d <- do.call(spec$data, idx)$all
+  if (attr(fit, 'is_subset')) {
+    d <- spec$subset()
+  } else {
+    d <- spec$full()
+  }
   niter <- fit$metadata()$iter_sampling
   nchains <- fit$num_chains()
   npost <- niter * nchains
   if (show_info) {
     cat('spec: ', dist, '[Hms', shape, ']',
-        ' using ', sum(d$set == 'train'),
-        ' obs out of ', nrow(d), ' (', idx$prop * 100, '% sample)',
+        ' using ', sum(d$all$set == 'train'),
+        ' obs out of ', nrow(d$all), ' (', d$prop * 100, '% sample)',
         '\n',
         sep = '')
     cat('post: ',
@@ -57,6 +60,7 @@ check_computation <- function(fit, show_info = TRUE) {
 #' @aliases pillar_shaft
 #' @importFrom pillar pillar_shaft
 #' @method pillar_shaft rhat
+#' @keywords internal
 pillar_shaft.rhat <- function(x, ...) {
   purp <- crayon::make_style('#EE00FF')
   xd <- vctrs::vec_data(x)
@@ -68,6 +72,7 @@ pillar_shaft.rhat <- function(x, ...) {
 #' @aliases pillar_shaft
 #' @importFrom pillar pillar_shaft
 #' @method pillar_shaft ess
+#' @keywords internal
 pillar_shaft.ess <- function(x, ...) {
   purp <- crayon::make_style('#EE00FF')
   xd <- vctrs::vec_data(x)

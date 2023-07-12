@@ -21,3 +21,4 @@ the (log) probability mass at x, given mu and kappa
 \description{
 The Negative Binomial Probability Mass Function (alternative parameterisation)
 }
+\keyword{internal}

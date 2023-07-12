@@ -1,8 +1,7 @@
 #' Fit the specified modskurt model by sampling its posterior distribution
 #'
 #' @param spec the modskurt model specification returned by `mskt_spec`
-#' @param train_prop the proportion of data to train the posterior on
-#' @param train_seed a seed for the training sample of proportion `train_prop`
+#' @param use_subset whether to use specified subset or all data
 #' @param seed a seed for the Stan random number generator
 #' @param init initialisation method, see ?cmdstanr::`model-method-sample`
 #' @param chains the number of Markov chains
@@ -18,8 +17,7 @@
 #' @export
 #'
 mskt_fit <- function(spec,
-                     train_prop = 1,
-                     train_seed = NULL,
+                     use_subset = FALSE,
                      seed = NULL,
                      init = NULL,
                      chains = 4,
@@ -34,6 +32,7 @@ mskt_fit <- function(spec,
   # retrieve cmdstan_model
   pkgdir <- path.package('modskurt')
   standir <- file.path(pkgdir, 'stan')
+
   # TODO: remove this from testing
   if (!dir.exists(standir)) {
     standir <- file.path(gsub('OneDrive - Massey University',
@@ -41,21 +40,31 @@ mskt_fit <- function(spec,
                               pkgdir,
                               fixed = TRUE), 'inst/stan')
   }
+
   stanexe <- file.path(standir, 'discrete.exe')
   if (!file.exists(stanexe)) {
     rlang::abort('modskurt models not compiled, see `?compile_stanmodels()')
   }
+
   suppressMessages({
     csm <-
       cmdstanr::cmdstan_model(stan_file = file.path(standir, 'discrete.stan'),
                               exe_file = stanexe,
                               include_paths = file.path(standir, '/blocks'))
   })
+
   if (!missing(seed) & !is.null(seed)) {
     set.seed(seed)
   }
-  sdat <- c(spec, spec$data(train_prop, train_seed)$train)
-  sdat$data <- NULL
+
+  if (use_subset) {
+    sdat <- c(spec, spec$subset()$train)
+  } else {
+    sdat <- c(spec, spec$full()$train)
+  }
+  sdat$subset <- NULL
+  sdat$full <- NULL
+
   if (is.null(init)) {
     init <- mskt_inits(sdat, chains)
   }
@@ -107,11 +116,12 @@ mskt_fit <- function(spec,
                show_exceptions = show_exceptions,
                ...)
   attr(fit, 'spec') <- spec
-  attr(fit, 'train') <- list(prop = train_prop, seed = train_seed)
+  attr(fit, 'is_subset') <- use_subset
   fit
 }
 
-# internal only for initialising from prior
+#' internal only for initialising from prior
+#' @keywords internal
 mskt_inits <- function(sdat, chains, from_data = TRUE) {
   # https://discourse.mc-stan.org/t/undesirable-behavior-in-initial-values-of-hierarchical-model/18961/8?u=hdrab127
   # "Another example is multimodal likelihood functions – priors can suppress
@@ -158,6 +168,7 @@ mskt_inits <- function(sdat, chains, from_data = TRUE) {
     })
   inits
 }
+#' @keywords internal
 skewness <- function(x) {
   n <- length(x)
   x <- x - mean(x)
