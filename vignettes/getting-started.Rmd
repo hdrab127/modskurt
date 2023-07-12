@@ -5,6 +5,8 @@ vignette: >
   %\VignetteIndexEntry{Getting started}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+resource_files:
+  - '../man/figures/workflow.JPG'
 ---
 
 ```{r setup, include = FALSE}
@@ -30,8 +32,8 @@ options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
 This vignette presents a minimal Bayesian workflow for modelling the distribution of discrete **species abundance**, $y$, along an **environmental gradient**, $x$, using the **modskurt** function to predict mean abundance, $\mu$. The diagram below outlines key steps for an informative and trustworthy analysis using the `modskurt` package, and also provides a layout for the rest of this vignette. If at any stage you find yourself needing more information, please check out the references and other resources on this web page.
 
 ```{r workflow-img, echo=FALSE, out.height="100%"}
-# knitr::include_graphics('workflow.JPG')
-htmltools::tags$img(src = 'workflow.JPG')
+knitr::include_graphics('../man/figures/workflow.JPG')
+# htmltools::tags$img(src = './workflow.JPG')
 ```
 
 ## Load packages and stan files
