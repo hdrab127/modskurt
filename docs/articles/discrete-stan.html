@@ -129,7 +129,7 @@ the environmental gradient, <span class="math inline">\(x\)</span>.</p>
   @param s scale (real number &gt; 0)
   @param r asymmetry (real number in (0, 1))
   @param d flatness (real number &gt;= 0)
-  @param p tail exaggeration (real number in (0, 2))
+  @param p tail exaggeration (real number in (0.05, 1.95))
   @return vector of mean values (real number vector &gt; 0)
   */
   vector mskt(vector xms, real H, real r, real d, real p) {
@@ -140,17 +140,19 @@ the environmental gradient, <span class="math inline">\(x\)</span>.</p>
                        fma(1 - r, exp(fma(-invp, xms / (1 - r), mdop)),
                            - exp(mdop) + 1)),
                    -p),
+               // avoid underflow for really small mu
                machine_precision());
+    // unintuitively log scale creates more arithmetic precision issues
+    // return log(H) - lmultiply(p, fma(
+    //   r,
+    //   exp( (xms ./ r - d) / p ),
+    //   fma(
+    //     1 - r,
+    //     exp( -(xms ./ (1 - r) + d) / p ),
+    //     - exp( -d / p ) + 1  
+    //   )
+    // ));
   }
-  // return log(H) - lmultiply(p, fma(
-  //   r,
-  //   exp( (xms ./ r - d) / p ),
-  //   fma(
-  //     1 - r,
-  //     exp( -(xms ./ (1 - r) + d) / p ),
-  //     - exp( -d / p ) + 1  
-  //   )
-  // ));
   real std_halfnormal_rng() {
     real u = uniform_rng(0.5, 1);
     real y = inv_Phi(u);
@@ -203,17 +205,16 @@ data {
   vector[1] hp_g1;
 }
 transformed data {
-  // data type specific perhaps
   int Nzp = Nz + 1;
 }
 parameters {
   // standard-normal rvs for non-centred par
   real&lt;lower=0,upper=1&gt; zH;
   real&lt;lower=0,upper=1&gt; zm;
-  real zs;
+  real                  zs;
   array[use_r] real&lt;lower=machine_precision(),upper=1-machine_precision()&gt; zr;
-  array[use_d] real                  zd;
-  array[use_p] real&lt;lower=0,upper=1&gt; zp;
+  array[use_d] real                                                        zd;
+  array[use_p] real&lt;lower=0,upper=1&gt;                                       zp;
   array[use_zi] real zg0;
   array[use_zi] real&lt;lower=0&gt; zg1;
   // hopefully that upper bound restricts phi &gt;= eps and avoids
@@ -227,21 +228,18 @@ transformed parameters {
   real H = zH * y_max;
   real m = fma(x_pos_range, zm, x_pos_min);
   real s = exp(fma(hp_s[2], zs, hp_s[1])) * x_pos_range;
-
   real r;
   if (use_r &gt; 0) {
     r = zr[1];
   } else {
     r = fix_r;
   }
-
   real d;
   if (use_d &gt; 0) {
     d = exp(fma(hp_d[2], zd[1], hp_d[1]));
   } else {
     d = fix_d;
   }
-
   real p;
   if (use_p &gt; 0) {
     p = fma(1.95, zp[1], + 0.05);
@@ -301,9 +299,6 @@ generated quantities {
   real pr_r;
   real pr_d;
   real pr_p;
-  // TODO: this should be log_prior_mu
-  // and have one for log_prior_phi
-  // and log_prior_zi for other dist checks
   real log_prior = 0;
   real pr_g0;
   real pr_g1;
