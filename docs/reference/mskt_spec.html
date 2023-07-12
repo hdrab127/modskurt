@@ -92,7 +92,9 @@
 <span>  dist <span class="op">=</span> <span class="st">"nb"</span>,</span>
 <span>  shape <span class="op">=</span> <span class="st">"rdp"</span>,</span>
 <span>  hyperparams <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  pred_grid <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pred_grid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subset_prop <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  subset_seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -128,6 +130,14 @@
 
 <dt>pred_grid</dt>
 <dd><p>vector of x values to make y predictions over</p></dd>
+
+
+<dt>subset_prop</dt>
+<dd><p>proportion of data to use for early model checks</p></dd>
+
+
+<dt>subset_seed</dt>
+<dd><p>a seed for the subset sample proportion</p></dd>
 
 </dl></div>
     <div class="section level2">

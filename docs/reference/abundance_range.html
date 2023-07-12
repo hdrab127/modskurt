@@ -89,7 +89,7 @@
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ndraws <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  capture_pct <span class="op">=</span> <span class="fl">80</span>,</span>
-<span>  using_range <span class="op">=</span> <span class="st">"high_zone"</span>,</span>
+<span>  using_range <span class="op">=</span> <span class="st">"HAZ"</span>,</span>
 <span>  based_on <span class="op">=</span> <span class="st">"median"</span>,</span>
 <span>  region <span class="op">=</span> <span class="st">"centre"</span>,</span>
 <span>  include_zero_inflation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -121,9 +121,8 @@ summary of abundance</p></dd>
 
 
 <dt>using_range</dt>
-<dd><p>"most_dens" for range of highest abundance density, or
-"high_zone" for range of x with abundance summary within highest possible,
-see details</p></dd>
+<dd><p>"ADL" for highest abundance density limit, or
+"HAZ" for highest abundance zone, see details</p></dd>
 
 
 <dt>based_on</dt>

@@ -122,7 +122,7 @@ both linked to the data through <code>modskurt</code> mean functions of
 the environmental gradient, <span class="math inline">\(x\)</span>.</p>
 <pre><code class="language-stan"><code>functions {
   /*
-  Log of the "mskt" unimodal mean function
+  The "mskt" unimodal mean function
   @param x predictor variable (real number vector)
   @param H height of curve at mode (real number &gt; 0)
   @param m mode (real number)
@@ -132,17 +132,15 @@ the environmental gradient, <span class="math inline">\(x\)</span>.</p>
   @param p tail exaggeration (real number in (0, 2))
   @return vector of mean values (real number vector &gt; 0)
   */
-  vector lmskt(vector xms, real H, real r, real d, real p) {
+  vector mskt(vector xms, real H, real r, real d, real p) {
     real invp = 1 / p;
     real mdop = - d * invp;
-    return log(fma(H,
-                 pow(fma(r,
-                         exp(fma(invp, xms / r, mdop)),
-                         fma(1 - r,
-                             exp(fma(-invp, xms / (1 - r), mdop)),
-                             exp(- mdop) + 1)),
-                     -p),
-                 machine_precision()));
+    return fma(H,
+               pow(fma(r, exp(fma(invp, xms / r, mdop)),
+                       fma(1 - r, exp(fma(-invp, xms / (1 - r), mdop)),
+                           - exp(mdop) + 1)),
+                   -p),
+               machine_precision());
   }
   // return log(H) - lmultiply(p, fma(
   //   r,
@@ -164,8 +162,8 @@ data {
   int&lt;lower=1&gt; Nz;
   vector[N] x;
 
-  // log effort (can be 0 if no offset required)
-  vector[N] leff;
+  // effort (can be 1 if no offset required)
+  vector[N] eff;
 
   // make predictions over grid
   int Nrep;
@@ -196,7 +194,7 @@ data {
 
   // 0: no prior, 1: with prior, 2: only prior
   int&lt;lower=0,upper=2&gt; sample_prior;
-  // base distribution
+  // fixed data type
   array[N] int&lt;lower=0&gt; y;
   real&lt;lower=0&gt; hp_kap;
 
@@ -220,7 +218,7 @@ parameters {
   array[use_zi] real&lt;lower=0&gt; zg1;
   // hopefully that upper bound restricts phi &gt;= eps and avoids
   // underflow complaints MH tries kap -&gt; inf
-  real&lt;lower=0,upper=1/sqrt(machine_precision())&gt; kap;
+  real&lt;lower=machine_precision(),upper=1/sqrt(machine_precision())&gt; kap;
 }
 transformed parameters {
   // extract z rv's and get on desired scale
@@ -250,8 +248,10 @@ transformed parameters {
   } else {
     p = fix_p;
   }
-  vector[N] lmu = leff + lmskt((x - m) / s, H, r, d, p);
-  // apparently this is more numerically stable than pow(kap, -2)?
+
+  vector[N] mu = eff .* mskt((x - m) / s, H, r, d, p);
+  vector[N] lmu = log(mu);
+  // this is more numerically stable than pow(kap, -2)?
   real phi = 1 / square(kap);
   array[use_zi] real g0;
   array[use_zi] real g1;
@@ -260,7 +260,7 @@ transformed parameters {
     // logistic function of the relative mean
     g0[1] = fma(hp_g0[2], zg0[1], hp_g0[1]);
     g1[1] = hp_g1[1] * zg1[1];
-    zi = inv_logit(fma(-g1[1] / H, exp(lmu), g0[1]));
+    zi = inv_logit(fma(-g1[1] / H, mu, g0[1]));
   }
 }
 model {
@@ -277,7 +277,6 @@ model {
     target += beta_lupdf(zp[1] | hp_p[1], hp_p[2]);
   }
   target += exponential_lupdf(kap | hp_kap);
-
   if (use_zi) {
     target += std_normal_lupdf(g0[1]);
     target += std_normal_lupdf(g1[1]);
@@ -288,12 +287,11 @@ model {
     }
     target += bernoulli_lupmf(0 | zi[Nzp:N]) +
               neg_binomial_2_log_lupmf(y[Nzp:N] | lmu[Nzp:N], phi);
-  } else { 
+  } else {
     target += neg_binomial_2_log_lupmf(y | lmu, phi);
   }
 }
 generated quantities {
-  vector[N] mu = exp(lmu);
   vector[N] log_lik;
   vector[Nrep] mu_rep;
   vector[Nrep] pr_mu_rep;
@@ -318,7 +316,7 @@ generated quantities {
   real pr_phi;
 
   if (sample_prior &lt; 2) {
-    mu_rep = exp(lmskt((xrep - m) / s, H, r, d, p));
+    mu_rep = mskt((xrep - m) / s, H, r, d, p);
     // calc log lik and yreps
     if (use_zi) {
       zi_rep = inv_logit(fma(-g1[1] / H, mu_rep, g0[1]));
@@ -350,7 +348,7 @@ generated quantities {
   }
 
   if (sample_prior &gt; 0) {
-    // calcs log_prior for mean pars now 
+    // calcs log_prior for mean pars now
     // dont store these
     vector[N] pr_mu;
 
@@ -391,8 +389,8 @@ generated quantities {
     }
     
     // maybe we can just calc this and derive the evenly gridded versions after?
-    pr_mu = exp(leff + lmskt((x - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p));
-    pr_mu_rep = exp(lmskt((xrep - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p));
+    pr_mu = eff .* mskt((x - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p);
+    pr_mu_rep = mskt((xrep - pr_m) / pr_s, pr_H, pr_r, pr_d, pr_p);
     // calc zi &amp; yreps
     vector[N] pr_zi;
     if (use_zi) {

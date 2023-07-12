@@ -40,7 +40,22 @@
     <loc>https://hdrab127.github.io/modskurt/reference/check_computation.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_post_calibration.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_post_dens.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_post_influencers.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/reference/check_prior_dens.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_prior_dist.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_prior_mskt.html</loc>
   </url>
   <url>
     <loc>https://hdrab127.github.io/modskurt/reference/compile_stanmodels.html</loc>
@@ -71,6 +86,9 @@
   </url>
   <url>
     <loc>https://hdrab127.github.io/modskurt/reference/mskt_spec.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/pzinb2.html</loc>
   </url>
   <url>
     <loc>https://hdrab127.github.io/modskurt/reference/qnbinom2.html</loc>

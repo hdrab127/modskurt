@@ -86,8 +86,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mskt_fit</span><span class="op">(</span></span>
 <span>  <span class="va">spec</span>,</span>
-<span>  train_prop <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  train_seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  use_subset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  chains <span class="op">=</span> <span class="fl">4</span>,</span>
@@ -108,12 +107,8 @@
 <dd><p>the modskurt model specification returned by `mskt_spec`</p></dd>
 
 
-<dt>train_prop</dt>
-<dd><p>the proportion of data to train the posterior on</p></dd>
-
-
-<dt>train_seed</dt>
-<dd><p>a seed for the training sample of proportion `train_prop`</p></dd>
+<dt>use_subset</dt>
+<dd><p>whether to use specified subset or all data</p></dd>
 
 
 <dt>seed</dt>

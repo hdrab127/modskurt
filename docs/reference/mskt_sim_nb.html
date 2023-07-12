@@ -84,13 +84,29 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mskt_sim_nb</span><span class="op">(</span><span class="va">x</span>, <span class="va">H</span>, <span class="va">m</span>, <span class="va">s</span>, r <span class="op">=</span> <span class="fl">0.5</span>, d <span class="op">=</span> <span class="fl">0</span>, p <span class="op">=</span> <span class="fl">1</span>, <span class="va">kappa</span>, g0 <span class="op">=</span> <span class="fl">0</span>, g1 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mskt_sim_nb</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  n_per_x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">H</span>,</span>
+<span>  <span class="va">m</span>,</span>
+<span>  <span class="va">s</span>,</span>
+<span>  r <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  d <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  p <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">kap</span>,</span>
+<span>  g0 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  g1 <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p>vector of environmental gradient values</p></dd>
+
+
+<dt>n_per_x</dt>
+<dd><p>number of y replicates to simulate for each x value</p></dd>
 
 
 <dt>H</dt>
@@ -117,7 +133,7 @@
 <dd><p>persistence</p></dd>
 
 
-<dt>kappa</dt>
+<dt>kap</dt>
 <dd><p>negative binomial dispersion</p></dd>
 
 
