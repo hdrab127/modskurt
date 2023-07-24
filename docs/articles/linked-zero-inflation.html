@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">modskurt</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -265,7 +265,7 @@ TODO: add legend for alpha!
 <span>           iter_sampling <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>           chains <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>           <span class="co"># debug_init = TRUE,</span></span>
+<span>           <span class="co"># for debugging</span></span>
 <span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
@@ -288,12 +288,12 @@ TODO: add legend for alpha!
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  6.001    2.660 8.661             2                 0 0.8508828</span></span>
-<span><span class="co">## 2        2  5.811    2.454 8.265             1                 0 1.1861269</span></span>
-<span><span class="co">## 3        3  4.542    2.105 6.647             5                 0 1.0944825</span></span>
-<span><span class="co">## 4        4  4.674    1.789 6.463            18                 0 0.9643593</span></span>
-<span><span class="co">## 5        5  6.072    2.898 8.970             2                 0 1.0613385</span></span>
-<span><span class="co">## 6        6  6.250    2.338 8.588             1                 0 0.8744557</span></span></code></pre>
+<span><span class="co">## 1        1  6.116    2.712 8.828             2                 0 0.8508828</span></span>
+<span><span class="co">## 2        2  6.075    2.505 8.580             1                 0 1.1861269</span></span>
+<span><span class="co">## 3        3  4.808    2.182 6.990             5                 0 1.0944825</span></span>
+<span><span class="co">## 4        4  4.815    1.782 6.597            18                 0 0.9643593</span></span>
+<span><span class="co">## 5        5  6.264    2.922 9.186             2                 0 1.0613385</span></span>
+<span><span class="co">## 6        6  6.350    2.376 8.726             1                 0 0.8744557</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -347,10 +347,10 @@ well-calibrated for the rest of the dist? Compare with a NB model.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling   total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 68.736   57.969 126.705            24                 0 0.9714918</span></span>
-<span><span class="co">## 2        2 62.473   66.268 128.741            18                 0 0.9745719</span></span>
-<span><span class="co">## 3        3 56.298   70.405 126.703            13                 0 0.9514785</span></span>
-<span><span class="co">## 4        4 57.881   71.181 129.062            24                 0 1.0103720</span></span></code></pre>
+<span><span class="co">## 1        1 68.580   58.674 127.254            24                 0 0.9714918</span></span>
+<span><span class="co">## 2        2 62.347   67.212 129.559            18                 0 0.9745719</span></span>
+<span><span class="co">## 3        3 56.685   71.487 128.172            13                 0 0.9514785</span></span>
+<span><span class="co">## 4        4 57.825   72.178 130.003            24                 0 1.0103720</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>

@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">modskurt</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -220,7 +220,6 @@ transformed data {
   real exp_hp_s1 = exp(hp_s[1]);
 }
 parameters {
-  // standard-normal rvs for non-centred par
   real&lt;lower=machine_precision(),upper=1&gt; zH;
   real&lt;lower=0,upper=1&gt;                   zm;
   real&lt;lower=machine_precision()&gt;         zs;
