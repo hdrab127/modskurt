@@ -13,6 +13,9 @@
     <loc>https://hdrab127.github.io/modskurt/articles/index.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/articles/linked-zero-inflation.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/articles/modskurt-priors.html</loc>
   </url>
   <url>
@@ -58,6 +61,9 @@
     <loc>https://hdrab127.github.io/modskurt/reference/check_prior_mskt.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/check_prior_zero.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/reference/compile_stanmodels.html</loc>
   </url>
   <url>
@@ -97,9 +103,15 @@
     <loc>https://hdrab127.github.io/modskurt/reference/qzinb2.html</loc>
   </url>
   <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/redstripe.html</loc>
+  </url>
+  <url>
     <loc>https://hdrab127.github.io/modskurt/reference/reexports.html</loc>
   </url>
   <url>
     <loc>https://hdrab127.github.io/modskurt/reference/tuangi.html</loc>
+  </url>
+  <url>
+    <loc>https://hdrab127.github.io/modskurt/reference/zilink.html</loc>
   </url>
 </urlset>

@@ -3,7 +3,7 @@
 \docType{data}
 \name{tuangi}
 \alias{tuangi}
-\title{Tuangi (NZ Cockle) estuarine abundance}
+\title{Tuangi (*Austrovenus structburyi*, NZ Cockle) estuarine abundance}
 \format{
 ## `tuangi`
 A data frame with 764 rows and 11 columns:

@@ -1,9 +1,8 @@
   /*
   The "mskt" unimodal mean function
-  @param x predictor variable (real number vector)
+  @param xms ( predictor variable (real number vector) - mode (m, real number) ) 
+              / scale (s, real number > 0)
   @param H height of curve at mode (real number > 0)
-  @param m mode (real number)
-  @param s scale (real number > 0)
   @param r asymmetry (real number in (0, 1))
   @param d flatness (real number >= 0)
   @param p tail exaggeration (real number in (0.05, 1.95))
@@ -29,6 +28,17 @@
     //     - exp( -d / p ) + 1  
     //   )
     // ));
+  }
+  /*
+  The "zinbl" zero-inflation link function
+  @param mu mean negative binomial abundance (real number vector)
+  @param H height of curve at mode (real number > 0)
+  @param g0 log-odds probability of excess zero when mu = 0
+  @param g1 rate at which log-odds probability of excess zero decreases as mu increases
+  @return vector of excess zero probabilities (real number vector in [0, 1])
+  */
+  vector zilink(vector mu, real H, real g0, real g1) {
+    return inv_logit(fma(-g1 / H, mu, g0));
   }
   real std_halfnormal_rng() {
     real u = uniform_rng(0.5, 1);

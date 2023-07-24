@@ -16,7 +16,7 @@ abundance_range(
   plotted = FALSE,
   point_alpha = 0.2,
   line_alpha = 0.02,
-  range_colour = "red"
+  range_colour = "#22CC99"
 )
 }
 \arguments{

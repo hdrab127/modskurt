@@ -62,10 +62,10 @@ check_computation <- function(fit, show_info = TRUE) {
 #' @method pillar_shaft rhat
 #' @keywords internal
 pillar_shaft.rhat <- function(x, ...) {
-  purp <- crayon::make_style('#EE00FF')
+  highlight <- crayon::bgYellow
   xd <- vctrs::vec_data(x)
   num <- as.double(xd)
-  xd[num >= 1.05] <- purp(xd[num >= 1.05])
+  xd[num >= 1.05] <- highlight(xd[num >= 1.05])
   pillar::new_pillar_shaft_simple(xd, align = 'right')
 }
 #' @export
@@ -74,9 +74,9 @@ pillar_shaft.rhat <- function(x, ...) {
 #' @method pillar_shaft ess
 #' @keywords internal
 pillar_shaft.ess <- function(x, ...) {
-  purp <- crayon::make_style('#EE00FF')
+  highlight <- crayon::bgYellow
   xd <- vctrs::vec_data(x)
   pct <- as.double(gsub('^.*\\((.*)\\)$', '\\1', xd))
-  xd[pct <= 0.1] <- purp(xd[pct <= 0.1])
+  xd[pct <= 0.1] <- highlight(xd[pct <= 0.1])
   pillar::new_pillar_shaft_simple(xd, align = 'right')
 }

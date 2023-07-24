@@ -1,0 +1,232 @@
+---
+title: "Linked zero-inflation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Linked zero-inflation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+resource_files:
+  - '../man/figures/workflow.JPG'
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  # collapse = TRUE,
+  # comment = "#>",
+  message = FALSE, 
+  warning = FALSE, 
+  # eval = identical(Sys.getenv("NOT_CRAN"), "true"),
+  dev = "png",
+  dpi = 120,
+  fig.asp = 0.4,
+  fig.width = 10,
+  out.width = "100%",
+  fig.align = "center"
+)
+options(crayon.enabled = TRUE)
+options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
+
+# eulachon <-
+#   readRDS('../fish/2022-10-02-trawl.rds') |>
+#   dplyr::filter(grepl('Thaleichthys', species), year == max(year)) |>
+#   dplyr::select(-species, -flourescence, -turb, -ld, -rd, -year)
+# usethis::use_data(eulachon, overwrite = TRUE)
+# redstripe <-
+#   readRDS('../fish/2022-10-02-trawl.rds') |>
+#   dplyr::filter(species == 'Sebastes proriger') |>
+#   dplyr::select(-species, -flourescence, -turb, -ld, -rd, -year)
+# usethis::use_data(redstripe, overwrite = TRUE)
+```
+
+## Overview
+
+ZINBL not really needed unless prop zero > 0.95?
+
+## Load packages and stan files
+
+```{r load-compile}
+library(modskurt)
+compile_stanmodels()
+
+# everyone loves a good graph
+library(ggplot2)
+library(patchwork)
+theme_set(theme_classic())
+
+# for reproducibility
+set.seed(123456)
+```
+
+## Case study - *Sebastes proriger* vs. water temperature
+
+<!-- 2015 data for *Sebastes goodei*, should be pretty hot? -->
+<!-- 2015 data for *Thaleichthys pacificus*. -->
+2015 data for *Sebastes proriger* (redstripe rockfish).
+
+```{r data}
+data(redstripe)
+redstripe
+```
+
+## A. Specify initial model
+
+$$
+\begin{aligned}
+y_n &\sim \text{ZINBL}\left[\mu_n = \text{Modskurt}(x_n), \kappa, \pi_n\right] \\
+\pi_n &= \gamma_0 - \gamma_1 \cdot \mu_n
+\end{aligned}
+$$
+
+with parameters:
+
+$$
+\begin{align}
+\kappa &\sim \text{Exponential}(0.5) \\
+\gamma_0 &\sim \text{Normal}(3.0, 1.5) \\
+\gamma_1 &\sim \text{HalfNormal}(3.0)
+\end{align}
+$$
+
+```{r model}
+spec <-
+  mskt_spec(data = redstripe,
+            # by including effort below, we are atually modelling catch per unit
+            # effort (CPUE) while retaining the discrete distribution of these
+            # count data
+            y = c('Sebastes proriger (CPUE)' = 'total_count'),
+            x = c('SST (°C)' = 'temp'),
+            effort = c('Area swept (ha)' = 'area_swept'),
+            dist = 'zinbl',
+            shape = 'rdp',
+            subset_prop = 0.3)
+```
+
+```{r model-spec}
+str(spec$subset())
+```
+
+## B. Verify initial model specification
+
+### Prior probabilities of parameter values
+
+```{r check-prior-dens, fig.asp=0.8, fig.cap="TODO: add legend for median, 50%HDI and 99% line!"}
+check_prior_dens(spec)
+```
+
+### Prior predictions for the `modskurt` mean
+
+```{r check-prior-mskt, fig.cap="TODO: add legend for alpha!"}
+check_prior_mskt(spec)
+```
+
+### Prior predictions for summary statistics of $y$
+
+```{r check-prior-dist, fig.asp=0.3}
+check_prior_dist(spec)
+```
+
+### Prior predictions for probability of excess zero $\pi$
+
+```{r check-prior-zero, fig.asp=0.3}
+check_prior_zero(spec)
+```
+
+*OPTIONAL*: refine model spec further
+
+## C. Fit subset model
+
+```{r fit-subset, results='hide'}
+fit_subset <-
+  mskt_fit(spec,
+           use_subset = TRUE,
+           iter_warmup = 200,
+           iter_sampling = 100,
+           chains = 6,
+           parallel_chains = 6,
+           # for debugging
+           show_messages = TRUE, show_exceptions = TRUE)
+```
+
+```{r fit-subset-check}
+check_computation(fit_subset)
+```
+
+*OPTIONAL*: refine model spec or fit parameters
+
+### Check subset model
+
+```{r check-post-dens-subset, fig.asp=0.8}
+# visual display of chain mixing and prior-data conflicts
+check_post_dens(fit_subset, by_chain = TRUE)
+```
+
+<!-- One out of six chains got confused between NB with high dispersion and ZINBL with low dispersion. This is a shortcoming and positive at the same time. It tells us that the model could have multiple solutions (that would be harder to identify with MLE unless do multiple fits). Best to try with more warmup samples to see if they all find the same mode. -->
+
+```{r check-post-calibration-subset}
+# uses test set for discrete pit
+check_post_calibration(fit_subset)
+```
+
+The slight increase suggests the model is struggling to capture overdispersion in the upper quantiles of data. However it appears well-calibrated for the rest of the dist? Compare with a NB model.
+
+*OPTIONAL*: refine model spec or fit parameters
+
+## D. Fit full model
+
+```{r fit-full, results='hide'}
+fit_full <-
+  mskt_fit(spec,
+           chains = 4,
+           parallel_chains = 4,
+           # sparse data can require a little more computing care
+           # default is 0.80
+           # adapt_delta = 0.90,
+           # for testing
+           debug_init = FALSE, show_messages = TRUE, show_exceptions = TRUE)
+```
+
+```{r fit-full-check}
+check_computation(fit_full)
+```
+
+*OPTIONAL*: refine model spec or fit parameters
+
+### Check full model
+
+```{r}
+check_post_dens(fit_full, by_chain = TRUE)
+```
+
+```{r check-post-influencers-full}
+# can be slow for large N
+check_post_influencers(fit_full)
+```
+
+*OPTIONAL*: refine model spec or fit parameters.
+
+## E. Use the model
+
+### Plot summaries of the abundance distribution
+
+```{r use-full-fit-dist}
+# plot the distribution of abundance along the gradient
+abundance_dist(fit_full,
+               include_zero_inflation = FALSE,
+               summaries = c('mean')) +
+  scale_y_sqrt()
+```
+
+### Calculate ranges of x for different percentages of abundance measures
+
+```{r use-full-fit-range-plot}
+abundance_range(fit_full,
+                capture_pct = 50,
+                using_range = 'HAZ',
+                based_on = 'mean',
+                include_zero_inflation = FALSE,
+                plotted = TRUE) +
+  labs(subtitle = '50% of highest mean counts') +
+  scale_y_sqrt()
+```
+
+## Summary

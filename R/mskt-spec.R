@@ -86,7 +86,7 @@ mskt_spec <- function(data,
          use_zi = as.integer(dist == 'zinbl'),
          hp_kap = hp$kap %||% c(0.5), # ~ exponential(rate)
          hp_g0  =  hp$g0 %||% c(3.0, 1.5), # ~ normal(mu, sd)
-         hp_g1  =  hp$g1 %||% c(3.0)) # ~ half_normal(mu, sd)
+         hp_g1  =  hp$g1 %||% c(5.0)) # ~ half_normal(mu, sd)
 
   # default prediction grid over all x
   if (is.null(pred_grid)) {
@@ -98,10 +98,14 @@ mskt_spec <- function(data,
   }
 
   # standardise y, x over prop of data set
+  # enclose seed for consistent subsets if not specified
+  curr_seed <- .Random.seed
   get_subset <- function(prop = 1, seed = NULL) {
     # optionally sample a proportion of training data
     if (!missing(seed) & !is.null(seed)) {
       set.seed(seed)
+    } else {
+      set.seed(curr_seed)
     }
     idx <- sample(nrow(d_all), round(prop * nrow(d_all)))
     d <- d_all
@@ -126,9 +130,9 @@ mskt_spec <- function(data,
 
     # check zeroes
     prop_zero <- (train$Nz / train$N)
-    if (prop_zero > 0.90) {
+    if (prop_zero > 0.90 & dist != 'zinbl') {
       rlang::warn(paste0(round(prop_zero * 100, 1), '% of y are zero. ',
-                         'Check if you can reduce the range of x at all?'))
+                         'Maybe try a zero-inflated model instead?'))
     }
     list(train = train, all = d, prop = prop, seed = seed)
   }

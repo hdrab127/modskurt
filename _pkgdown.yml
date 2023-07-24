@@ -22,6 +22,8 @@ navbar:
       menu:
         - text: 'How to use `modskurt`'
           href: articles/getting-started.html
+        - text: 'Linked zero-inflation (ZINBL)'
+          href: articles/linked-zero-inflation.html
         - text: 'Prior specification'
           href: articles/prior-specification.html
         - text: 'Stan discrete model'

@@ -1,4 +1,4 @@
-#' Tuangi (NZ Cockle) estuarine abundance
+#' Tuangi (*Austrovenus structburyi*, NZ Cockle) estuarine abundance
 #'
 #' Discrete counts of tuangi in intertidal estuaries of New Zealand
 #'

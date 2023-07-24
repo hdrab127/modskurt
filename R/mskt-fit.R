@@ -68,40 +68,6 @@ mskt_fit <- function(spec,
   if (is.null(init)) {
     init <- mskt_inits(sdat, chains)
   }
-  # browser()
-  # if (FALSE) {
-  #   dat <- do.call(rbind,
-  #                  lapply(init, \(i) as.data.frame(
-  #                    purrr::discard(i, ~ length(.x) == 0))
-  #                  ))
-  #   out <-
-  #     lapply(seq_along(init), \(i) {
-  #       dat <- init[[i]]
-  #       pars <- list()
-  #       with(sdat, {
-  #         pars$H <- as.double(dat$zH * y_max)
-  #         pars$m <- as.double(dat$zm * x_pos_range + x_min)
-  #         pars$s <- as.double(exp(dat$zs * hp_s[2] + hp_s[1]) * x_pos_range)
-  #         pars$r <- as.double(dat$zr)
-  #         pars$d <- as.double(exp(dat$zd * hp_d[2] + hp_d[1]))
-  #         pars$p <- as.double(dat$zp * 1.99 + 0.01)
-  #         pars
-  #         data.frame(H = pars$H,
-  #                    m = pars$m,
-  #                    s = pars$s,
-  #                    r = pars$r,
-  #                    d = pars$d,
-  #                    p = pars$p,
-  #                    chain = i,
-  #                    x = sdat$x,
-  #                    mu = do.call(mskt, c(list(x = sdat$x), pars)))
-  #       })
-  #     })
-  #   out[[4]]
-  #   ggplot(do.call(rbind, out), aes(x, mu)) +
-  #     geom_line() +
-  #     facet_wrap(~ chain, scales = 'free_y')
-  # }
   fit <-
     csm$sample(data = sdat,
                seed = seed,
@@ -130,7 +96,7 @@ mskt_inits <- function(sdat, chains, from_data = TRUE) {
   # regardless of how little probability that mode captures. Custom
   # initializations can avoid these extraneous modes but again it’s up to the
   # user to verify that they are in fact extraneous."
-  ypos <- sdat$y[sdat$y > 0]
+  ypos <- sdat$y[sdat$y > 0] / sdat$eff[sdat$y > 0]
   xpos <- sdat$x[sdat$y > 0]
   xwtd <- unlist(lapply(seq_along(xpos), \(j) rep(xpos[j], ypos[j])))
 
@@ -139,28 +105,41 @@ mskt_inits <- function(sdat, chains, from_data = TRUE) {
     lapply(seq_len(chains), function(cid) {
       with(sdat, {
         init <-
-          list(zH = rbeta(1, hp_H[1], hp_H[2]),
-               zm = rbeta(1, hp_m[1], hp_m[2]),
-               zs = rnorm(1, hp_s[1], hp_s[2]),
-               zr = as.array(rbeta(1, hp_r[1], hp_r[2])),
-               zd = as.array(rnorm(1, hp_d[1], hp_d[2])),
-               zp = as.array(min(0.1, rbeta(1, hp_p[1], hp_p[2]))),
-               kap = rexp(1, hp_kap),
+          # try keep H at least one
+          list(zH = max(c(1 / y_max, stats::rbeta(1, hp_H[1], hp_H[2]))),
+               zm = stats::rbeta(1, hp_m[1], hp_m[2]),
+               zs = 0.15 + rhnorm(1),
+               zr = as.array(stats::rbeta(1, hp_r[1], hp_r[2])),
+               zd = as.array(stats::rnorm(1)),
+               # low p values create undefined mu headaches
+               zp = as.array(max(c(0.25, stats::rbeta(1, hp_p[1], hp_p[2])))),
+               kap = stats::rexp(1, hp_kap),
                zg0 = numeric(),
                zg1 = numeric())
         if (use_zi) {
-          init$zg0 <- as.array(rnorm(1, hp_g0[1], hp_g0[2]))
-          init$zg1 <- as.array(qnorm(runif(1, 0.5, 1), 0, hp_g1))
+          # if using zero-inflation (and it is actually present)
+          # should always have very high excess-zero intercept to avoid fighting
+          # with kappa
+          init$zg0 <- as.array(stats::qlogis(0.999))
+          init$zg1 <- as.array(rhnorm(1))
         }
         if (from_data) {
           # use some data driven initial values
-          init$zH <- unname(quantile(ypos, runif(1, 0.2, 0.8))) / sdat$y_max
+          init$zH <- max(c(1, unname(quantile(ypos,
+                                              stats::runif(1, 0.3, 0.7))))) /
+            sdat$y_max
           init$zm <- (
-            unname(quantile(xwtd, runif(1, 0.2, 0.8))) - sdat$x_pos_min
+            unname(quantile(xwtd, stats::runif(1, 0.3, 0.7))) - sdat$x_pos_min
           ) / sdat$x_pos_range
+          if (is.na(init$zm) || init$zm == 1) {
+            init$zm <- rbeta(1, hp_m[1], hp_m[2])
+          }
           # when r approaches bounds it can cause inf vals
           init$zr <- as.array(stats::plogis(skewness(xwtd) *
-                                              runif(1, 0.75, 1.25)))
+                                              stats::runif(1, 0.75, 1.25)))
+          if (is.na(init$zr)) {
+            init$zr <- as.array(stats::rbeta(1, hp_r[1], hp_r[2]))
+          }
           # TODO: better s from sd?
         }
         init

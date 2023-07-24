@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-vignettes">Vignettes</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-vignettes">
     <a class="dropdown-item" href="../articles/getting-started.html">How to use `modskurt`</a>
+    <a class="dropdown-item" href="../articles/linked-zero-inflation.html">Linked zero-inflation (ZINBL)</a>
     <a class="dropdown-item" href="../articles/prior-specification.html">Prior specification</a>
     <a class="dropdown-item" href="../articles/discrete-stan.html">Stan discrete model</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples</a>
@@ -267,10 +268,11 @@ default priors that <em>should</em> just work 🤞:</p>
 \begin{align}
   H &amp;\sim \text{Beta}(2, 3) \cdot \max y \\
   m &amp;\sim \text{Beta}(1, 1) \cdot \text{range}~ x + \min x \\
-  \log s &amp;\sim \text{Normal}(-2, 0.6) + \log \text{range}~ x \\
+  \log s &amp;\sim \text{Normal}(-2.0, 0.6) + \log \text{range}~ x \\
   r &amp;\sim \text{Beta}(1.2, 1.2) \\
-  \log d &amp;\sim \text{Normal}(0.5, 1) \\
-  p &amp;\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05, \\
+  \log d &amp;\sim \text{Normal}(0.5, 1.0) \\
+  p &amp;\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05 \\
+  \kappa &amp;\sim \text{Exponential}(0.5), \\
 \end{align}
 \]</span></p>
 <p>However, we still need to check these in each and every model and
@@ -317,11 +319,15 @@ priors above.</p>
 <span><span class="co">##  $ use_zi      : int 0</span></span>
 <span><span class="co">##  $ hp_kap      : num 0.5</span></span>
 <span><span class="co">##  $ hp_g0       : num [1:2] 3 1.5</span></span>
-<span><span class="co">##  $ hp_g1       : num 3</span></span>
+<span><span class="co">##  $ hp_g1       : num 5</span></span>
 <span><span class="co">##  $ Nrep        : int 101</span></span>
 <span><span class="co">##  $ xrep        : int [1:101] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
 <span><span class="co">##  $ subset      :function ()  </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 139 18 139 68 18 68 1798 1798</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000027ed1114b88&gt; </span></span>
 <span><span class="co">##  $ full        :function (prop = 1, seed = NULL)  </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 103 17 138 3 17 3 1762 1797</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000027ed1114b88&gt; </span></span>
 <span><span class="co">##  - attr(*, "pars")= chr [1:7] "H" "m" "s" "r" ...</span></span>
 <span><span class="co">##  - attr(*, "nms")=List of 3</span></span>
 <span><span class="co">##   ..$ y  : chr "Tuangi (count)"</span></span>
@@ -430,8 +436,7 @@ smaller values of overdispersion:</p>
 <code class="sourceCode R"><span><span class="va">spec</span><span class="op">$</span><span class="va">hp_kap</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
 <span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span>, <span class="st">'kap'</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>design <span class="op">=</span> <span class="st">'A##</span></span>
-<span><span class="st">              BBB'</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>design <span class="op">=</span> <span class="st">'A##\nBBB'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/unnamed-chunk-1-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p>A little better, and a little is fine, remember the prior model
 should fit knowledge of the tuangi-mud relationship, not specific data
@@ -444,7 +449,7 @@ realisations of it.</p>
 </h2>
 <p>The prior model looks okay, so let’s look at a posterior. The idea of
 the subset model is to “fail fast”. That is, if we missed any model
-misspecifications above, then instead of wasting your time and computer
+misspecification above, then instead of wasting your time and computer
 resources fitting a full model right off the bat, we can first fit a
 very quick approximate model that uses a subset of the data and minimal
 posterior samples over maximal chains. Each chain will roughly estimate
@@ -467,24 +472,24 @@ the posterior for the subset of data, and ….</p>
 <span><span class="co">## post: 6 chains each with 100 draws (600 total)</span></span></code></pre>
 <pre><code><span><span class="co">## $summary</span></span>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 7 × 10</span></span></span>
-<span><span class="co">##   <span style="font-weight: bold;">variable</span>   <span style="font-weight: bold;">mean</span> <span style="font-weight: bold;">median</span>     <span style="font-weight: bold;">sd</span>    <span style="font-weight: bold;">mad</span>     <span style="font-weight: bold;">q5</span>    <span style="font-weight: bold;">q95</span>   <span style="font-weight: bold;">rhat</span>  <span style="font-weight: bold;">ess_bulk</span>  <span style="font-weight: bold;">ess_tail</span></span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H         9.31   9.12  1.46   1.45    7.36  12.1     1.01 312 (0.5) 395 (0.7)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        16.1   16.4   6.26   5.96    4.89  25.9     <span style="color: #FF00FF;">1.05</span> 162 (0.3) <span style="color: #FF00FF;"> 57 (0.1)</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        22.2   21.1   7.41   6.77   12.4   35.7     1.02 216 (0.4) 305 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>683  <span style="color: #949494;">0.</span>710 <span style="color: #949494;">0.</span>165  <span style="color: #949494;">0.</span>162   <span style="color: #949494;">0.</span>358  <span style="color: #949494;">0.</span>899   1.04 244 (0.4) 325 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         2.06   1.78  1.37   1.27    <span style="color: #949494;">0.</span>433  4.83    1.01 239 (0.4) 295 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         1.22   1.30  <span style="color: #949494;">0.</span>486  <span style="color: #949494;">0.</span>563   <span style="color: #949494;">0.</span>322  1.89    1.02 406 (0.7) 351 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.26   1.26  <span style="color: #949494;">0.0</span>69<span style="text-decoration: underline;">9</span> <span style="color: #949494;">0.0</span>71<span style="text-decoration: underline;">4</span>  1.14   1.37    1.02 287 (0.5) 426 (0.7)</span></span>
+<span><span class="co">##   <span style="font-weight: bold;">variable</span>   <span style="font-weight: bold;">mean</span> <span style="font-weight: bold;">median</span>      <span style="font-weight: bold;">sd</span>     <span style="font-weight: bold;">mad</span>     <span style="font-weight: bold;">q5</span>    <span style="font-weight: bold;">q95</span>  <span style="font-weight: bold;">rhat</span>  <span style="font-weight: bold;">ess_bulk</span>  <span style="font-weight: bold;">ess_tail</span></span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rha&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H         8.63   8.60   <span style="color: #949494;">0.</span>976   <span style="color: #949494;">0.</span>960   7.14  10.4   0.999 440 (0.7) 439 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        14.3   14.3    7.26    7.59    2.41  25.9   1.035 198 (0.3) 164 (0.3)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        27.6   25.6   11.8    10.2    12.6   48.9   1.008 183 (0.3) 125 (0.2)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>611  <span style="color: #949494;">0.</span>629  <span style="color: #949494;">0.</span>173   <span style="color: #949494;">0.</span>202   <span style="color: #949494;">0.</span>325  <span style="color: #949494;">0.</span>857 1.013 269 (0.4) 343 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         2.27   1.81   1.73    1.40    <span style="color: #949494;">0.</span>355  5.81  1.023 174 (0.3) 123 (0.2)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         1.18   1.25   <span style="color: #949494;">0.</span>512   <span style="color: #949494;">0.</span>603   <span style="color: #949494;">0.</span>265  1.89  1.012 519 (0.9) 303 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.21   1.21   <span style="color: #949494;">0.0</span>71<span style="text-decoration: underline;">1</span>  <span style="color: #949494;">0.0</span>69<span style="text-decoration: underline;">4</span>  1.09   1.32  1.000 528 (0.9) 423 (0.7)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  1.868    1.105 2.973             1                 0 0.7410424</span></span>
-<span><span class="co">## 2        2  1.746    1.258 3.004             0                 0 0.6850410</span></span>
-<span><span class="co">## 3        3  1.947    0.985 2.932             0                 0 0.9556187</span></span>
-<span><span class="co">## 4        4  1.756    1.257 3.013             0                 0 0.9347321</span></span>
-<span><span class="co">## 5        5  2.571    1.154 3.725             0                 0 0.4587924</span></span>
-<span><span class="co">## 6        6  2.215    0.953 3.168             0                 0 1.1240496</span></span></code></pre>
+<span><span class="co">## 1        1  2.150    0.949 3.099             0                 0 0.9515648</span></span>
+<span><span class="co">## 2        2  2.188    0.721 2.909             0                 0 1.2158109</span></span>
+<span><span class="co">## 3        3  2.035    0.885 2.920             0                 0 0.8885822</span></span>
+<span><span class="co">## 4        4  2.156    0.852 3.008             0                 0 0.8325988</span></span>
+<span><span class="co">## 5        5  2.134    0.853 2.987             0                 0 0.8103148</span></span>
+<span><span class="co">## 6        6  2.131    0.809 2.940             1                 0 0.8126523</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -522,20 +527,20 @@ number of posterior samples.</p>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 7 × 10</span></span></span>
 <span><span class="co">##   <span style="font-weight: bold;">variable</span>   <span style="font-weight: bold;">mean</span> <span style="font-weight: bold;">median</span>     <span style="font-weight: bold;">sd</span>    <span style="font-weight: bold;">mad</span>     <span style="font-weight: bold;">q5</span>    <span style="font-weight: bold;">q95</span>  <span style="font-weight: bold;">rhat</span>   <span style="font-weight: bold;">ess_bulk</span>   <span style="font-weight: bold;">ess_tail</span></span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rha&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H         8.23   8.19  <span style="color: #949494;">0.</span>660  <span style="color: #949494;">0.</span>637   7.19   9.37      1 2623 (0.7) 2679 (0.7)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        14.2   14.0   2.83   2.76    9.82  19.1       1 1746 (0.4) 2232 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        22.6   22.0   5.55   5.47   14.5   32.3       1 1143 (0.3) 1666 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>772  <span style="color: #949494;">0.</span>792 <span style="color: #949494;">0.0</span>96<span style="text-decoration: underline;">4</span> <span style="color: #949494;">0.0</span>80<span style="text-decoration: underline;">6</span>  <span style="color: #949494;">0.</span>576  <span style="color: #949494;">0.</span>888     1 1596 (0.4) 1691 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         1.57   1.41  <span style="color: #949494;">0.</span>901  <span style="color: #949494;">0.</span>855   <span style="color: #949494;">0.</span>448  3.36      1 1219 (0.3) 1618 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         1.22   1.26  <span style="color: #949494;">0.</span>472  <span style="color: #949494;">0.</span>547   <span style="color: #949494;">0.</span>368  1.90      1 2115 (0.5) 1784 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.19   1.19  <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">4</span> <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">7</span>  1.13   1.25      1 2936 (0.7) 2485 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H         8.26   8.22  <span style="color: #949494;">0.</span>658  <span style="color: #949494;">0.</span>639   7.22   9.41  1.002 1937 (0.5) 2006 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m        14.3   14.0   2.86   2.74    9.82  19.3   1.002 1633 (0.4) 1739 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s        22.9   22.4   5.43   5.26   14.6   32.0   1.008 1285 (0.3) 1729 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r         <span style="color: #949494;">0.</span>770  <span style="color: #949494;">0.</span>789 <span style="color: #949494;">0.0</span>98<span style="text-decoration: underline;">1</span> <span style="color: #949494;">0.0</span>83<span style="text-decoration: underline;">7</span>  <span style="color: #949494;">0.</span>578  <span style="color: #949494;">0.</span>889 1.001 1428 (0.4) 1472 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d         1.52   1.35  <span style="color: #949494;">0.</span>895  <span style="color: #949494;">0.</span>803   <span style="color: #949494;">0.</span>393  3.30  1.009 1291 (0.3) 1744 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p         1.20   1.25  <span style="color: #949494;">0.</span>475  <span style="color: #949494;">0.</span>549   <span style="color: #949494;">0.</span>347  1.89  1.000 2071 (0.5) 1998 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap       1.19   1.19  <span style="color: #949494;">0.0</span>36<span style="text-decoration: underline;">8</span> <span style="color: #949494;">0.0</span>37<span style="text-decoration: underline;">9</span>  1.13   1.25  0.999 3118 (0.8) 2688 (0.7)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 27.739   31.163 58.902             0                 0 1.0474322</span></span>
-<span><span class="co">## 2        2 25.456   30.055 55.511             0                 0 0.9202813</span></span>
-<span><span class="co">## 3        3 25.609   32.660 58.269             0                 0 0.8693720</span></span>
-<span><span class="co">## 4        4 27.288   25.286 52.574             0                 0 0.8829889</span></span></code></pre>
+<span><span class="co">## 1        1 21.792   20.827 42.619             1                 0 0.9774463</span></span>
+<span><span class="co">## 2        2 23.778   30.879 54.657             0                 0 0.8960095</span></span>
+<span><span class="co">## 3        3 22.826   26.069 48.895             0                 0 0.8544922</span></span>
+<span><span class="co">## 4        4 23.630   27.725 51.355             0                 0 0.8961821</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
@@ -559,8 +564,6 @@ because those data points are really unusual, or because our model is
 misspecified and the subset model checks didn’t pick it up.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_post_influencers.html">check_post_influencers</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##              pareto_khat Tuangi (count) Mud (%)</span></span>
-<span><span class="co">## log_lik[757]        0.54              2      32</span></span></code></pre>
 <p><img src="getting-started_files/figure-html/check-post-influencers-full-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p>The model only struggled to predict one point, and the console
 printout shows that there was nothing unusual about that point (count =
@@ -585,7 +588,7 @@ of tuangi.</li>
 </h3>
 <p>This is the complete distribution, choose any summaries that are the
 most informative.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot the distribution of abundance along the gradient</span></span>
 <span><span class="fu"><a href="../reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit_full</span>, summaries <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'mean'</span>, <span class="st">'median'</span>, <span class="st">'q90'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/use-full-fit-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
@@ -634,7 +637,7 @@ concentrations beyond which there is less than
 <code>capture_pct = 10</code>% of predicted tuangi density
 (<code>using_range = 'ADL'</code>) <code>based_on = 'mean'</code>
 predicted counts.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># compose in row using patchwork</span></span>
 <span><span class="op">(</span><span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
 <span>                 capture_pct <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -655,18 +658,18 @@ predicted counts.</p>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Species range (see x.avg row) calculated as the  (averaged across posterior draws):</span></span>
-<span><span class="co">##                left     centre       right</span></span>
-<span><span class="co">## mean.avg 4.59787623  8.2926662  4.13267989</span></span>
-<span><span class="co">## mean.se  0.07816153  0.0788315  0.03941794</span></span>
-<span><span class="co">## x.avg    0.37513231 14.9600000 46.09046989</span></span>
-<span><span class="co">## x.se     0.07906539  0.3368037  0.47635208</span></span>
+<span><span class="co">##                left      centre       right</span></span>
+<span><span class="co">## mean.avg 4.61090497  8.20110380  4.10910425</span></span>
+<span><span class="co">## mean.se  0.08438676  0.09694215  0.04775475</span></span>
+<span><span class="co">## x.avg    0.49785178 14.16000000 46.61076990</span></span>
+<span><span class="co">## x.se     0.10869801  0.40341400  0.48788582</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Species range (see x.avg row) calculated as the  (averaged across posterior draws):</span></span>
-<span><span class="co">##              left      centre       right</span></span>
-<span><span class="co">## mean.avg 4.463646  7.05821738  2.28642380</span></span>
-<span><span class="co">## mean.se  0.127262  0.08010073  0.03393153</span></span>
-<span><span class="co">## x.avg    0.000000 26.04171608 60.60901225</span></span>
-<span><span class="co">## x.se     0.000000  0.17090597  0.34676628</span></span></code></pre>
+<span><span class="co">##               left     centre       right</span></span>
+<span><span class="co">## mean.avg 4.2890112  7.2015242  2.37501269</span></span>
+<span><span class="co">## mean.se  0.1177878  0.0939659  0.03865507</span></span>
+<span><span class="co">## x.avg    0.0000000 26.1261025 60.32001383</span></span>
+<span><span class="co">## x.se     0.0000000  0.1672911  0.39998770</span></span></code></pre>
 <p><img src="getting-started_files/figure-html/use-full-fit-range-plot-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p>The console printout shows that sediment with between about 0% and
 46% mud content has average tuangi counts within half (50%) of their

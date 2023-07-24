@@ -35,9 +35,12 @@ abundance_dist <- function(fit,
   } else {
     d <- spec$full()$all
   }
+  # use cpue (will do nothing if no effort specd)
+  d$y <- d$y / d$eff
+
   mus <- mskt_predict(fit, ndraws, seed, include_zero_inflation)
 
-  # TODO: plot cpue instead?
+
   gg <-
     ggplot2::ggplot(d, ggplot2::aes(.data$x, .data$y))
   if (!is_subset) {
@@ -68,6 +71,11 @@ abundance_dist <- function(fit,
                          alpha = line_alpha,
                          data = mus)
   }
+  if (!include_zero_inflation | dist == 'nb') {
+    mu_nm <- 'NB mean'
+  } else {
+    mu_nm <- 'ZINBL mean'
+  }
   # then quantiles
   qps <- summaries[grepl('^q', summaries)]
   if ('median' %in% summaries) {
@@ -82,8 +90,10 @@ abundance_dist <- function(fit,
                                            '#DD0000'))(50)
     qcols <- c(qcols, rev(qcols[1:49]))
     qcols <- qcols[100 * qps]
-    qcols <- c('Mean' = '#22CC99',
-               setNames(qcols, names(qps)))
+    qcols <- setNames(qcols, names(qps))
+    if ('mean' %in% summaries) {
+      qcols <- c(setNames('#22CC99', mu_nm), qcols)
+    }
     for (qnm in names(qps)) {
       gg <-
         gg +
@@ -102,15 +112,22 @@ abundance_dist <- function(fit,
     gg <-
       gg +
       ggplot2::scale_colour_manual(values = unname(qcols),
-                                   labels = names(qcols)) +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(
-        alpha = 0.75,
-        linewidth = 1,
-        order = 1
-      )))
+                                   labels = names(qcols))
     # labels = parse(text = names(qcols)))
+  } else if ('mean' %in% summaries) {
+    gg <-
+      gg +
+      ggplot2::scale_colour_manual(values = '#22CC99',
+                                   labels = mu_nm)
+  } else {
+    stop('at least one summary must be specified')
   }
   gg +
+    ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(
+      alpha = 0.75,
+      linewidth = 1,
+      order = 1
+    ))) +
     ggplot2::labs(x = nms$x,
                   y = nms$y,
                   colour = substitute(y%~%distnm,
@@ -142,6 +159,9 @@ mskt_predict <- function(fit, ndraws = NULL, seed = NULL, include_zero_inflation
   }))
   if (dist == 'nb' | !include_zero_inflation) {
     mus$zi <- 0
+  } else {
+    # zinbl mean/expectation
+    mus$mu <- (1 - mus$zi) * mus$mu
   }
   mus$kap <- kap
   mus <- mus[, c('chain', 'draw', 'x', 'mu', 'kap', 'zi')]
@@ -198,7 +218,7 @@ abundance_range <- function(fit,
                             plotted = FALSE,
                             point_alpha = 0.2,
                             line_alpha = 0.02,
-                            range_colour = 'red') {
+                            range_colour = '#22CC99') {
   # calcs intervals and optionally plots over abundance_dist
   spec <- attr(fit, 'spec')
   nms <- attr(spec, 'nms')
@@ -210,6 +230,8 @@ abundance_range <- function(fit,
   } else {
     d <- spec$full()$all
   }
+  # use cpue (will do nothing if no effort specd)
+  d$y <- d$y / d$eff
   mus <- mskt_predict(fit, ndraws, seed, include_zero_inflation)
   agg <- based_on
   if (agg == 'median') {
@@ -246,6 +268,11 @@ abundance_range <- function(fit,
     }))
   dy_nm <- paste0(toupper(substring(based_on, 0, 1)),
                   substring(based_on, 2))
+  if (dy_nm == 'Mean' & (!include_zero_inflation | dist == 'nb')) {
+    dy_nm <- 'NB mean'
+  } else {
+    dy_nm <- 'ZINBL mean'
+  }
   dy_nm <- gsub('^Q(\\d*)$', 'Q[\\1]', dy_nm)
     dy_console <- dy_nm
   if (grepl('^Q', dy_nm)) {
@@ -333,6 +360,7 @@ abundance_range <- function(fit,
                                        group = .data$group,
                                        alpha = .data$leg),
                           size = 2,
+                          shape = 4,
                           colour = range_colour,
                           data = range_points) +
       ggplot2::geom_vline(ggplot2::aes(xintercept = .data$x,

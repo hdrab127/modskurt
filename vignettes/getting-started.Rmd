@@ -32,7 +32,7 @@ options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
 This vignette presents a minimal Bayesian workflow for modelling the distribution of discrete **species abundance**, $y$, along an **environmental gradient**, $x$, using the **modskurt** function to predict mean abundance, $\mu$. The diagram below outlines key steps for an informative and trustworthy analysis using the `modskurt` package, and also provides a layout for the rest of this vignette. If at any stage you find yourself needing more information, please check out the references and other resources on this web page.
 
 ```{r workflow-img, echo=FALSE, out.height="100%"}
-knitr::include_graphics('../man/figures/workflow.JPG')
+try(knitr::include_graphics('../man/figures/workflow.JPG'), silent = TRUE)
 # htmltools::tags$img(src = './workflow.JPG')
 ```
 
@@ -106,10 +106,11 @@ $$
 \begin{align}
   H &\sim \text{Beta}(2, 3) \cdot \max y \\
   m &\sim \text{Beta}(1, 1) \cdot \text{range}~ x + \min x \\
-  \log s &\sim \text{Normal}(-2, 0.6) + \log \text{range}~ x \\
+  \log s &\sim \text{Normal}(-2.0, 0.6) + \log \text{range}~ x \\
   r &\sim \text{Beta}(1.2, 1.2) \\
-  \log d &\sim \text{Normal}(0.5, 1) \\
-  p &\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05, \\
+  \log d &\sim \text{Normal}(0.5, 1.0) \\
+  p &\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05 \\
+  \kappa &\sim \text{Exponential}(0.5), \\
 \end{align}
 $$
 
@@ -194,8 +195,7 @@ Lets tweak the rate hyperparameter for the exponentially distributed overdispers
 spec$hp_kap <- 1
 check_prior_dens(spec, 'kap') + 
   check_prior_dist(spec) +
-  plot_layout(design = 'A##
-              BBB')
+  plot_layout(design = 'A##\nBBB')
 ```
 
 A little better, and a little is fine, remember the prior model should fit knowledge of the tuangi-mud relationship, not specific data realisations of it.
@@ -204,7 +204,7 @@ A little better, and a little is fine, remember the prior model should fit knowl
 
 ## C. Fit subset model
 
-The prior model looks okay, so let's look at a posterior. The idea of the subset model is to "fail fast". That is, if we missed any model misspecifications above, then instead of wasting your time and computer resources fitting a full model right off the bat, we can first fit a very quick approximate model that uses a subset of the data and minimal posterior samples over maximal chains. Each chain will roughly estimate the posterior for the subset of data, and ....
+The prior model looks okay, so let's look at a posterior. The idea of the subset model is to "fail fast". That is, if we missed any model misspecification above, then instead of wasting your time and computer resources fitting a full model right off the bat, we can first fit a very quick approximate model that uses a subset of the data and minimal posterior samples over maximal chains. Each chain will roughly estimate the posterior for the subset of data, and ....
 
 ```{r fit-subset, results='hide'}
 fit_subset <-

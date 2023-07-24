@@ -28,6 +28,9 @@ check_post_dens <- function(fit,
     sdat <- c(spec, spec$full()$train)
   }
   cfgs <- mskt_pars(sdat, pars)
+  pars[pars %in% c('g0', 'g1')] <- paste0(pars[pars %in% c('g0', 'g1')], '[1]')
+  names(cfgs)[names(cfgs) %in% c('g0', 'g1')] <-
+    paste0(names(cfgs)[names(cfgs) %in% c('g0', 'g1')], '[1]')
   if (by_chain) {
     draws <- fit$draws(pars, format = 'array')
     draws <- do.call(rbind, lapply(seq_len(fit$num_chains()), function(i) {
@@ -73,7 +76,9 @@ check_post_dens <- function(fit,
     if (by_chain) {
       gg <-
         gg +
-        ggplot2::geom_line(data = pr_dens, colour = '#AAAAAA') +
+        ggplot2::geom_line(data = pr_dens,
+                           linetype = 'dashed',
+                           colour = '#AAAAAA') +
         ggplot2::geom_line(ggplot2::aes(group = .data[['chain']],
                                       colour = .data[['chain']])) +
         ggplot2::geom_segment(ggplot2::aes(x = .data[['x']],
@@ -145,6 +150,8 @@ check_post_calibration <- function(fit, ndraws = 50) {
   } else {
     d <- spec$full()$all
   }
+  # use cpue (will do nothing if no effort specd)
+  d$y <- d$y / d$eff
   mus <- mskt_predict(fit, ndraws)
 
   # TODO: interpolate or change subset fit to include x_test in xreps
@@ -222,6 +229,8 @@ check_post_influencers <- function(fit) {
   } else {
     d <- spec$full()$all
   }
+  # use cpue (will do nothing if no effort specd)
+  d$y <- d$y / d$eff
   d$set <- NULL
 
   pks <- cbind(data.frame(fit$loo()[['pointwise']]), d)

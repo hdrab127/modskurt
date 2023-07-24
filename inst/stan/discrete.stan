@@ -3,7 +3,7 @@ functions {
 }
 data {
 #include mu-rdp/data.stan
-  // fixed data type
+  // integer abundance y 
   array[N] int<lower=0> y;
   real<lower=0> hp_kap;
 
@@ -21,7 +21,7 @@ parameters {
 }
 transformed parameters {
 #include mu-rdp/tpars.stan
-  // this is more numerically stable than pow(kap, -2)?
+  // more numerically stable than pow(kap, -2)?
   real phi = 1 / square(kap);
 #include zi-logistic-reg/tpars-zi.stan
 }

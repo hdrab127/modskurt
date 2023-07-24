@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-vignettes">Vignettes</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-vignettes">
     <a class="dropdown-item" href="../articles/getting-started.html">How to use `modskurt`</a>
+    <a class="dropdown-item" href="../articles/linked-zero-inflation.html">Linked zero-inflation (ZINBL)</a>
     <a class="dropdown-item" href="../articles/prior-specification.html">Prior specification</a>
     <a class="dropdown-item" href="../articles/discrete-stan.html">Stan discrete model</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples</a>
@@ -123,10 +124,9 @@ the environmental gradient, <span class="math inline">\(x\)</span>.</p>
 <pre><code class="language-stan"><code>functions {
   /*
   The "mskt" unimodal mean function
-  @param x predictor variable (real number vector)
+  @param xms ( predictor variable (real number vector) - mode (m, real number) ) 
+              / scale (s, real number &gt; 0)
   @param H height of curve at mode (real number &gt; 0)
-  @param m mode (real number)
-  @param s scale (real number &gt; 0)
   @param r asymmetry (real number in (0, 1))
   @param d flatness (real number &gt;= 0)
   @param p tail exaggeration (real number in (0.05, 1.95))
@@ -152,6 +152,17 @@ the environmental gradient, <span class="math inline">\(x\)</span>.</p>
     //     - exp( -d / p ) + 1  
     //   )
     // ));
+  }
+  /*
+  The "zinbl" zero-inflation link function
+  @param mu mean negative binomial abundance (real number vector)
+  @param H height of curve at mode (real number &gt; 0)
+  @param g0 log-odds probability of excess zero when mu = 0
+  @param g1 rate at which log-odds probability of excess zero decreases as mu increases
+  @return vector of excess zero probabilities (real number vector in [0, 1])
+  */
+  vector zilink(vector mu, real H, real g0, real g1) {
+    return inv_logit(fma(-g1 / H, mu, g0));
   }
   real std_halfnormal_rng() {
     real u = uniform_rng(0.5, 1);
@@ -196,7 +207,7 @@ data {
 
   // 0: no prior, 1: with prior, 2: only prior
   int&lt;lower=0,upper=2&gt; sample_prior;
-  // fixed data type
+  // integer abundance y 
   array[N] int&lt;lower=0&gt; y;
   real&lt;lower=0&gt; hp_kap;
 
@@ -206,12 +217,13 @@ data {
 }
 transformed data {
   int Nzp = Nz + 1;
+  real exp_hp_s1 = exp(hp_s[1]);
 }
 parameters {
   // standard-normal rvs for non-centred par
-  real&lt;lower=0,upper=1&gt; zH;
-  real&lt;lower=0,upper=1&gt; zm;
-  real                  zs;
+  real&lt;lower=machine_precision(),upper=1&gt; zH;
+  real&lt;lower=0,upper=1&gt;                   zm;
+  real&lt;lower=machine_precision()&gt;         zs;
   array[use_r] real&lt;lower=machine_precision(),upper=1-machine_precision()&gt; zr;
   array[use_d] real                                                        zd;
   array[use_p] real&lt;lower=0,upper=1&gt;                                       zp;
@@ -227,7 +239,11 @@ transformed parameters {
   // https://mc-stan.org/docs/stan-users-guide/reparameterizations.html
   real H = zH * y_max;
   real m = fma(x_pos_range, zm, x_pos_min);
-  real s = exp(fma(hp_s[2], zs, hp_s[1])) * x_pos_range;
+  // this can sometimes reach zero...
+  // a better solution might be to sample zs from half-normal
+  // then use expm1? 
+  // real s = exp(fma(hp_s[2], zs, hp_s[1])) * x_pos_range;
+  real s = exp_hp_s1 * expm1(hp_s[2] * zs) * x_pos_range;
   real r;
   if (use_r &gt; 0) {
     r = zr[1];
@@ -246,10 +262,21 @@ transformed parameters {
   } else {
     p = fix_p;
   }
-
   vector[N] mu = eff .* mskt((x - m) / s, H, r, d, p);
   vector[N] lmu = log(mu);
-  // this is more numerically stable than pow(kap, -2)?
+  // for (n in 1:N) {
+  //   if (is_nan(lmu[n])) {
+  //     print("eff:", eff[n],
+  //           ",x:", x[n],
+  //           ",H:", H, 
+  //           ",m:", m,
+  //           ",s:", s, 
+  //           ",r:", r, 
+  //           ",d:", d, 
+  //           ",p:", p);
+  //   }
+  // }
+  // more numerically stable than pow(kap, -2)?
   real phi = 1 / square(kap);
   array[use_zi] real g0;
   array[use_zi] real g1;

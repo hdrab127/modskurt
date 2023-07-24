@@ -71,9 +71,24 @@ qhnorm <- function(p, sd = 1) {
   stats::qnorm((p + 1) / 2, 0, sd)
 }
 #' @keywords internal
-dhnorm <- function(x, sd = 1) {
-  2 * stats::dnorm(x, 0, sd)
+dhnorm <- function(x, sd = 1, log = FALSE) {
+  ds <- 2 * stats::dnorm(x, 0, sd)
+  if (log) {
+    ds <- log(ds)
+  }
+  ds
 }
+#' @keywords internal
+rhnorm <- function(n, sd = 1) {
+  us <- stats::runif(n, 0.5, 1.0)
+  xs <- stats::qnorm(us, 0, sd)
+  xs
+}
+# local({
+#   sd <- 1
+#   curve(dhnorm(x, sd), 0, sd * 3)
+#   lines(density(rhnorm(1e5, sd)), col = 2)
+# })
 # qphi <- function(p, rate = 1) {
 #   (rate / log(1 / (1 - p))) ^ 2
 # }
@@ -127,7 +142,6 @@ check_prior_mskt <- function(spec,
   # 90% quantiles + median => 6 * 6 * 6 = 216 lines
   # vs 216 random draws which would show distributions better?
 
-  # TODO: this should prob use same seed as fit
   nms <- attr(spec, 'nms')
 
   if (use_subset) {
@@ -177,7 +191,6 @@ check_prior_mskt <- function(spec,
 check_prior_dist <- function(spec,
                              use_subset = TRUE,
                              n_draws = 50) {
-  # TODO: this should prob use same seed as fit
   nms <- attr(spec, 'nms')
 
   if (use_subset) {
@@ -238,6 +251,87 @@ check_prior_dist <- function(spec,
     (plots[[2]] + ggplot2::labs(x = 'sum(y = 0) / N') + ggplot2::xlim(0, 1)) +
     (plots[[3]] + ggplot2::labs(x = 'IQR(y)')) +
     patchwork::plot_layout(guides = 'collect')
+}
+
+#' Check prior predictions of excess zero probabilities cover all possible relationships
+#'
+#' @param spec the modskurt model specification returned by `mskt_spec`
+#' @param use_subset whether to use specified subset or all data
+#' @param n_draws number of draws from the joint prior to use
+#'
+#' Plot prob zero for median mu_n? or just for a bell curve to show how it works?
+#'
+#' @importFrom rlang .data
+#'
+#' @export
+check_prior_zero <- function(spec,
+                             use_subset = TRUE,
+                             n_draws = 50) {
+  nms <- attr(spec, 'nms')
+
+  if (use_subset) {
+    sdat <- c(spec, spec$subset()$train)
+  } else {
+    sdat <- c(spec, spec$full()$train)
+  }
+  H <- 100
+  pars <- mskt_pars(sdat, intersect(attr(spec, 'pars'), c('kap', 'g0', 'g1')))
+  draws <- lapply(setNames(names(pars), names(pars)), function(nm) {
+    cfg <- pars[[nm]]
+    raws <- do.call(get(paste0('r', cfg$pr)),
+                    c(list(n = n_draws), cfg$hp))
+    log_prob <- do.call(get(paste0('d', cfg$pr)),
+                        c(list(x = raws, log = TRUE), cfg$hp))
+    # don't need to transform any dist pars
+    list(val = raws, lp = log_prob)
+  })
+  vals <- do.call(cbind, lapply(draws, '[[', 'val'))
+  mus <- data.frame(x = sdat$xrep,
+                    mu = mskt(sdat$xrep,
+                              H,
+                              min(sdat$xrep) + (
+                                max(sdat$xrep) - min(sdat$xrep)
+                              ) / 2,
+                              sdat$x_pos_range / 3,
+                              d = 2))
+  mus$mu_std <- mus$mu / H
+  probs <- list(
+    nb = exp(draws$kap$lp),
+    zi = exp(draws$g0$lp + draws$g1$lp),
+    zinbl = exp(draws$kap$lp + draws$g0$lp + draws$g1$lp)
+  )
+  probs <- lapply(probs, \(ps) 0.5 * ps / max(ps))
+  zis <- do.call(rbind, lapply(seq_len(n_draws), function(n) {
+    data.frame(draw = n,
+               x = mus$x,
+               nb = do.call(prob_nb_zero, c(list(mu = mus$mu), vals[n, 1])),
+               nb_jp = probs$nb[n],
+               zi = do.call(zilink, c(list(mu = mus$mu, H = H), vals[n, -1])),
+               zi_jp = probs$zi[n],
+               zinbl = do.call(prob_zinbl_zero,
+                               c(list(mu = mus$mu, H = H), vals[n, ])),
+               zinbl_jp = probs$zinbl[n])
+  }))
+  plots <- lapply(c('nb', 'zi', 'zinbl'), function(stat) {
+    ggplot2::ggplot() +
+      ggplot2::geom_line(ggplot2::aes(x = .data[['x']],
+                                      y = .data[['mu_std']]),
+                         data = mus) +
+      ggplot2::geom_line(ggplot2::aes(x = .data[['x']],
+                                      y = .data[[stat]],
+                                      group = .data[['draw']],
+                                      alpha = .data[[paste0(stat, '_jp')]]),
+                         colour = '#0033DD',
+                         data = zis) +
+      ggplot2::scale_alpha_identity(guide = 'none') +
+      ggplot2::labs(y = NULL, x = NULL) +
+      ggplot2::ylim(0, 1)
+  })
+  (plots[[1]] + ggplot2::labs(y = 'Prior Pr(y = 0)',
+                              subtitle = 'Negative Binomial')) +
+    (plots[[2]] + ggplot2::labs(x = paste0('Grid of ', nms$x),
+                                subtitle = expression('Excess zero,'~pi))) +
+    (plots[[3]] + ggplot2::labs(subtitle = 'ZINBL'))
 }
 
 # check_prior_zero(spec) # zi link
@@ -368,10 +462,21 @@ mskt_pars <- function(sdat, pars) {
       'g0' = list(title = expression(
         gamma[0] %~% 'Normal' * group('(', list(mu, sigma), ')')),
         nm = 'gamma[0]',
+        # TODO: do this in geoms only...?
+        # nm = 'logit^-1~gamma[0]',
+        # tr = stats::plogis,
         pr = 'norm',
         hp = list(mean = hp_g0[1], sd = hp_g0[2]),
         tr = identity,
         geoms = identity),
+        # geoms = \(gg) {
+        #   gg +
+        #     scale_x_continuous(expression(logit^-1~gamma[0]),
+        #                        # limits = c(0.01, 0.99),
+        #                        # breaks = c(0.01, seq(0.1, 0.9, 0.1), 0.99),
+        #                        # labels = c('~0', seq(0.1, 0.9, 0.1), '~1'),
+        #                        trans = scales::logit_trans())
+        # }),
       'g1' = list(title = expression(
         gamma[1] %~% 'Half-Normal' * group('(', list(sigma), ')')),
         nm = 'gamma[1]',
@@ -384,3 +489,4 @@ mskt_pars <- function(sdat, pars) {
         }))[pars]
   })
 }
+

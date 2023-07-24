@@ -14,7 +14,7 @@ mskt_sim_nb(
   d = 0,
   p = 1,
   kap,
-  g0 = 0,
+  g0 = -Inf,
   g1 = 0
 )
 }
