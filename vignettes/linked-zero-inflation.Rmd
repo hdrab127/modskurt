@@ -34,13 +34,17 @@ options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
 # redstripe <-
 #   readRDS('../fish/2022-10-02-trawl.rds') |>
 #   dplyr::filter(species == 'Sebastes proriger') |>
-#   dplyr::select(-species, -flourescence, -turb, -ld, -rd, -year)
+#   dplyr::select(-trawl_id, -lat, -lng, -species, -flourescence, -turb, -ld, -rd, -year,
+#                 -cpue_kg, -cpue_count) |>
+#   dplyr::relocate(date, .before = 1)
 # usethis::use_data(redstripe, overwrite = TRUE)
 ```
 
 ## Overview
 
-ZINBL not really needed unless prop zero > 0.95?
+The [Getting started article](./getting-started.html) showed how to model the negative binomial distribution of species abundance along an environmental gradient using the `modskurt` mean function. We've found that in the vast majority of species-environment relationships, abundance can be reasonably characterised by a negative binomial distribution. However, for very rare and hard to detect species, there can be zero counts in "excess" of what the negative binomial distribution *should* predict. We say *should*, because mathematically, the negative binomial distribution can predict extremely high proportions of zeros, although to achieve this we require extremely high dispersion parameter values. Which is quite restricting in practice, the mechanisms that can cause high zero proportions may not also produce extremely disperse data.
+
+To increase zero-rates, while maintaining realistic dispersion of abundance, a zero-inflated negative binomial can be used where a point probability mass is added at zero. This can work well in simple models, but in generalised models like these `modskurt` ones, there is often a relationship between mean abundance and zero rates in different environmental conditions. For example, mean abundances and zero rates are usually quite different in conditions where the species is commonly found and easy to detect, versus intolerable conditions that are hard to sample the species in. For this reason, the `modskurt` model utilises a **z**ero-**i**inflated **n**egative **b**inomial with excess-zero probability **l**inked (ZINBL) to mean abundances through a logistic regression. The formula for this distribution will be covered later, as we work through another case study.
 
 ## Load packages and stan files
 
@@ -59,9 +63,11 @@ set.seed(123456)
 
 ## Case study - *Sebastes proriger* vs. water temperature
 
-<!-- 2015 data for *Sebastes goodei*, should be pretty hot? -->
-<!-- 2015 data for *Thaleichthys pacificus*. -->
-2015 data for *Sebastes proriger* (redstripe rockfish).
+`ZINBL` distributions of abundance are typically most fruitful when proportions of zeros are very high, like $>0.95$ high. A great example of this is the Northwest Pacific groundfish trawl survey data for *Sebastes proriger* (redstripe rockfish) over the ocean temperature gradient - [ more info](https://www.fisheries.noaa.gov/west-coast/science-data/us-west-coast-groundfish-bottom-trawl-survey). Key variables are:
+
+- `total_count` the number of individual redstripes caught during each trawl.
+- `temp` average water temperature recorded at the net during the trawl.
+- `area_swept` total area (ha) of water swept during the trawl (trawl length * net mouth diameter), this is the sampling **effort** used to observe `total_count`.
 
 ```{r data}
 data(redstripe)
@@ -70,29 +76,45 @@ redstripe
 
 ## A. Specify initial model
 
+The `ZINBL` distribution is defined as a mixture of the negative binomial distribution and a bernoulli process with mixing proportion, $\pi$ modelled as a decreasing logistic function of `modskurt` mean abundance, $\mu$,
+
 $$
 \begin{aligned}
 y_n &\sim \text{ZINBL}\left[\mu_n = \text{Modskurt}(x_n), \kappa, \pi_n\right] \\
-\pi_n &= \gamma_0 - \gamma_1 \cdot \mu_n
+&= \pi_n \cdot (y_n == 0) + (1 - \pi_n) \cdot \text{NB}(\mu_n, \phi) \\
+\text{logit}^{-1}~\pi_n &= \gamma_0 - \gamma_1 \cdot \mu_n
 \end{aligned}
 $$
 
-with parameters:
+with new parameters:
+
+- $\gamma_0 \in \mathbb{R}$: log-odds intercept for the probability of observing an excess-zero,
+- $\gamma_1 > 0$: describes the rate at which the excess-zero probability decreases as the average abundance increases. As $\gamma_0 \to 0$ or $\gamma_1 \to \infty$, $\pi \to 0$ and the ZINBL reduces to the NB distribution.
+
+Muck around with parameters [here](https://salt-ecology.shinyapps.io/nb-zinbl-prior-specs/).
+
+As with the negative binomial model, the `modskurt` package suggests some default priors that *should* just work 🤞🤞:
 
 $$
 \begin{align}
 \kappa &\sim \text{Exponential}(0.5) \\
 \gamma_0 &\sim \text{Normal}(3.0, 1.5) \\
-\gamma_1 &\sim \text{HalfNormal}(3.0)
+\gamma_1 &\sim \text{HalfNormal}(5.0)
 \end{align}
 $$
+
+Note, now that we have sampling effort, we can internally standardise counts to catch per unit effort (CPUE), $y / \text{area_swept}$, in the model using
+
+$$
+y_n \sim \text{ZINBL}\left[\text{area_swept} \cdot \mu_n, \kappa, \pi_n\right]
+$$
+
+Specifying the model in `R`:
 
 ```{r model}
 spec <-
   mskt_spec(data = redstripe,
-            # by including effort below, we are atually modelling catch per unit
-            # effort (CPUE) while retaining the discrete distribution of these
-            # count data
+            # total_count is being modelled as CPUE by including effort
             y = c('Sebastes proriger (CPUE)' = 'total_count'),
             x = c('SST (°C)' = 'temp'),
             effort = c('Area swept (ha)' = 'area_swept'),
@@ -101,11 +123,15 @@ spec <-
             subset_prop = 0.3)
 ```
 
+A quick look at the model spec for the full dataset shows that the zero proportion is about $2252 / 2330 = 0.97$:
+
 ```{r model-spec}
-str(spec$subset())
+str(spec$full())
 ```
 
 ## B. Verify initial model specification
+
+This is very much the same as in [getting started](./getting-started.html), except now we can have a look at the new linked zero inflation parameters, and the excess-zero probabilities they predict.
 
 ### Prior probabilities of parameter values
 
@@ -115,17 +141,23 @@ check_prior_dens(spec)
 
 ### Prior predictions for the `modskurt` mean
 
+Note above that values for `m` are by default constrained within the range of `x` that had at least one non-zero abundance, `y`, recorded. The effect of this is quite visible when looking at prior predictions for mean abundance:
+
 ```{r check-prior-mskt, fig.cap="TODO: add legend for alpha!"}
 check_prior_mskt(spec)
 ```
 
 ### Prior predictions for summary statistics of $y$
 
+Dispersion is a little high again?
+
 ```{r check-prior-dist, fig.asp=0.3}
 check_prior_dist(spec)
 ```
 
 ### Prior predictions for probability of excess zero $\pi$
+
+This is a new test, showing how excess-zero probabilities interact with mean abundances using a simple bell-shaped mean shape (black line). The shape of the mean here doesn't really matter, it's more about looking at how excess probabilities decrease relative to mean abundance. The difference between zero-probabilities for the plain `nb` are strikingly lower than that of the `zinbl`, where `nb` zero-probability quickly reduces as the mean increases, while the `zinbl` model keeps it a lot higher till mean abundances almost reach their peak:
 
 ```{r check-prior-zero, fig.asp=0.3}
 check_prior_zero(spec)
@@ -134,6 +166,8 @@ check_prior_zero(spec)
 *OPTIONAL*: refine model spec further
 
 ## C. Fit subset model
+
+Hopefully you're happy with the model specification and prior checks above? So we can proceed to some posterior checks using a "subset" mudel:
 
 ```{r fit-subset, results='hide'}
 fit_subset <-
@@ -147,6 +181,8 @@ fit_subset <-
            show_messages = TRUE, show_exceptions = TRUE)
 ```
 
+A few divergences like this raise an initial warning that the posterior is not simple to compute. Summaries for the `m` parameter confirm this, where some of the chains may not have mixed (independently sampled the posterior parameter space):
+
 ```{r fit-subset-check}
 check_computation(fit_subset)
 ```
@@ -155,58 +191,85 @@ check_computation(fit_subset)
 
 ### Check subset model
 
+To dig deeper into the high `rhat`, $\hat{R}$, values for `m` we can look at the marginal posterior distributions for each chain:
+
 ```{r check-post-dens-subset, fig.asp=0.8}
 # visual display of chain mixing and prior-data conflicts
 check_post_dens(fit_subset, by_chain = TRUE)
 ```
 
-<!-- One out of six chains got confused between NB with high dispersion and ZINBL with low dispersion. This is a shortcoming and positive at the same time. It tells us that the model could have multiple solutions (that would be harder to identify with MLE unless do multiple fits). Best to try with more warmup samples to see if they all find the same mode. -->
+The `m` issue isn't apparent visually, there's something with `m` and `r` discussed in thesis.
+
+Moving forward, we can compare the CDF of the posterior predictive distribution vs the empirical CDF's of the training and test data using a discrete probability integral transform plot:
 
 ```{r check-post-calibration-subset}
 # uses test set for discrete pit
 check_post_calibration(fit_subset)
 ```
 
-The slight increase suggests the model is struggling to capture overdispersion in the upper quantiles of data. However it appears well-calibrated for the rest of the dist? Compare with a NB model.
+The little uptick at the end suggests that the posterior distribution predicts both training (subset, seen) data and test (unseen) data well up until the very highest counts, where it might be slightly underdispersed (i.e., underpredicting max counts). We could check this with the `bayesplot` package using similar methods as `check_prior_dist` above.
+
+```{r}
+bayesplot::ppc_stat(y = spec$subset()$train$y,
+                    yrep = fit_subset$draws('y_rep', format = 'matrix'),
+                    stat = 'max')
+```
 
 *OPTIONAL*: refine model spec or fit parameters
 
 ## D. Fit full model
 
+Alright, some concerns with chains not mixing above, but not enough to suggest gross posterior misspecification. It could just be that, with the added complexity of the `zinbl` model and the sparser data, the computation needs a little more time to learn the posterior curvature. We do this by increasing the warm-up iterations to the default 1000 per chain:
+
 ```{r fit-full, results='hide'}
 fit_full <-
   mskt_fit(spec,
+           iter_warmup = 1000,
+           iter_sampling = 1000,
            chains = 4,
            parallel_chains = 4,
-           # sparse data can require a little more computing care
-           # default is 0.80
-           # adapt_delta = 0.90,
+           # we could also take smaller steps around the posterior using
+           # adapt_delta > 0.8, but better to avoid if possible
            # for testing
-           debug_init = FALSE, show_messages = TRUE, show_exceptions = TRUE)
+           show_messages = TRUE, show_exceptions = TRUE)
 ```
 
+Less divergences than before, increasing `adapt_delta` should clear those. The parameter diagnostics all look good:
+
 ```{r fit-full-check}
-check_computation(fit_full)
+check_computation(fit_full,
+                  # to save console space
+                  hide_stats = c('mean', 'sd'))
 ```
 
 *OPTIONAL*: refine model spec or fit parameters
 
 ### Check full model
 
+Can check the marginal posterior distributions for each parameter again:
+
 ```{r}
 check_post_dens(fit_full, by_chain = TRUE)
 ```
+
+Much more certain, or precise. Using approximate leave-one-out cross-validation (LOO-CV) we can identify data points the posterior struggles to predict:
 
 ```{r check-post-influencers-full}
 # can be slow for large N
 check_post_influencers(fit_full)
 ```
 
+A few zero-counts in mid-range temperatures, possibly the complex interaction between mean shape, dispersion, and linked zero-inflation struggling ever so slightly.
+
 *OPTIONAL*: refine model spec or fit parameters.
 
 ## E. Use the model
 
+To the fun(ner) part!
+
 ### Plot summaries of the abundance distribution
+
+We'll plot the non zero-inflated `modskurt` mean here to get an idea of what average redstripe CPUE would be in the absence of excess-zeros:
 
 ```{r use-full-fit-dist}
 # plot the distribution of abundance along the gradient
@@ -217,6 +280,8 @@ abundance_dist(fit_full,
 ```
 
 ### Calculate ranges of x for different percentages of abundance measures
+
+And a quick look at the temperatures that have greater than half of the highest predicted mean CPUE:
 
 ```{r use-full-fit-range-plot}
 abundance_range(fit_full,
@@ -229,4 +294,8 @@ abundance_range(fit_full,
   scale_y_sqrt()
 ```
 
+About $6.3$ to $7.5$ degree celsius, this may be useful, somewhere?
+
 ## Summary
+
+This article stepped through the `modskurt` workflow with a ZINBL (zero-inflated negative binomial with excess-zero probability linked to the negative binomial mean) model of redstripe rockfish abundance at different water temperatures. The ZINBL model is very powerful, but possibly limited to very sparse data and careful prior specification to reliably estimate a credible posterior over a more complex likelihood surface.

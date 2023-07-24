@@ -133,7 +133,7 @@ web page.</p>
 <h2 id="load-packages-and-stan-files">Load packages and stan files<a class="anchor" aria-label="anchor" href="#load-packages-and-stan-files"></a>
 </h2>
 <p>This section assumes you’ve already got <code>modskurt</code>
-installed and running, if not, jump over to this packages’ <a href="./index.html">home page</a>.</p>
+installed and running, if not, jump over to this packages’ <a href="../index.html">home page</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># compile_stanmodels only runs when needed, so it doesn't hurt to keep these</span></span>
 <span><span class="co"># lines together in any analysis</span></span>
@@ -197,7 +197,8 @@ for discrete abundance data like these, we recommend first trying a
 <strong>negative binomial</strong> (NB) regression, however there may be
 some cases, particularly for rare and hard to sample species, where it
 might be worth going straight for a <strong>zero-inflated negative
-binomial linked</strong> (ZINBL) extension – see <a href="for%20an%20example">TODO……..</a>.</p>
+binomial linked</strong> (ZINBL) extension – see <a href="../linked-zero-inflation.html">the ZINBL article</a> for an
+example.</p>
 <p>Given the negative binomial distribution of abundance, <span class="math inline">\(y\)</span>, the <code>modskurt</code> package
 specifies that the mean of the negative binomial distribution (or
 expected abundance <span class="math inline">\(\mu =
@@ -208,7 +209,7 @@ y_n \sim \text{NegativeBinomial}\left[\mu_n = f(x_n), \kappa\right]
 \]</span></p>
 <p>where subscript, <span class="math inline">\(n\)</span>, denotes the
 <span class="math inline">\(n\)</span>th sample of abundance and
-environmental gradient, and <span class="math inline">\(kappa\)</span>
+environmental gradient, and <span class="math inline">\(\kappa\)</span>
 is an overdispersion parameter that models the variation of abundance
 relative to mean abundance.</p>
 <p>The modskurt function, <span class="math inline">\(f\)</span>, is
@@ -253,10 +254,11 @@ similar effect to increasing the tail weight of a distribution
 function.</li>
 </ul>
 <p>The effect of each parameter is best described visually, so please
-check out this <a href="">Observable</a> if you haven’t already and
-toggle through different parameter values. Not all of these parameters
-are necessary for every analysis, but that discussion is best
-illustrated in a <a href="">separate example</a>.</p>
+check out this <a href="https://salt-ecology.shinyapps.io/modskurt-prior-specs/" class="external-link">app</a>
+if you haven’t already and toggle through different parameter values.
+Not all of these parameters are necessary for every analysis, but that
+discussion is best illustrated in a <a href="TODO">separate
+example</a>.</p>
 <p>Being a Bayesian model, we get to determine what values of each
 parameter are realistic given the relationship we wish to model, rather
 than whatever potentially unrealistic value fits the data best. This is
@@ -323,11 +325,11 @@ priors above.</p>
 <span><span class="co">##  $ Nrep        : int 101</span></span>
 <span><span class="co">##  $ xrep        : int [1:101] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
 <span><span class="co">##  $ subset      :function ()  </span></span>
-<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 139 18 139 68 18 68 1798 1798</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001f08d434008&gt; </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 139 18 139 68 18 68 1759 1759</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000021b8222a5a8&gt; </span></span>
 <span><span class="co">##  $ full        :function (prop = 1, seed = NULL)  </span></span>
-<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 103 17 138 3 17 3 1762 1797</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001f08d434008&gt; </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 103 17 138 3 17 3 1723 1758</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x0000021b8222a5a8&gt; </span></span>
 <span><span class="co">##  - attr(*, "pars")= chr [1:7] "H" "m" "s" "r" ...</span></span>
 <span><span class="co">##  - attr(*, "nms")=List of 3</span></span>
 <span><span class="co">##   ..$ y  : chr "Tuangi (count)"</span></span>
@@ -372,7 +374,7 @@ misspecification.</li>
 <li>
 <a href="../reference/check_prior_zero.html"><code>check_prior_zero</code></a>:
 Predict rates of zero-inflation given the mean and check for believable
-relationships – more on this <a href="">here - TODO: ZINBL vig</a>
+relationships – more on this <a href="./linked-zero-inflation.html">here</a>
 </li>
 </ul>
 <div class="section level3">
@@ -484,12 +486,12 @@ the posterior for the subset of data, and ….</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  2.678    1.233 3.911             0                 0 0.9515648</span></span>
-<span><span class="co">## 2        2  2.720    0.927 3.647             0                 0 1.2158109</span></span>
-<span><span class="co">## 3        3  2.658    1.137 3.795             0                 0 0.8885822</span></span>
-<span><span class="co">## 4        4  2.683    1.094 3.777             0                 0 0.8325988</span></span>
-<span><span class="co">## 5        5  2.631    1.118 3.749             0                 0 0.8103148</span></span>
-<span><span class="co">## 6        6  2.737    1.055 3.792             1                 0 0.8126523</span></span></code></pre>
+<span><span class="co">## 1        1  2.613    1.128 3.741             0                 0 0.9515648</span></span>
+<span><span class="co">## 2        2  2.527    0.808 3.335             0                 0 1.2158109</span></span>
+<span><span class="co">## 3        3  2.339    1.016 3.355             0                 0 0.8885822</span></span>
+<span><span class="co">## 4        4  2.425    0.986 3.411             0                 0 0.8325988</span></span>
+<span><span class="co">## 5        5  2.482    1.053 3.535             0                 0 0.8103148</span></span>
+<span><span class="co">## 6        6  2.523    0.911 3.434             1                 0 0.8126523</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -537,10 +539,10 @@ number of posterior samples.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 23.733   23.054 46.787             1                 0 0.9774463</span></span>
-<span><span class="co">## 2        2 25.837   33.968 59.805             0                 0 0.8960095</span></span>
-<span><span class="co">## 3        3 24.871   28.846 53.717             0                 0 0.8544922</span></span>
-<span><span class="co">## 4        4 25.697   30.690 56.387             0                 0 0.8961821</span></span></code></pre>
+<span><span class="co">## 1        1 26.034   24.024 50.058             1                 0 0.9774463</span></span>
+<span><span class="co">## 2        2 28.516   36.463 64.979             0                 0 0.8960095</span></span>
+<span><span class="co">## 3        3 27.194   30.276 57.470             0                 0 0.8544922</span></span>
+<span><span class="co">## 4        4 28.148   32.364 60.512             0                 0 0.8961821</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>

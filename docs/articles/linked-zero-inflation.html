@@ -118,7 +118,35 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>ZINBL not really needed unless prop zero &gt; 0.95?</p>
+<p>The <a href="./getting-started.html">Getting started article</a>
+showed how to model the negative binomial distribution of species
+abundance along an environmental gradient using the
+<code>modskurt</code> mean function. We’ve found that in the vast
+majority of species-environment relationships, abundance can be
+reasonably characterised by a negative binomial distribution. However,
+for very rare and hard to detect species, there can be zero counts in
+“excess” of what the negative binomial distribution <em>should</em>
+predict. We say <em>should</em>, because mathematically, the negative
+binomial distribution can predict extremely high proportions of zeros,
+although to achieve this we require extremely high dispersion parameter
+values. Which is quite restricting in practice, the mechanisms that can
+cause high zero proportions may not also produce extremely disperse
+data.</p>
+<p>To increase zero-rates, while maintaining realistic dispersion of
+abundance, a zero-inflated negative binomial can be used where a point
+probability mass is added at zero. This can work well in simple models,
+but in generalised models like these <code>modskurt</code> ones, there
+is often a relationship between mean abundance and zero rates in
+different environmental conditions. For example, mean abundances and
+zero rates are usually quite different in conditions where the species
+is commonly found and easy to detect, versus intolerable conditions that
+are hard to sample the species in. For this reason, the
+<code>modskurt</code> model utilises a
+<strong>z</strong>ero-<strong>i</strong>inflated
+<strong>n</strong>egative <strong>b</strong>inomial with excess-zero
+probability <strong>l</strong>inked (ZINBL) to mean abundances through a
+logistic regression. The formula for this distribution will be covered
+later, as we work through another case study.</p>
 </div>
 <div class="section level2">
 <h2 id="load-packages-and-stan-files">Load packages and stan files<a class="anchor" aria-label="anchor" href="#load-packages-and-stan-files"></a>
@@ -139,83 +167,132 @@
 <div class="section level2">
 <h2 id="case-study---sebastes-proriger-vs--water-temperature">Case study - <em>Sebastes proriger</em> vs. water temperature<a class="anchor" aria-label="anchor" href="#case-study---sebastes-proriger-vs--water-temperature"></a>
 </h2>
-<!-- 2015 data for *Sebastes goodei*, should be pretty hot? -->
-<!-- 2015 data for *Thaleichthys pacificus*. -->
-<p>2015 data for <em>Sebastes proriger</em> (redstripe rockfish).</p>
+<p><code>ZINBL</code> distributions of abundance are typically most
+fruitful when proportions of zeros are very high, like <span class="math inline">\(&gt;0.95\)</span> high. A great example of this is
+the Northwest Pacific groundfish trawl survey data for <em>Sebastes
+proriger</em> (redstripe rockfish) over the ocean temperature gradient -
+<a href="https://www.fisheries.noaa.gov/west-coast/science-data/us-west-coast-groundfish-bottom-trawl-survey" class="external-link">more
+info</a>. Key variables are:</p>
+<ul>
+<li>
+<code>total_count</code> the number of individual redstripes caught
+during each trawl.</li>
+<li>
+<code>temp</code> average water temperature recorded at the net
+during the trawl.</li>
+<li>
+<code>area_swept</code> total area (ha) of water swept during the
+trawl (trawl length * net mouth diameter), this is the sampling
+<strong>effort</strong> used to observe <code>total_count</code>.</li>
+</ul>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">redstripe</span><span class="op">)</span></span>
 <span><span class="va">redstripe</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2,330 × 13</span></span></span>
-<span><span class="co">##      <span style="font-weight: bold;">trawl_id</span>   <span style="font-weight: bold;">lat</span>   <span style="font-weight: bold;">lng</span> <span style="font-weight: bold;">depth</span> <span style="font-weight: bold;">date</span>       <span style="font-weight: bold;">area_swept</span>    <span style="font-weight: bold;">do</span>  <span style="font-weight: bold;">temp</span>   <span style="font-weight: bold;">sal</span> <span style="font-weight: bold;">total_kg</span></span></span>
-<span><span class="co">##         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 1</span>    2.01<span style="color: #949494;">e</span>11  34.0 -<span style="color: #BB0000;">120.</span>  57   2012-07-14       1.70 4.58  12.5   33.6        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 2</span>    2.01<span style="color: #949494;">e</span>11  37.8 -<span style="color: #BB0000;">123.</span>  57.2 2010-06-26       1.34 2.01   8.92  34.0        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 3</span>    2.01<span style="color: #949494;">e</span>11  37.8 -<span style="color: #BB0000;">123.</span>  57.6 2012-06-30       1.70 1.03   8.50  34.0        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 4</span>    2.01<span style="color: #949494;">e</span>11  34.6 -<span style="color: #BB0000;">121.</span>  58.6 2008-10-21       1.40 3.95  11.9   33.6        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 5</span>    2.01<span style="color: #949494;">e</span>11  33.9 -<span style="color: #BB0000;">119.</span>  58.6 2013-07-20       1.51 3.10  10.5   33.6        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 6</span>    2.01<span style="color: #949494;">e</span>11  35.1 -<span style="color: #BB0000;">121.</span>  59.1 2010-10-06       1.48 2.69  11.0   33.6        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 7</span>    2.01<span style="color: #949494;">e</span>11  37.7 -<span style="color: #BB0000;">123.</span>  59.2 2013-06-29       1.55 <span style="color: #949494;">0.</span>819  8.71  34.0        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 8</span>    2.01<span style="color: #949494;">e</span>11  34.2 -<span style="color: #BB0000;">119.</span>  59.3 2011-10-11       1.67 4.11  11.2   33.4        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 9</span>    2.01<span style="color: #949494;">e</span>11  42.0 -<span style="color: #BB0000;">124.</span>  59.4 2010-09-16       1.57 2.39   8.55  33.8        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">10</span>    2.01<span style="color: #949494;">e</span>11  40.8 -<span style="color: #BB0000;">124.</span>  59.4 2010-06-22       1.63 2.01   7.28  34.0        <span style="color: #949494;">0</span></span></span>
-<span><span class="co">## <span style="color: #949494;"># ℹ 2,320 more rows</span></span></span>
-<span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: </span><span style="color: #949494; font-weight: bold;">cpue_kg</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">total_count</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">cpue_count</span><span style="color: #949494;"> &lt;dbl&gt;</span></span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2,330 × 8</span></span></span>
+<span><span class="co">##    <span style="font-weight: bold;">date</span>       <span style="font-weight: bold;">depth</span> <span style="font-weight: bold;">area_swept</span>    <span style="font-weight: bold;">do</span>  <span style="font-weight: bold;">temp</span>   <span style="font-weight: bold;">sal</span> <span style="font-weight: bold;">total_kg</span> <span style="font-weight: bold;">total_count</span></span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 2012-07-14  57         1.70 4.58  12.5   33.6        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 2010-06-26  57.2       1.34 2.01   8.92  34.0        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 2012-06-30  57.6       1.70 1.03   8.50  34.0        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 2008-10-21  58.6       1.40 3.95  11.9   33.6        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 2013-07-20  58.6       1.51 3.10  10.5   33.6        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 2010-10-06  59.1       1.48 2.69  11.0   33.6        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 2013-06-29  59.2       1.55 <span style="color: #949494;">0.</span>819  8.71  34.0        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 2011-10-11  59.3       1.67 4.11  11.2   33.4        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 2010-09-16  59.4       1.57 2.39   8.55  33.8        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 2010-06-22  59.4       1.63 2.01   7.28  34.0        <span style="color: #949494;">0</span>           <span style="color: #949494;">0</span></span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 2,320 more rows</span></span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="a--specify-initial-model">A. Specify initial model<a class="anchor" aria-label="anchor" href="#a--specify-initial-model"></a>
 </h2>
+<p>The <code>ZINBL</code> distribution is defined as a mixture of the
+negative binomial distribution and a bernoulli process with mixing
+proportion, <span class="math inline">\(\pi\)</span> modelled as a
+decreasing logistic function of <code>modskurt</code> mean abundance,
+<span class="math inline">\(\mu\)</span>,</p>
 <p><span class="math display">\[
 \begin{aligned}
 y_n &amp;\sim \text{ZINBL}\left[\mu_n = \text{Modskurt}(x_n), \kappa,
 \pi_n\right] \\
-\pi_n &amp;= \gamma_0 - \gamma_1 \cdot \mu_n
+&amp;= \pi_n \cdot (y_n == 0) + (1 - \pi_n) \cdot \text{NB}(\mu_n, \phi)
+\\
+\text{logit}^{-1}~\pi_n &amp;= \gamma_0 - \gamma_1 \cdot \mu_n
 \end{aligned}
 \]</span></p>
-<p>with parameters:</p>
+<p>with new parameters:</p>
+<ul>
+<li>
+<span class="math inline">\(\gamma_0 \in \mathbb{R}\)</span>:
+log-odds intercept for the probability of observing an excess-zero,</li>
+<li>
+<span class="math inline">\(\gamma_1 &gt; 0\)</span>: describes the
+rate at which the excess-zero probability decreases as the average
+abundance increases. As <span class="math inline">\(\gamma_0 \to
+0\)</span> or <span class="math inline">\(\gamma_1 \to \infty\)</span>,
+<span class="math inline">\(\pi \to 0\)</span> and the ZINBL reduces to
+the NB distribution.</li>
+</ul>
+<p>Muck around with parameters <a href="https://salt-ecology.shinyapps.io/nb-zinbl-prior-specs/" class="external-link">here</a>.</p>
+<p>As with the negative binomial model, the <code>modskurt</code>
+package suggests some default priors that <em>should</em> just work
+🤞🤞:</p>
 <p><span class="math display">\[
 \begin{align}
 \kappa &amp;\sim \text{Exponential}(0.5) \\
 \gamma_0 &amp;\sim \text{Normal}(3.0, 1.5) \\
-\gamma_1 &amp;\sim \text{HalfNormal}(3.0)
+\gamma_1 &amp;\sim \text{HalfNormal}(5.0)
 \end{align}
 \]</span></p>
+<p>Note, now that we have sampling effort, we can internally standardise
+counts to catch per unit effort (CPUE), <span class="math inline">\(y /
+\text{area_swept}\)</span>, in the model using</p>
+<p><span class="math display">\[
+y_n \sim \text{ZINBL}\left[\text{area_swept} \cdot \mu_n, \kappa,
+\pi_n\right]
+\]</span></p>
+<p>Specifying the model in <code>R</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_spec.html">mskt_spec</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">redstripe</span>,</span>
-<span>            <span class="co"># by including effort below, we are atually modelling catch per unit</span></span>
-<span>            <span class="co"># effort (CPUE) while retaining the discrete distribution of these</span></span>
-<span>            <span class="co"># count data</span></span>
+<span>            <span class="co"># total_count is being modelled as CPUE by including effort</span></span>
 <span>            y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Sebastes proriger (CPUE)'</span> <span class="op">=</span> <span class="st">'total_count'</span><span class="op">)</span>,</span>
 <span>            x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'SST (°C)'</span> <span class="op">=</span> <span class="st">'temp'</span><span class="op">)</span>,</span>
 <span>            effort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Area swept (ha)'</span> <span class="op">=</span> <span class="st">'area_swept'</span><span class="op">)</span>,</span>
 <span>            dist <span class="op">=</span> <span class="st">'zinbl'</span>,</span>
 <span>            shape <span class="op">=</span> <span class="st">'rdp'</span>,</span>
 <span>            subset_prop <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></code></pre></div>
+<p>A quick look at the model spec for the full dataset shows that the
+zero proportion is about <span class="math inline">\(2252 / 2330 =
+0.97\)</span>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">spec</span><span class="op">$</span><span class="fu">subset</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">spec</span><span class="op">$</span><span class="fu">full</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## List of 4</span></span>
 <span><span class="co">##  $ train:List of 10</span></span>
-<span><span class="co">##   ..$ y          : int [1:699] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
-<span><span class="co">##   ..$ x          : num [1:699] 7.49 11.78 7.01 6.45 11.05 ...</span></span>
-<span><span class="co">##   ..$ eff        : num [1:699] 1.4 1.69 1.44 1.64 1.66 ...</span></span>
-<span><span class="co">##   ..$ N          : int 699</span></span>
-<span><span class="co">##   ..$ Nz         : int 673</span></span>
-<span><span class="co">##   ..$ x_range    : num 7.18</span></span>
-<span><span class="co">##   ..$ x_pos_range: num 1.82</span></span>
-<span><span class="co">##   ..$ x_min      : num 5.5</span></span>
+<span><span class="co">##   ..$ y          : int [1:2330] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
+<span><span class="co">##   ..$ x          : num [1:2330] 7.49 11.78 7.01 6.45 11.05 ...</span></span>
+<span><span class="co">##   ..$ eff        : num [1:2330] 1.4 1.69 1.44 1.64 1.66 ...</span></span>
+<span><span class="co">##   ..$ N          : int 2330</span></span>
+<span><span class="co">##   ..$ Nz         : int 2252</span></span>
+<span><span class="co">##   ..$ x_range    : num 9.1</span></span>
+<span><span class="co">##   ..$ x_pos_range: num 3.57</span></span>
+<span><span class="co">##   ..$ x_min      : num 5.45</span></span>
 <span><span class="co">##   ..$ x_pos_min  : num 6.28</span></span>
-<span><span class="co">##   ..$ y_max      : int 2124</span></span>
+<span><span class="co">##   ..$ y_max      : int 35314</span></span>
 <span><span class="co">##  $ all  :'data.frame':   2330 obs. of  4 variables:</span></span>
 <span><span class="co">##   ..$ y  : int [1:2330] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
 <span><span class="co">##   ..$ x  : num [1:2330] 12.45 8.92 8.5 11.85 10.51 ...</span></span>
 <span><span class="co">##   ..$ eff: num [1:2330] 1.7 1.34 1.7 1.4 1.51 ...</span></span>
-<span><span class="co">##   ..$ set: chr [1:2330] "train" "test" "train" "train" ...</span></span>
-<span><span class="co">##  $ prop : num 0.3</span></span>
+<span><span class="co">##   ..$ set: chr [1:2330] "train" "train" "train" "train" ...</span></span>
+<span><span class="co">##  $ prop : num 1</span></span>
 <span><span class="co">##  $ seed : NULL</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="b--verify-initial-model-specification">B. Verify initial model specification<a class="anchor" aria-label="anchor" href="#b--verify-initial-model-specification"></a>
 </h2>
+<p>This is very much the same as in <a href="./getting-started.html">getting started</a>, except now we can
+have a look at the new linked zero inflation parameters, and the
+excess-zero probabilities they predict.</p>
 <div class="section level3">
 <h3 id="prior-probabilities-of-parameter-values">Prior probabilities of parameter values<a class="anchor" aria-label="anchor" href="#prior-probabilities-of-parameter-values"></a>
 </h3>
@@ -230,6 +307,10 @@ TODO: add legend for median, 50%HDI and 99% line!
 <div class="section level3">
 <h3 id="prior-predictions-for-the-modskurt-mean">Prior predictions for the <code>modskurt</code> mean<a class="anchor" aria-label="anchor" href="#prior-predictions-for-the-modskurt-mean"></a>
 </h3>
+<p>Note above that values for <code>m</code> are by default constrained
+within the range of <code>x</code> that had at least one non-zero
+abundance, <code>y</code>, recorded. The effect of this is quite visible
+when looking at prior predictions for mean abundance:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_mskt.html">check_prior_mskt</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -241,6 +322,7 @@ TODO: add legend for alpha!
 <div class="section level3">
 <h3 id="prior-predictions-for-summary-statistics-of-y">Prior predictions for summary statistics of <span class="math inline">\(y\)</span><a class="anchor" aria-label="anchor" href="#prior-predictions-for-summary-statistics-of-y"></a>
 </h3>
+<p>Dispersion is a little high again?</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <p><img src="linked-zero-inflation_files/figure-html/check-prior-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
@@ -248,6 +330,15 @@ TODO: add legend for alpha!
 <div class="section level3">
 <h3 id="prior-predictions-for-probability-of-excess-zero-pi">Prior predictions for probability of excess zero <span class="math inline">\(\pi\)</span><a class="anchor" aria-label="anchor" href="#prior-predictions-for-probability-of-excess-zero-pi"></a>
 </h3>
+<p>This is a new test, showing how excess-zero probabilities interact
+with mean abundances using a simple bell-shaped mean shape (black line).
+The shape of the mean here doesn’t really matter, it’s more about
+looking at how excess probabilities decrease relative to mean abundance.
+The difference between zero-probabilities for the plain <code>nb</code>
+are strikingly lower than that of the <code>zinbl</code>, where
+<code>nb</code> zero-probability quickly reduces as the mean increases,
+while the <code>zinbl</code> model keeps it a lot higher till mean
+abundances almost reach their peak:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_zero.html">check_prior_zero</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <p><img src="linked-zero-inflation_files/figure-html/check-prior-zero-1.png" width="100%" style="display: block; margin: auto;"></p>
@@ -257,6 +348,9 @@ TODO: add legend for alpha!
 <div class="section level2">
 <h2 id="c--fit-subset-model">C. Fit subset model<a class="anchor" aria-label="anchor" href="#c--fit-subset-model"></a>
 </h2>
+<p>Hopefully you’re happy with the model specification and prior checks
+above? So we can proceed to some posterior checks using a “subset”
+mudel:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_subset</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
@@ -267,6 +361,10 @@ TODO: add legend for alpha!
 <span>           parallel_chains <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>           <span class="co"># for debugging</span></span>
 <span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>A few divergences like this raise an initial warning that the
+posterior is not simple to compute. Summaries for the <code>m</code>
+parameter confirm this, where some of the chains may not have mixed
+(independently sampled the posterior parameter space):</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## spec: zinbl[Hmsrdp] using 699 obs out of 2330 (30% sample)</span></span>
@@ -287,78 +385,107 @@ TODO: add legend for alpha!
 <span><span class="co">## <span style="color: #949494;"># ℹ 1 more variable: </span><span style="color: #949494; font-weight: bold;">ess_tail</span><span style="color: #949494;"> &lt;ess&gt;</span></span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
-<span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  6.116    2.712 8.828             2                 0 0.8508828</span></span>
-<span><span class="co">## 2        2  6.075    2.505 8.580             1                 0 1.1861269</span></span>
-<span><span class="co">## 3        3  4.808    2.182 6.990             5                 0 1.0944825</span></span>
-<span><span class="co">## 4        4  4.815    1.782 6.597            18                 0 0.9643593</span></span>
-<span><span class="co">## 5        5  6.264    2.922 9.186             2                 0 1.0613385</span></span>
-<span><span class="co">## 6        6  6.350    2.376 8.726             1                 0 0.8744557</span></span></code></pre>
+<span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
+<span><span class="co">## 1        1  6.425    2.947  9.372             2                 0 0.8508828</span></span>
+<span><span class="co">## 2        2  6.460    2.626  9.086             1                 0 1.1861269</span></span>
+<span><span class="co">## 3        3  4.799    2.284  7.083             5                 0 1.0944825</span></span>
+<span><span class="co">## 4        4  5.253    1.848  7.101            18                 0 0.9643593</span></span>
+<span><span class="co">## 5        5  6.815    3.282 10.097             2                 0 1.0613385</span></span>
+<span><span class="co">## 6        6  6.965    2.562  9.527             1                 0 0.8744557</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
 </h3>
+<p>To dig deeper into the high <code>rhat</code>, <span class="math inline">\(\hat{R}\)</span>, values for <code>m</code> we can
+look at the marginal posterior distributions for each chain:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># visual display of chain mixing and prior-data conflicts</span></span>
 <span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_subset</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="linked-zero-inflation_files/figure-html/check-post-dens-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
-<!-- One out of six chains got confused between NB with high dispersion and ZINBL with low dispersion. This is a shortcoming and positive at the same time. It tells us that the model could have multiple solutions (that would be harder to identify with MLE unless do multiple fits). Best to try with more warmup samples to see if they all find the same mode. -->
+<p>The <code>m</code> issue isn’t apparent visually, there’s something
+with <code>m</code> and <code>r</code> discussed in thesis.</p>
+<p>Moving forward, we can compare the CDF of the posterior predictive
+distribution vs the empirical CDF’s of the training and test data using
+a discrete probability integral transform plot:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># uses test set for discrete pit</span></span>
 <span><span class="fu"><a href="../reference/check_post_calibration.html">check_post_calibration</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
 <p><img src="linked-zero-inflation_files/figure-html/check-post-calibration-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p>The slight increase suggests the model is struggling to capture
-overdispersion in the upper quantiles of data. However it appears
-well-calibrated for the rest of the dist? Compare with a NB model.</p>
+<p>The little uptick at the end suggests that the posterior distribution
+predicts both training (subset, seen) data and test (unseen) data well
+up until the very highest counts, where it might be slightly
+underdispersed (i.e., underpredicting max counts). We could check this
+with the <code>bayesplot</code> package using similar methods as
+<code>check_prior_dist</code> above.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/PPC-test-statistics.html" class="external-link">ppc_stat</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">spec</span><span class="op">$</span><span class="fu">subset</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">train</span><span class="op">$</span><span class="va">y</span>,</span>
+<span>                    yrep <span class="op">=</span> <span class="va">fit_subset</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="st">'y_rep'</span>, format <span class="op">=</span> <span class="st">'matrix'</span><span class="op">)</span>,</span>
+<span>                    stat <span class="op">=</span> <span class="st">'max'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-1-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="d--fit-full-model">D. Fit full model<a class="anchor" aria-label="anchor" href="#d--fit-full-model"></a>
 </h2>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<p>Alright, some concerns with chains not mixing above, but not enough
+to suggest gross posterior misspecification. It could just be that, with
+the added complexity of the <code>zinbl</code> model and the sparser
+data, the computation needs a little more time to learn the posterior
+curvature. We do this by increasing the warm-up iterations to the
+default 1000 per chain:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_full</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
+<span>           iter_warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>           iter_sampling <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>           chains <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>           <span class="co"># sparse data can require a little more computing care</span></span>
-<span>           <span class="co"># default is 0.80</span></span>
-<span>           <span class="co"># adapt_delta = 0.90,</span></span>
+<span>           <span class="co"># we could also take smaller steps around the posterior using</span></span>
+<span>           <span class="co"># adapt_delta &gt; 0.8, but better to avoid if possible</span></span>
 <span>           <span class="co"># for testing</span></span>
-<span>           debug_init <span class="op">=</span> <span class="cn">FALSE</span>, show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
+<span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Less divergences than before, increasing <code>adapt_delta</code>
+should clear those. The parameter diagnostics all look good:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
+<span>                  <span class="co"># to save console space</span></span>
+<span>                  hide_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'mean'</span>, <span class="st">'sd'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## spec: zinbl[Hmsrdp] using 2330 obs out of 2330 (100% sample)</span></span>
 <span><span class="co">## post: 4 chains each with 1000 draws (4000 total)</span></span></code></pre>
 <pre><code><span><span class="co">## $summary</span></span>
-<span><span class="co">## <span style="color: #949494;"># A tibble: 9 × 10</span></span></span>
-<span><span class="co">##   <span style="font-weight: bold;">variable</span>    <span style="font-weight: bold;">mean</span>  <span style="font-weight: bold;">median</span>      <span style="font-weight: bold;">sd</span>     <span style="font-weight: bold;">mad</span>      <span style="font-weight: bold;">q5</span>      <span style="font-weight: bold;">q95</span>   <span style="font-weight: bold;">rhat</span>   <span style="font-weight: bold;">ess_bulk</span></span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        864.    792.    343.    257.    476.    <span style="text-decoration: underline;">1</span>48<span style="color: #949494;">4</span>.         1 3132 (0.8)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m          6.61    6.60    <span style="color: #949494;">0.</span>148   <span style="color: #949494;">0.</span>157   6.39     6.87       1 1651 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s          <span style="color: #949494;">0.</span>544   <span style="color: #949494;">0.</span>513   <span style="color: #949494;">0.</span>160   <span style="color: #949494;">0.</span>135   <span style="color: #949494;">0.</span>346    <span style="color: #949494;">0.</span>844      1 1998 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r          <span style="color: #949494;">0.</span>795   <span style="color: #949494;">0.</span>822   <span style="color: #949494;">0.</span>135   <span style="color: #949494;">0.</span>132   <span style="color: #949494;">0.</span>527    <span style="color: #949494;">0.</span>962      1 1703 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d          1.86    1.70    <span style="color: #949494;">0.</span>943   <span style="color: #949494;">0.</span>852   <span style="color: #949494;">0.</span>596    3.57       1 1890 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p          <span style="color: #949494;">0.</span>796   <span style="color: #949494;">0.</span>693   <span style="color: #949494;">0.</span>533   <span style="color: #949494;">0.</span>611   <span style="color: #949494;">0.</span>106    1.76       1 2598 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap        2.33    2.32    <span style="color: #949494;">0.</span>145   <span style="color: #949494;">0.</span>144   2.10     2.57       1 3055 (0.8)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">8</span> g0[1]      4.40    4.39    <span style="color: #949494;">0.</span>251   <span style="color: #949494;">0.</span>255   4.01     4.83       1 2288 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">9</span> g1[1]      1.21    1.21    <span style="color: #949494;">0.</span>190   <span style="color: #949494;">0.</span>189   <span style="color: #949494;">0.</span>908    1.53       1 2271 (0.6)</span></span>
-<span><span class="co">## <span style="color: #949494;"># ℹ 1 more variable: </span><span style="color: #949494; font-weight: bold;">ess_tail</span><span style="color: #949494;"> &lt;ess&gt;</span></span></span>
+<span><span class="co">## <span style="color: #949494;"># A tibble: 9 × 8</span></span></span>
+<span><span class="co">##   <span style="font-weight: bold;">variable</span>  <span style="font-weight: bold;">median</span>     <span style="font-weight: bold;">mad</span>      <span style="font-weight: bold;">q5</span>      <span style="font-weight: bold;">q95</span>   <span style="font-weight: bold;">rhat</span>   <span style="font-weight: bold;">ess_bulk</span>   <span style="font-weight: bold;">ess_tail</span></span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        792.    257.    476.    <span style="text-decoration: underline;">1</span>48<span style="color: #949494;">4</span>.         1 3132 (0.8) 2272 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m          6.60    <span style="color: #949494;">0.</span>157   6.39     6.87       1 1651 (0.4) 1593 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s          <span style="color: #949494;">0.</span>513   <span style="color: #949494;">0.</span>135   <span style="color: #949494;">0.</span>346    <span style="color: #949494;">0.</span>844      1 1998 (0.5) 2290 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r          <span style="color: #949494;">0.</span>822   <span style="color: #949494;">0.</span>132   <span style="color: #949494;">0.</span>527    <span style="color: #949494;">0.</span>962      1 1703 (0.4) 2434 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d          1.70    <span style="color: #949494;">0.</span>852   <span style="color: #949494;">0.</span>596    3.57       1 1890 (0.5) 1929 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p          <span style="color: #949494;">0.</span>693   <span style="color: #949494;">0.</span>611   <span style="color: #949494;">0.</span>106    1.76       1 2598 (0.6) 1744 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap        2.32    <span style="color: #949494;">0.</span>144   2.10     2.57       1 3055 (0.8) 2570 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">8</span> g0[1]      4.39    <span style="color: #949494;">0.</span>255   4.01     4.83       1 2288 (0.6) 2303 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">9</span> g1[1]      1.21    <span style="color: #949494;">0.</span>189   <span style="color: #949494;">0.</span>908    1.53       1 2271 (0.6) 1789 (0.4)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling   total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 68.580   58.674 127.254            24                 0 0.9714918</span></span>
-<span><span class="co">## 2        2 62.347   67.212 129.559            18                 0 0.9745719</span></span>
-<span><span class="co">## 3        3 56.685   71.487 128.172            13                 0 0.9514785</span></span>
-<span><span class="co">## 4        4 57.825   72.178 130.003            24                 0 1.0103720</span></span></code></pre>
+<span><span class="co">## 1        1 91.514   61.661 153.175            24                 0 0.9714918</span></span>
+<span><span class="co">## 2        2 84.818   70.862 155.680            18                 0 0.9745719</span></span>
+<span><span class="co">## 3        3 78.446   75.338 153.784            13                 0 0.9514785</span></span>
+<span><span class="co">## 4        4 79.941   76.129 156.070            24                 0 1.0103720</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_full</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-1-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>Can check the marginal posterior distributions for each parameter
+again:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_full</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-2-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>Much more certain, or precise. Using approximate leave-one-out
+cross-validation (LOO-CV) we can identify data points the posterior
+struggles to predict:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># can be slow for large N</span></span>
 <span><span class="fu"><a href="../reference/check_post_influencers.html">check_post_influencers</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##               pareto_khat Sebastes proriger (CPUE) SST (°C) Area swept (ha)</span></span>
@@ -367,16 +494,23 @@ well-calibrated for the rest of the dist? Compare with a NB model.</p>
 <span><span class="co">## log_lik[2287]        0.69                        0      6.3             1.8</span></span>
 <span><span class="co">## log_lik[2330]        1.63                        0      6.1             1.5</span></span></code></pre>
 <p><img src="linked-zero-inflation_files/figure-html/check-post-influencers-full-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>A few zero-counts in mid-range temperatures, possibly the complex
+interaction between mean shape, dispersion, and linked zero-inflation
+struggling ever so slightly.</p>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="e--use-the-model">E. Use the model<a class="anchor" aria-label="anchor" href="#e--use-the-model"></a>
 </h2>
+<p>To the fun(ner) part!</p>
 <div class="section level3">
 <h3 id="plot-summaries-of-the-abundance-distribution">Plot summaries of the abundance distribution<a class="anchor" aria-label="anchor" href="#plot-summaries-of-the-abundance-distribution"></a>
 </h3>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<p>We’ll plot the non zero-inflated <code>modskurt</code> mean here to
+get an idea of what average redstripe CPUE would be in the absence of
+excess-zeros:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot the distribution of abundance along the gradient</span></span>
 <span><span class="fu"><a href="../reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
 <span>               include_zero_inflation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -388,7 +522,9 @@ well-calibrated for the rest of the dist? Compare with a NB model.</p>
 <h3 id="calculate-ranges-of-x-for-different-percentages-of-abundance-measures">Calculate ranges of x for different percentages of abundance
 measures<a class="anchor" aria-label="anchor" href="#calculate-ranges-of-x-for-different-percentages-of-abundance-measures"></a>
 </h3>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<p>And a quick look at the temperatures that have greater than half of
+the highest predicted mean CPUE:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abundance_range.html">abundance_range</a></span><span class="op">(</span><span class="va">fit_full</span>,</span>
 <span>                capture_pct <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>                using_range <span class="op">=</span> <span class="st">'HAZ'</span>,</span>
@@ -405,11 +541,20 @@ measures<a class="anchor" aria-label="anchor" href="#calculate-ranges-of-x-for-d
 <span><span class="co">## x.avg      6.33893171   6.61184220   7.51756997</span></span>
 <span><span class="co">## x.se       0.02492162   0.01915691   0.02178029</span></span></code></pre>
 <p><img src="linked-zero-inflation_files/figure-html/use-full-fit-range-plot-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>About <span class="math inline">\(6.3\)</span> to <span class="math inline">\(7.5\)</span> degree celsius, this may be useful,
+somewhere?</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
+<p>This article stepped through the <code>modskurt</code> workflow with
+a ZINBL (zero-inflated negative binomial with excess-zero probability
+linked to the negative binomial mean) model of redstripe rockfish
+abundance at different water temperatures. The ZINBL model is very
+powerful, but possibly limited to very sparse data and careful prior
+specification to reliably estimate a credible posterior over a more
+complex likelihood surface.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

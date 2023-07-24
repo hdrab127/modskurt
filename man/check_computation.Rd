@@ -4,12 +4,14 @@
 \alias{check_computation}
 \title{Check posterior computation is acceptable}
 \usage{
-check_computation(fit, show_info = TRUE)
+check_computation(fit, show_info = TRUE, hide_stats = c())
 }
 \arguments{
 \item{fit}{fitted model object from `mskt_fit`}
 
 \item{show_info}{print information about model spec and posterior sample}
+
+\item{hide_stats}{which summary stats to hide}
 }
 \value{
 a list with ...

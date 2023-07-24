@@ -38,7 +38,7 @@ try(knitr::include_graphics('../man/figures/workflow.JPG'), silent = TRUE)
 
 ## Load packages and stan files
 
-This section assumes you've already got `modskurt` installed and running, if not, jump over to this packages' [home page](./index.html).
+This section assumes you've already got `modskurt` installed and running, if not, jump over to this packages' [home page](../index.html).
 
 ```{r load-compile}
 # compile_stanmodels only runs when needed, so it doesn't hurt to keep these
@@ -71,7 +71,7 @@ For attribution and technical details of how these data are collected, please co
 
 ## A. Specify initial model
 
-The first step in the analysis of a species' abundance over an environmental gradient is to specify the distribution model. In general for discrete abundance data like these, we recommend first trying a **negative binomial** (NB) regression, however there may be some cases, particularly for rare and hard to sample species, where it might be worth going straight for a **zero-inflated negative binomial linked** (ZINBL) extension -- see [TODO........](for an example).
+The first step in the analysis of a species' abundance over an environmental gradient is to specify the distribution model. In general for discrete abundance data like these, we recommend first trying a **negative binomial** (NB) regression, however there may be some cases, particularly for rare and hard to sample species, where it might be worth going straight for a **zero-inflated negative binomial linked** (ZINBL) extension -- see [the ZINBL article](../linked-zero-inflation.html) for an example.
 
 Given the negative binomial distribution of abundance, $y$, the `modskurt` package specifies that the mean of the negative binomial distribution (or expected abundance $\mu = \text{E}[y]$) is a non-linear function, $f$ of the environmental gradient, $x$, mud content in this case. Yielding the following generalised non-linear regression model (GNLM):
 
@@ -79,7 +79,7 @@ $$
 y_n \sim \text{NegativeBinomial}\left[\mu_n = f(x_n), \kappa\right]
 $$
 
-where subscript, $n$, denotes the $n$th sample of abundance and environmental gradient, and $kappa$ is an overdispersion parameter that models the variation of abundance relative to mean abundance.
+where subscript, $n$, denotes the $n$th sample of abundance and environmental gradient, and $\kappa$ is an overdispersion parameter that models the variation of abundance relative to mean abundance.
 
 The modskurt function, $f$, is visually unappealing, but (believe us!) it produces appealing and realistic shapes of mean abundance along environmental gradients:
 
@@ -98,7 +98,7 @@ with parameters:
 - $d \in \mathbb{R}$: controls the peakedness ($d < 0$) or broadness ($d > 0$, e.g. plateau-like shape) of the peak in mean abundance around $m$.
 - $p > 0$: persists higher-levels of abundance in relatively extreme conditions; this is a similar effect to increasing the tail weight of a distribution function.
 
-The effect of each parameter is best described visually, so please check out this [Observable]() if you haven't already and toggle through different parameter values. Not all of these parameters are necessary for every analysis, but that discussion is best illustrated in a [separate example]().
+The effect of each parameter is best described visually, so please check out this [app](https://salt-ecology.shinyapps.io/modskurt-prior-specs/) if you haven't already and toggle through different parameter values. Not all of these parameters are necessary for every analysis, but that discussion is best illustrated in a [separate example](TODO).
 
 Being a Bayesian model, we get to determine what values of each parameter are realistic given the relationship we wish to model, rather than whatever potentially unrealistic value fits the data best. This is a huge benefit of Bayesian modelling, but also a huge hurdle when dealing with complex parameter spaces like that of the model above. To make life easier, the `modskurt` package suggests some default priors that *should* just work 🤞:
 
@@ -155,7 +155,7 @@ The `modskurt` provides four checking functions:
 - [`check_prior_dens`](../reference/check_prior_dens.html): Plot the marginal prior densities and check their probabilities align with reasonable values.
 - [`check_prior_mskt`](../reference/check_prior_mskt.html): Randomly sample from the joint prior and check that predictions for the mean, $\mu$, contain all possible shapes and sizes.
 - [`check_prior_dist`](../reference/check_prior_dist.html): Simulate $y$ replicates from the joint prior model and plot "severe tests" to check for overdispersion misspecification.
-- [`check_prior_zero`](../reference/check_prior_zero.html): Predict rates of zero-inflation given the mean and check for believable relationships -- more on this [here - TODO: ZINBL vig]()
+- [`check_prior_zero`](../reference/check_prior_zero.html): Predict rates of zero-inflation given the mean and check for believable relationships -- more on this [here](./linked-zero-inflation.html)
 
 ### Prior probabilities of parameter values
 

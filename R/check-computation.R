@@ -2,11 +2,14 @@
 #'
 #' @param fit fitted model object from `mskt_fit`
 #' @param show_info print information about model spec and posterior sample
+#' @param hide_stats which summary stats to hide
 #'
 #' @return a list with ...
 #' @export
 #'
-check_computation <- function(fit, show_info = TRUE) {
+check_computation <- function(fit,
+                              show_info = TRUE,
+                              hide_stats = c()) {
   spec <- attr(fit, 'spec')
   dist <- attr(spec, 'dist')
   shape <- attr(spec, 'shape')
@@ -44,6 +47,9 @@ check_computation <- function(fit, show_info = TRUE) {
   summ$ess_bulk <- vctrs::new_vctr(summ$ess_bulk, class = 'ess')
   summ$ess_tail <- vctrs::new_vctr(summ$ess_tail, class = 'ess')
   summ$num_samples <- NULL
+  if (length(hide_stats) > 0) {
+    summ <- summ[, -which(names(summ) %in% hide_stats)]
+  }
 
   # summ$mean <- NULL
   # summ$sd <- NULL

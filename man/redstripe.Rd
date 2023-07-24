@@ -5,7 +5,7 @@
 \alias{redstripe}
 \title{*Sebastes proriger* (redstripe rockfish) estuarine abundance}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 2330 rows and 13 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 2330 rows and 8 columns.
 }
 \source{
 <https://www.fisheries.noaa.gov/west-coast/science-data/us-west-coast-groundfish-bottom-trawl-survey>
