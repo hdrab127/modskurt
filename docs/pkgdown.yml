@@ -5,8 +5,9 @@ articles:
   discrete-stan: discrete-stan.html
   getting-started: getting-started.html
   linked-zero-inflation: linked-zero-inflation.html
+  modskurt-priors: modskurt-priors.html
   prior-specification: prior-specification.html
-last_built: 2023-07-24T02:46Z
+last_built: 2023-07-25T08:50Z
 urls:
   reference: https://hdrab127.github.io/modskurt/reference
   article: https://hdrab127.github.io/modskurt/articles

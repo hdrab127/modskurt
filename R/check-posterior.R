@@ -131,8 +131,6 @@ check_post_dens <- function(fit,
 #' @export
 check_post_calibration <- function(fit, ndraws = 50) {
   # both use randomised
-  # subset uses test data
-  # full uses leave-one-out
 
   # for y ~ ZINBL with cdf F
   # PIT score = F(y-1) + U * [F(y) - F(y-1)]
@@ -168,6 +166,7 @@ check_post_calibration <- function(fit, ndraws = 50) {
                               ys$zi[pos_idx])
   ys$PIT <- ys$Fym1 + stats::runif(nrow(ys)) * (ys$Fy - ys$Fym1)
 
+
   fPIT <- tapply(ys, ys$set, function(dset) {
     # boundary corrected density of dicrete PIT scores
     with(stats::density(dset$PIT, n = 199, from = -0.49, to = 1.49), {
@@ -195,15 +194,21 @@ check_post_calibration <- function(fit, ndraws = 50) {
   U$x <- (as.double(U$x) - 1) / 100
   U$y <- U$y / 10
 
-  ggplot2::ggplot(U, ggplot2::aes(.data[['x']], .data[['y']])) +
+  gg <-
+    ggplot2::ggplot(U, ggplot2::aes(.data[['x']], .data[['y']])) +
     ggplot2::geom_line(ggplot2::aes(group = .data[['draw']], colour = 'Uniform'),
-                      alpha = 0.2) +
+                       alpha = 0.2) +
     ggplot2::geom_line(ggplot2::aes(colour = 'Training'),
-                      linewidth = 1.2,
-                      data = fPIT$train) +
-    ggplot2::geom_line(ggplot2::aes(colour = 'Test'),
-                      linewidth = 1.2,
-                      data = fPIT$test) +
+                       linewidth = 1.2,
+                       data = fPIT$train)
+  if (is_subset) {
+    gg <-
+      gg +
+      ggplot2::geom_line(ggplot2::aes(colour = 'Test'),
+                         linewidth = 1.2,
+                         data = fPIT$test)
+  }
+  gg +
     ggplot2::lims(y = c(0, NA), x = c(0, 1)) +
     ggplot2::scale_colour_manual(values = c('#BBBBBB', '#88CC88', '#005500'),
                                 breaks = c('Uniform', 'Training', 'Test')) +

@@ -10,15 +10,15 @@ template:
 navbar:
   bg: dark
   structure:
-    left: [intro, Vignettes, Functions, News, OtherPackages, Stan]
+    left: [intro, Articles, Functions, News, OtherPackages, Stan]
     right: [search, github]
   components:
     intro:
       icon: fa-home
       href: index.html
       aria-label: msktr
-    Vignettes:
-      text: "Vignettes"
+    Articles:
+      text: "Articles"
       menu:
         - text: 'How to use `modskurt`'
           href: articles/getting-started.html
@@ -26,6 +26,8 @@ navbar:
           href: articles/linked-zero-inflation.html
         - text: 'Prior specification'
           href: articles/prior-specification.html
+        - text: 'Modskurt priors'
+          href: articles/modskurt-priors.html
         - text: 'Stan discrete model'
           href: articles/discrete-stan.html
         - text: 'Examples'

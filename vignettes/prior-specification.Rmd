@@ -1,5 +1,5 @@
 ---
-title: "Prior Specification"
+title: "Prior specification"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Prior Specification}
@@ -26,7 +26,7 @@ Two interactive pages have been created to help encode information into the prio
 
 The **modskurt mean function** that describes the shape of average abundance along the gradient in question: 
 
-- https://salt-ecology.shinyapps.io/modskurt-prior-specs/
+- https://observablehq.com/@hdrab127/modskurt-prior-specs
 
 The negative binomial-based **abundance distributions** that describe the probability of observing different species counts and excess-zeros given the modskurt mean: 
 
