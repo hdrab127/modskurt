@@ -29,7 +29,7 @@ navbar:
         - text: 'Modskurt priors'
           href: articles/modskurt-priors.html
         - text: 'ZINBL priors'
-          href: articles/modskurt-priors.html
+          href: articles/zinbl-priors.html
         - text: 'Stan discrete model'
           href: articles/discrete-stan.html
         - text: 'Examples'

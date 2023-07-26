@@ -55,6 +55,7 @@
     <a class="dropdown-item" href="../articles/linked-zero-inflation.html">Linked zero-inflation (ZINBL)</a>
     <a class="dropdown-item" href="../articles/prior-specification.html">Prior specification</a>
     <a class="dropdown-item" href="../articles/modskurt-priors.html">Modskurt priors</a>
+    <a class="dropdown-item" href="../articles/zinbl-priors.html">ZINBL priors</a>
     <a class="dropdown-item" href="../articles/discrete-stan.html">Stan discrete model</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples</a>
   </div>
@@ -387,12 +388,12 @@ parameter confirm this, where some of the chains may not have mixed
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  6.908    2.869  9.777             2                 0 0.8508828</span></span>
-<span><span class="co">## 2        2  6.823    2.611  9.434             1                 0 1.1861269</span></span>
-<span><span class="co">## 3        3  5.214    2.544  7.758             5                 0 1.0944825</span></span>
-<span><span class="co">## 4        4  5.435    2.056  7.491            18                 0 0.9643593</span></span>
-<span><span class="co">## 5        5  7.022    3.134 10.156             2                 0 1.0613385</span></span>
-<span><span class="co">## 6        6  7.229    2.509  9.738             1                 0 0.8744557</span></span></code></pre>
+<span><span class="co">## 1        1  7.171    2.928 10.099             2                 0 0.8508828</span></span>
+<span><span class="co">## 2        2  7.001    2.795  9.796             1                 0 1.1861269</span></span>
+<span><span class="co">## 3        3  5.630    2.554  8.184             5                 0 1.0944825</span></span>
+<span><span class="co">## 4        4  5.617    2.118  7.735            18                 0 0.9643593</span></span>
+<span><span class="co">## 5        5  7.242    3.284 10.526             2                 0 1.0613385</span></span>
+<span><span class="co">## 6        6  7.412    2.566  9.978             1                 0 0.8744557</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -470,10 +471,10 @@ should clear those. The parameter diagnostics all look good:</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling   total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 71.001   60.188 131.189            24                 0 0.9714918</span></span>
-<span><span class="co">## 2        2 64.141   68.608 132.749            18                 0 0.9745719</span></span>
-<span><span class="co">## 3        3 58.170   72.947 131.117            13                 0 0.9514785</span></span>
-<span><span class="co">## 4        4 59.676   73.654 133.330            24                 0 1.0103720</span></span></code></pre>
+<span><span class="co">## 1        1 72.912   61.741 134.653            24                 0 0.9714918</span></span>
+<span><span class="co">## 2        2 66.117   70.813 136.930            18                 0 0.9745719</span></span>
+<span><span class="co">## 3        3 59.769   75.320 135.089            13                 0 0.9514785</span></span>
+<span><span class="co">## 4        4 61.310   75.983 137.293            24                 0 1.0103720</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>

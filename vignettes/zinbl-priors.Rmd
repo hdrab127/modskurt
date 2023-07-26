@@ -8,4 +8,4 @@ vignette: >
 ---
 
 <style>#main{max-width:64rem !important}</style>
-<iframe width="100%" height="3400px" frameborder="0" src="https://observablehq.com/embed/@hdrab127/zinbl-prior-specs?cell=*"></iframe>
+<iframe width="100%" height="3700px" frameborder="0" src="https://observablehq.com/embed/@hdrab127/zinbl-prior-specs?cell=*"></iframe>
