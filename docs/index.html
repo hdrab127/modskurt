@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="index.html">modskurt</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -152,15 +152,16 @@
 <span>                               m <span class="op">=</span> <span class="fl">35</span>,</span>
 <span>                               s <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>                               r <span class="op">=</span> <span class="fl">0.9</span>,</span>
-<span>                               kap <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>                               kap <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>            y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Abundance (count)'</span> <span class="op">=</span> <span class="st">'y'</span><span class="op">)</span>,</span>
 <span>            x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Env gradient'</span> <span class="op">=</span> <span class="st">'x'</span><span class="op">)</span>,</span>
 <span>            dist <span class="op">=</span> <span class="st">'nb'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># fit a minimal model (with less than optimal iterations)</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
-<span>                iter_warmup <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>                iter_sampling <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu"><a href="reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
+<span>           iter_warmup <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>           iter_sampling <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># check the posterior summary and computation diagnostics</span></span>
 <span><span class="fu"><a href="reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -171,7 +172,7 @@
 <div class="section level2">
 <h2 id="how-to-use-the-modskurt-package">How to use the <code>modskurt</code> package<a class="anchor" aria-label="anchor" href="#how-to-use-the-modskurt-package"></a>
 </h2>
-<p>See <a href="./articles/getting-started.html">Getting started</a> for a worked example and recommended workflow for analysing these nonlinear <code>modskurt</code> models of the distribution of a species’ abundance along environmental gradients.</p>
+<p>See <a href="https://hdrab127.github.io/modskurt/articles/getting-started.html">Getting started</a> for a worked example and recommended workflow for analysing these nonlinear <code>modskurt</code> models of the distribution of a species’ abundance along environmental gradients.</p>
 <p>More articles will follow.</p>
 </div>
 <div class="section level2">

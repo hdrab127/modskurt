@@ -53,15 +53,16 @@ spec <-
                                m = 35,
                                s = 40,
                                r = 0.9,
-                               kap = 0.5),
+                               kap = 1),
             y = c('Abundance (count)' = 'y'),
             x = c('Env gradient' = 'x'),
             dist = 'nb')
 
 # fit a minimal model (with less than optimal iterations)
-fit <- mskt_fit(spec,
-                iter_warmup = 200,
-                iter_sampling = 100)
+fit <- 
+  mskt_fit(spec,
+           iter_warmup = 200,
+           iter_sampling = 100)
 
 # check the posterior summary and computation diagnostics
 check_computation(fit)
@@ -72,7 +73,7 @@ abundance_dist(fit)
 
 ## How to use the `modskurt` package
 
-See [Getting started](./articles/getting-started.html) for a worked example and recommended workflow for analysing these nonlinear `modskurt` models of the distribution of a species' abundance along environmental gradients.
+See [Getting started](https://hdrab127.github.io/modskurt/articles/getting-started.html) for a worked example and recommended workflow for analysing these nonlinear `modskurt` models of the distribution of a species' abundance along environmental gradients.
 
 More articles will follow.
 
