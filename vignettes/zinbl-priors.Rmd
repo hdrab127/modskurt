@@ -1,0 +1,11 @@
+---
+title: "ZINBL prior specification"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ZINBL prior specification}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<style>#main{max-width:64rem !important}</style>
+<iframe width="100%" height="3400px" frameborder="0" src="https://observablehq.com/embed/@hdrab127/zinbl-prior-specs?cell=*"></iframe>

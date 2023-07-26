@@ -30,7 +30,7 @@ The `modskurt` **mean function** that describes the shape of average abundance a
 
 The negative binomial-based **abundance distributions** that describe the probability of observing different species counts and excess-zeros given the `modskurt` mean: 
 
-- https://salt-ecology.shinyapps.io/nb-zinbl-prior-specs/
+- [ZINBL priors](./zinbl-priors.html)
 
 ## In practice
 
