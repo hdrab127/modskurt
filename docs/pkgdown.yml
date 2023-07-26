@@ -3,12 +3,13 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   discrete-stan: discrete-stan.html
+  examples: examples.html
   getting-started: getting-started.html
   linked-zero-inflation: linked-zero-inflation.html
   modskurt-priors: modskurt-priors.html
   prior-specification: prior-specification.html
   zinbl-priors: zinbl-priors.html
-last_built: 2023-07-26T00:39Z
+last_built: 2023-07-26T05:28Z
 urls:
   reference: https://hdrab127.github.io/modskurt/reference
   article: https://hdrab127.github.io/modskurt/articles

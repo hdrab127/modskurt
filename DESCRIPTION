@@ -1,7 +1,7 @@
 Package: modskurt
 Type: Package
 Title: Bayesian Distributions of Species Abundance Along Environmental Gradients
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: 
     c(person("Hayden", "Rabel", , "hayden.rabel@gmail.com",
              role = c("aut", "cre")),
