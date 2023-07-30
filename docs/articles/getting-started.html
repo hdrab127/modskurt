@@ -141,7 +141,7 @@ installed and running, if not, jump over to this packages’ <a href="../index.h
 <span><span class="co"># lines together in any analysis</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hdrab127.github.io/modskurt/">modskurt</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/compile_stanmodels.html">compile_stanmodels</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "Already compiled: discrete.stan"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Compiling now: discrete.stan"</span></span></code></pre>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># everyone loves a good graph</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -327,11 +327,11 @@ priors above.</p>
 <span><span class="co">##  $ Nrep        : int 101</span></span>
 <span><span class="co">##  $ xrep        : int [1:101] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
 <span><span class="co">##  $ subset      :function ()  </span></span>
-<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 139 18 139 68 18 68 1759 1759</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001b913f00f80&gt; </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 139 18 139 68 18 68 1878 1878</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001f506943ea8&gt; </span></span>
 <span><span class="co">##  $ full        :function (prop = 1, seed = NULL)  </span></span>
-<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 103 17 138 3 17 3 1723 1758</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001b913f00f80&gt; </span></span>
+<span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 103 17 138 3 17 3 1842 1877</span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001f506943ea8&gt; </span></span>
 <span><span class="co">##  - attr(*, "pars")= chr [1:7] "H" "m" "s" "r" ...</span></span>
 <span><span class="co">##  - attr(*, "nms")=List of 3</span></span>
 <span><span class="co">##   ..$ y  : chr "Tuangi (count)"</span></span>
@@ -488,12 +488,12 @@ the posterior for the subset of data, and ….</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  2.465    1.069 3.534             0                 0 0.9515648</span></span>
-<span><span class="co">## 2        2  2.395    0.796 3.191             0                 0 1.2158109</span></span>
-<span><span class="co">## 3        3  2.294    1.035 3.329             0                 0 0.8885822</span></span>
-<span><span class="co">## 4        4  2.328    0.970 3.298             0                 0 0.8325988</span></span>
-<span><span class="co">## 5        5  2.356    0.976 3.332             0                 0 0.8103148</span></span>
-<span><span class="co">## 6        6  2.448    0.931 3.379             1                 0 0.8126523</span></span></code></pre>
+<span><span class="co">## 1        1  2.483    1.047 3.530             0                 0 0.9515648</span></span>
+<span><span class="co">## 2        2  2.442    0.797 3.239             0                 0 1.2158109</span></span>
+<span><span class="co">## 3        3  2.252    1.014 3.266             0                 0 0.8885822</span></span>
+<span><span class="co">## 4        4  2.433    0.949 3.382             0                 0 0.8325988</span></span>
+<span><span class="co">## 5        5  2.389    0.964 3.353             0                 0 0.8103148</span></span>
+<span><span class="co">## 6        6  2.485    0.874 3.359             1                 0 0.8126523</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -541,10 +541,10 @@ number of posterior samples.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 25.598   24.151 49.749             1                 0 0.9774463</span></span>
-<span><span class="co">## 2        2 28.042   34.150 62.192             0                 0 0.8960095</span></span>
-<span><span class="co">## 3        3 27.091   29.541 56.632             0                 0 0.8544922</span></span>
-<span><span class="co">## 4        4 27.803   30.958 58.761             0                 0 0.8961821</span></span></code></pre>
+<span><span class="co">## 1        1 23.420   22.570 45.990             1                 0 0.9774463</span></span>
+<span><span class="co">## 2        2 25.818   32.508 58.326             0                 0 0.8960095</span></span>
+<span><span class="co">## 3        3 24.601   27.910 52.511             0                 0 0.8544922</span></span>
+<span><span class="co">## 4        4 25.567   29.410 54.977             0                 0 0.8961821</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
@@ -661,14 +661,14 @@ predicted counts.</p>
 <span>     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="st">'90% limit of mean count density'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## Species range (see x.avg row) calculated as the  (averaged across posterior draws):</span></span>
+<span><span class="co">## Species range (see x.avg row) calculated as the region of x where the NB mean abundance (NB mean) is within 50% of the highest value of NB mean along x (averaged across posterior draws):</span></span>
 <span><span class="co">##                left      centre       right</span></span>
 <span><span class="co">## mean.avg 4.61090497  8.20110380  4.10910425</span></span>
 <span><span class="co">## mean.se  0.08438676  0.09694215  0.04775475</span></span>
 <span><span class="co">## x.avg    0.49785178 14.16000000 46.61076990</span></span>
 <span><span class="co">## x.se     0.10869801  0.40341400  0.48788582</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Species range (see x.avg row) calculated as the  (averaged across posterior draws):</span></span>
+<span><span class="co">## Species range (see x.avg row) calculated as the smallest region of x where the density of NB mean abundance (NB mean) is equal to 90% of the total density of NB mean along x (averaged across posterior draws):</span></span>
 <span><span class="co">##               left     centre       right</span></span>
 <span><span class="co">## mean.avg 4.2890112  7.2015242  2.37501269</span></span>
 <span><span class="co">## mean.se  0.1177878  0.0939659  0.03865507</span></span>

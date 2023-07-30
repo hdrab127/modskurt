@@ -9,7 +9,9 @@ check_prior_dens(
   pars = attr(spec, "pars"),
   use_subset = TRUE,
   prob_inner = 0.5,
-  prob_outer = 0.99
+  prob_outer = 0.99,
+  prob_annotate = 0.95,
+  plot = TRUE
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ check_prior_dens(
 \item{prob_inner}{inner probability (high density interval) to highlight}
 
 \item{prob_outer}{outer probability range to plot the density between}
+
+\item{prob_annotate}{optional, add markers at certain probability interval}
+
+\item{plot}{boolean, plot together, or return list of individual ggplots}
 }
 \value{
 a patchwork of ggplots

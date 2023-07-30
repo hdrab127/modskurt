@@ -5,6 +5,8 @@
 #' @param use_subset whether to use specified subset or all data
 #' @param prob_inner inner probability (high density interval) to highlight
 #' @param prob_outer outer probability range to plot the density between
+#' @param prob_annotate optional, add markers at certain probability interval
+#' @param plot boolean, plot together, or return list of individual ggplots
 #'
 #' @importFrom rlang .data
 #'
@@ -14,14 +16,22 @@ check_prior_dens <- function(spec,
                              pars = attr(spec, 'pars'),
                              use_subset = TRUE,
                              prob_inner = 0.5,
-                             prob_outer = 0.99) {
+                             prob_outer = 0.99,
+                             prob_annotate = 0.95,
+                             plot = TRUE) {
   # outer prob (op), inner prob (ip)
   oplow <- (1 - prob_outer) / 2
   opupp <- 1 - oplow
+  if (is.null(prob_annotate)) {
+    prob_annotate <- prob_outer
+  }
+  aplow <- (1 - prob_annotate) / 2
+  apupp <- 1 - aplow
   iplow <- (1 - prob_inner) / 2
   ipupp <- 1 - iplow
-  ps <- sort(unique(c(c(iplow, 0.5, ipupp),
+  ps <- sort(unique(c(aplow, iplow, 0.5, ipupp, apupp,
                       seq(oplow, opupp, length.out = 100))))
+  ap_idx <- which(ps == aplow | ps == apupp)
   ip_idx <- which(ps >= iplow & ps < ipupp)
   med_idx <- which(ps == 0.5)
 
@@ -41,29 +51,65 @@ check_prior_dens <- function(spec,
     # if (cfg$nm == 'italic(r)') {
     #   y_nm <- 'Prior density'
     # }
-    dens <- data.frame(x = xs, y = ys, inner = FALSE, med = FALSE)
+    dens <- data.frame(x = xs, y = ys, mark = FALSE, inner = FALSE, med = FALSE)
+    dens$mark[ap_idx] <- TRUE
     dens$inner[ip_idx] <- TRUE
     dens$med[med_idx] <- TRUE
     gg <-
       ggplot2::ggplot(dens, ggplot2::aes(.data[['x']], .data[['y']])) +
-      ggplot2::geom_area(data = dens[dens$inner, ],
-                        fill = '#e1f1fc',
-                        outline.type = 'lower') +
-      ggplot2::geom_line(colour = '#03386c') +
+      ggplot2::geom_area(ggplot2::aes(fill = 'inner'),
+                         data = dens[dens$inner, ],
+                         # fill = '#f1f9ff',
+                         outline.type = 'lower') +
+      ggplot2::geom_line(ggplot2::aes(colour = 'density')) +
       ggplot2::geom_segment(ggplot2::aes(x = .data[['x']],
-                                       xend = .data[['x']],
-                                       y = 0,
-                                       yend = .data[['y']]),
-                           colour = '#6497b1',
-                           data = dens[dens$med, ],
-                           lwd = 1) +
+                                         xend = .data[['x']],
+                                         y = 0,
+                                         yend = .data[['y']]),
+                            colour = '#6497b1',
+                            data = dens[dens$med, ],
+                            linewidth = 1) +
+      # trick a vertical legend entry
+      ggplot2::geom_vline(ggplot2::aes(xintercept = .data[['x']],
+                                       linetype = 'med'),
+                          na.rm = TRUE,
+                          data = data.frame(x = NA_real_)) +
+      ggplot2::geom_point(ggplot2::aes(shape = 'mark'),
+                          data = dens[dens$mark, ],
+                          colour = '#cc0000',
+                          size = 2) +
+      ggplot2::scale_colour_manual(NULL,
+                                   labels = paste0('Density function'),
+                                   values = '#03386c') +
+      ggplot2::scale_fill_manual(NULL,
+                                 labels = paste0(100 * prob_inner, '% HDI'),
+                                 values = '#f1f9ff') +
+      ggplot2::scale_linetype_manual(NULL,
+                                     labels = 'Median',
+                                     values = 'solid') +
+      ggplot2::scale_shape_manual(NULL,
+                                  labels = paste0('Edges of ',
+                                                  100 * prob_annotate, '% HDI'),
+                                  values = 1) +
+      ggplot2::guides(colour = ggplot2::guide_legend(order = 1),
+                      linetype = ggplot2::guide_legend(order = 2,
+                                                       override.aes = list(
+                                                         linewidth = 1,
+                                                         colour = '#6497b1'
+                                                       )),
+                      fill = ggplot2::guide_legend(order = 3),
+                      shape = ggplot2::guide_legend(order = 4)) +
       ggplot2::labs(x = parse(text = cfg$nm),
-                   y = y_nm,
-                   subtitle = cfg$title)
+                    y = y_nm,
+                    subtitle = cfg$title)
 
     cfg$geoms(gg)
   })
-  patchwork::wrap_plots(plots, guides = 'collect')
+  if (plot) {
+    patchwork::wrap_plots(plots, guides = 'collect')
+  } else {
+    plots
+  }
 }
 
 #' @keywords internal
@@ -169,10 +215,10 @@ check_prior_mskt <- function(spec,
   }))
   ggplot2::ggplot(mus) +
     ggplot2::geom_line(ggplot2::aes(x = .data[['x']],
-                                  y = .data[['mu']],
-                                  group = .data[['draw']],
-                                  alpha = .data[['jp']]),
-                      colour = '#DD3300') +
+                                    y = .data[['mu']],
+                                    group = .data[['draw']],
+                                    alpha = .data[['jp']]),
+                       colour = '#DD3300') +
     ggplot2::scale_alpha_identity(guide = 'none') +
     # scale_x_continuous(expand = c(0.01, 0.01)) +
     # scale_y_continuous(sec.axis = sec_axis(~ .), limits = c(0, sdat$y_max)) +
@@ -213,33 +259,33 @@ check_prior_dist <- function(spec,
                      draw = n,
                      max_y = max(y),
                      prop_0 = mean(y == 0),
-                     iqr_y = stats::IQR(y)))
+                     sd_y = stats::sd(y)))
   }))
   yobs <- data.frame(name = 'obs',
                      draw = 0,
                      max_y = max(sdat$y),
                      prop_0 = mean(sdat$y == 0),
-                     iqr_y = stats::IQR(sdat$y))
-  plots <- lapply(c('max_y', 'prop_0', 'iqr_y'), function(stat) {
+                     sd_y = stats::sd(sdat$y))
+  plots <- lapply(c('max_y', 'prop_0', 'sd_y'), function(stat) {
     ggplot2::ggplot() +
       ggplot2::geom_histogram(ggplot2::aes(x = .data[[stat]],
-                                         fill = .data[['name']]),
-                             bins = n_draws / 2,
-                             na.rm = TRUE,
-                             colour = '#88CC88',
-                             data = yrep) +
+                                           fill = .data[['name']]),
+                              bins = n_draws / 2,
+                              na.rm = TRUE,
+                              colour = '#88CC88',
+                              data = yrep) +
       ggplot2::geom_vline(ggplot2::aes(xintercept = .data[[stat]],
-                                     colour = .data[['name']]),
-                         linewidth = 1,
-                         data = yobs) +
+                                       colour = .data[['name']]),
+                          linewidth = 1,
+                          data = yobs) +
       ggplot2::scale_colour_manual(nms$y,
-                                  values = c('obs' = '#005500'),
-                                  guide = ggplot2::guide_legend(order = 1),
-                                  labels = 'Observed') +
+                                   values = c('obs' = '#005500'),
+                                   guide = ggplot2::guide_legend(order = 1),
+                                   labels = 'Observed') +
       ggplot2::scale_fill_manual(NULL,
-                                values = c('rep' = '#BBFFAA'),
-                                guide = ggplot2::guide_legend(order = 2),
-                                labels = 'Replicated') +
+                                 values = c('rep' = '#BBFFAA'),
+                                 guide = ggplot2::guide_legend(order = 2),
+                                 labels = 'Replicated') +
       ggplot2::labs(y = NULL) +
       ggplot2::theme(legend.title = ggplot2::element_text(
         margin = ggplot2::margin(b = 6, unit = 'pt')),
@@ -249,7 +295,7 @@ check_prior_dist <- function(spec,
   # print(yrep)
   (plots[[1]] + ggplot2::labs(x = 'max(y)', y = '% of reps')) +
     (plots[[2]] + ggplot2::labs(x = 'sum(y = 0) / N') + ggplot2::xlim(0, 1)) +
-    (plots[[3]] + ggplot2::labs(x = 'IQR(y)')) +
+    (plots[[3]] + ggplot2::labs(x = 'sd(y)')) +
     patchwork::plot_layout(guides = 'collect')
 }
 
@@ -339,9 +385,10 @@ check_prior_zero <- function(spec,
 mskt_pars <- function(sdat, pars) {
   with(sdat, {
     list(
-      'H' = list(title = expression(
+      'H' = list(title = substitute(
         italic(H) %~% 'Beta' * group('(', list(alpha, beta), ')') %.%
-          'max' ~ italic(y)),
+          'max' ~ italic(y),
+        list(alpha = hp_H[1], beta = hp_H[2])),
         nm = 'italic(H)',
         pr = 'beta',
         hp = list(shape1 = hp_H[1], shape2 = hp_H[2]),
@@ -349,8 +396,8 @@ mskt_pars <- function(sdat, pars) {
         geoms = \(gg) {
           gg +
             ggplot2::geom_vline(xintercept = y_max,
-                               alpha = 0.5,
-                               lty = 2) +
+                                alpha = 0.5,
+                                lty = 2) +
             ggplot2::xlim(0, y_max)# +
           # geom_text(aes(label = label),
           #           parse = TRUE,
@@ -364,9 +411,10 @@ mskt_pars <- function(sdat, pars) {
           #             x = y_max,
           #             y = max(.x$y)))
         }),
-      'm' = list(title = expression(
+      'm' = list(title = substitute(
         italic(m) %~% 'Beta' * group('(', list(alpha, beta), ')') %.%
-          'range' ~ italic(x)[italic(y)>0] + 'min' ~ italic(x)[italic(y)>0]),
+          'range' ~ italic(x)[italic(y)>0] + 'min' ~ italic(x)[italic(y)>0],
+        list(alpha = hp_m[1], beta = hp_m[2])),
         nm = 'italic(m)',
         pr = 'beta',
         hp = list(shape1 = hp_m[1], shape2 = hp_m[2]),
@@ -374,11 +422,11 @@ mskt_pars <- function(sdat, pars) {
         geoms = \(gg) {
           gg +
             ggplot2::geom_vline(xintercept = x_pos_min,
-                               alpha = 0.5,
-                               lty = 2) +
+                                alpha = 0.5,
+                                lty = 2) +
             ggplot2::geom_vline(xintercept = x_pos_range + x_pos_min,
-                               alpha = 0.5,
-                               lty = 2)# +
+                                alpha = 0.5,
+                                lty = 2)# +
           # geom_text(aes(label = label),
           #           parse = TRUE,
           #           hjust = 0,
@@ -402,9 +450,10 @@ mskt_pars <- function(sdat, pars) {
           #             x = x_pos_range + x_pos_min,
           #             y = 0))
         }),
-      's' = list(title = expression(
+      's' = list(title = substitute(
         'log' ~ italic(s) %~% 'Normal' * group('(', list(mu, sigma), ')') %.%
-          'range' ~ italic(x)[italic(y)>0]),
+          'range' ~ italic(x)[italic(y)>0],
+        list(mu = hp_s[1], sigma = hp_s[2])),
         nm = 'italic(s)',
         pr = 'norm',
         hp = list(mean = hp_s[1], sd = hp_s[2]),
@@ -412,8 +461,8 @@ mskt_pars <- function(sdat, pars) {
         geoms = \(gg) {
           gg +
             ggplot2::geom_vline(xintercept = x_pos_range,
-                               alpha = 0.5,
-                               lty = 2)# +
+                                alpha = 0.5,
+                                lty = 2)# +
           # geom_text(aes(label = label),
           #           parse = TRUE,
           #           hjust = -0.1,
@@ -424,30 +473,34 @@ mskt_pars <- function(sdat, pars) {
           #             x = x_pos_range,
           #             y = max(.x$y)))
         }),
-      'r' = list(title = expression(
-        italic(r) %~% 'Beta' * group('(', list(alpha, beta), ')')),
+      'r' = list(title = substitute(
+        italic(r) %~% 'Beta' * group('(', list(alpha, beta), ')'),
+        list(alpha = hp_r[1], beta = hp_r[2])),
         nm = 'italic(r)',
         pr = 'beta',
         hp = list(shape1 = hp_r[1], shape2 = hp_r[2]),
         tr = identity,
         geoms = identity),
-      'd' = list(title = expression(
-        'log' ~ italic(d) %~% 'Normal' * group('(', list(mu, sigma), ')')),
+      'd' = list(title = substitute(
+        'log' ~ italic(d) %~% 'N' * group('(', list(mu, sigma), ')'),
+        list(mu = hp_d[1], sigma = hp_d[2])),
         nm = 'italic(d)',
         pr = 'norm',
         hp = list(mean = hp_d[1], sd = hp_d[2]),
         tr = \(z) exp(z),
         geoms = identity),
-      'p' = list(title = expression(
+      'p' = list(title = substitute(
         italic(p) %~% 'Beta' * group('(', list(alpha, beta), ')') %.%
-          1.95 + 0.05),
+          1.95 + 0.05,
+        list(alpha = hp_p[1], beta = hp_p[2])),
         nm = 'italic(p)',
         pr = 'beta',
         hp = list(shape1 = hp_p[1], shape2 = hp_p[2]),
         tr = \(z) z * 1.95 + 0.05,
         geoms = identity),
-      'kap' = list(title = expression(
-        kappa == 1 / sqrt(phi) %~% 'Exp' * group('(', list(lambda), ')')),
+      'kap' = list(title = substitute(
+        kappa == 1 / sqrt(phi) %~% 'Exp' * group('(', list(lambda), ')'),
+        list(lambda = hp_kap)),
         nm = 'kappa',
         pr = 'exp',
         hp = list(rate = hp_kap),
@@ -459,8 +512,9 @@ mskt_pars <- function(sdat, pars) {
       #   hp = list(rate = hp_kap),
       #   tr = identity,
       #   geoms = \(gg) gg + xlim(0, 1)),
-      'g0' = list(title = expression(
-        gamma[0] %~% 'Normal' * group('(', list(mu, sigma), ')')),
+      'g0' = list(title = substitute(
+        gamma[0] %~% 'Normal' * group('(', list(mu, sigma), ')'),
+        list(mu = hp_g0[1], sigma = hp_g0[2])),
         nm = 'gamma[0]',
         # TODO: do this in geoms only...?
         # nm = 'logit^-1~gamma[0]',
@@ -469,16 +523,17 @@ mskt_pars <- function(sdat, pars) {
         hp = list(mean = hp_g0[1], sd = hp_g0[2]),
         tr = identity,
         geoms = identity),
-        # geoms = \(gg) {
-        #   gg +
-        #     scale_x_continuous(expression(logit^-1~gamma[0]),
-        #                        # limits = c(0.01, 0.99),
-        #                        # breaks = c(0.01, seq(0.1, 0.9, 0.1), 0.99),
-        #                        # labels = c('~0', seq(0.1, 0.9, 0.1), '~1'),
-        #                        trans = scales::logit_trans())
-        # }),
-      'g1' = list(title = expression(
-        gamma[1] %~% 'Half-Normal' * group('(', list(sigma), ')')),
+      # geoms = \(gg) {
+      #   gg +
+      #     scale_x_continuous(expression(logit^-1~gamma[0]),
+      #                        # limits = c(0.01, 0.99),
+      #                        # breaks = c(0.01, seq(0.1, 0.9, 0.1), 0.99),
+      #                        # labels = c('~0', seq(0.1, 0.9, 0.1), '~1'),
+      #                        trans = scales::logit_trans())
+      # }),
+      'g1' = list(title = substitute(
+        gamma[1] %~% 'Half-Normal' * group('(', list(sigma), ')'),
+        list(sigma = hp_g1)),
         nm = 'gamma[1]',
         pr = 'hnorm',
         hp = list(sd = hp_g1),

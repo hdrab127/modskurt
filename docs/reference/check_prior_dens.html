@@ -92,7 +92,9 @@
 <span>  pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">spec</span>, <span class="st">"pars"</span><span class="op">)</span>,</span>
 <span>  use_subset <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  prob_inner <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  prob_outer <span class="op">=</span> <span class="fl">0.99</span></span>
+<span>  prob_outer <span class="op">=</span> <span class="fl">0.99</span>,</span>
+<span>  prob_annotate <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -116,6 +118,14 @@
 
 <dt>prob_outer</dt>
 <dd><p>outer probability range to plot the density between</p></dd>
+
+
+<dt>prob_annotate</dt>
+<dd><p>optional, add markers at certain probability interval</p></dd>
+
+
+<dt>plot</dt>
+<dd><p>boolean, plot together, or return list of individual ggplots</p></dd>
 
 </dl></div>
     <div class="section level2">

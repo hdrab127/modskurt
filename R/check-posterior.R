@@ -6,6 +6,8 @@
 #' @param prob_outer outer probability range to plot the density between
 #' @param by_chain plot chains separately to identify multiple modes and mixing
 #'   issues
+#' @param plot boolean, plot together, or return list of individual ggplots
+#' @param chain_legend_ncol for the thesis figure
 #'
 #' @importFrom rlang .data
 #'
@@ -14,7 +16,9 @@ check_post_dens <- function(fit,
                             pars = attr(spec, 'pars'),
                             prob_inner = 0.5,
                             prob_outer = 0.99,
-                            by_chain = FALSE) {
+                            by_chain = FALSE,
+                            chain_legend_ncol = 1,
+                            plot = TRUE) {
   oplow <- (1 - prob_outer) / 2
   opupp <- 1 - oplow
   iplow <- (1 - prob_inner) / 2
@@ -43,7 +47,7 @@ check_post_dens <- function(fit,
     draws$chain <- 1
   }
 
-  plots <- lapply(names(cfgs), function(nm) {
+  plots <- lapply(setNames(names(cfgs), names(cfgs)), function(nm) {
     cfg <- cfgs[[nm]]
     # prior
     pr_xs <- do.call(get(paste0('q', cfg$pr)), c(list(p = ps), cfg$hp))
@@ -76,11 +80,23 @@ check_post_dens <- function(fit,
     if (by_chain) {
       gg <-
         gg +
-        ggplot2::geom_line(data = pr_dens,
-                           linetype = 'dashed',
+        ggplot2::geom_line(ggplot2::aes(linetype = 'prior'),
+                           data = pr_dens,
+                           # linetype = 'dashed',
                            colour = '#AAAAAA') +
+        ggplot2::geom_blank(ggplot2::aes(linetype = 'post'),
+                            data = data.frame(x = NA_real_, y = NA_real_),
+                            na.rm = TRUE) +
+        ggplot2::scale_linetype_manual('Density',
+                                       values = c('dashed', 'solid'),
+                                       breaks = c('prior', 'post'),
+                                       labels = c('Prior', 'Posterior')) +
         ggplot2::geom_line(ggplot2::aes(group = .data[['chain']],
                                       colour = .data[['chain']])) +
+        ggplot2::guides(colour = ggplot2::guide_legend(ncol = chain_legend_ncol),
+                        linetype = ggplot2::guide_legend(override.aes = list(
+                          colour = c('#AAAAAA', '#000000')
+                        ))) +
         ggplot2::geom_segment(ggplot2::aes(x = .data[['x']],
                                          xend = .data[['x']],
                                          y = 0,
@@ -118,7 +134,11 @@ check_post_dens <- function(fit,
 
     cfg$geoms(gg)
   })
-  patchwork::wrap_plots(plots, guides = 'collect')
+  if (plot) {
+    patchwork::wrap_plots(plots, guides = 'collect')
+  } else {
+    plots
+  }
 }
 
 #' Check prediction calibration using discrete PIT histograms
@@ -214,7 +234,7 @@ check_post_calibration <- function(fit, ndraws = 50) {
                                 breaks = c('Uniform', 'Training', 'Test')) +
     ggplot2::labs(x = 'Discrete PIT score',
                  y = 'Relative frequency',
-                 colour = 'Source')
+                 colour = 'Compared to')
 }
 
 #' Check for posterior misspecification by assessing influence data points

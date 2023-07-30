@@ -74,7 +74,7 @@ abundance_dist <- function(fit,
   if (!include_zero_inflation | dist == 'nb') {
     mu_nm <- 'NB mean'
   } else {
-    mu_nm <- 'ZINBL mean'
+    mu_nm <- 'E[y]'
   }
   # then quantiles
   qps <- summaries[grepl('^q', summaries)]
@@ -271,7 +271,7 @@ abundance_range <- function(fit,
   if (dy_nm == 'Mean' & (!include_zero_inflation | dist == 'nb')) {
     dy_nm <- 'NB mean'
   } else {
-    dy_nm <- 'ZINBL mean'
+    dy_nm <- 'E[y]'
   }
   dy_nm <- gsub('^Q(\\d*)$', 'Q[\\1]', dy_nm)
     dy_console <- dy_nm
@@ -281,12 +281,12 @@ abundance_range <- function(fit,
   }
   cat('\nSpecies range (see x.avg row) calculated as the ',
       switch(using_range,
-             'high_zone' = paste0('region of x where the ',
+             'HAZ' = paste0('region of x where the ',
                                   dy_console, ' abundance (',
                                   dy_nm, ') is within ',
                                   capture_pct, '% of the highest value of ',
                                   dy_nm, ' along x'),
-             'most_dens' = paste0('smallest region of x where the density of ',
+             'ADL' = paste0('smallest region of x where the density of ',
                                   dy_console, ' abundance (',
                                   dy_nm, ') is equal to ',
                                   capture_pct, '% of the total density of ',
@@ -322,8 +322,8 @@ abundance_range <- function(fit,
 
     cont_nm <- paste0(capture_pct, '% ',
                       switch(using_range,
-                             'high_zone' = 'HAZ',
-                             'most_dens' = 'ADL'))
+                             'HAZ' = 'HAZ',
+                             'ADL' = 'ADL'))
     xidx <- ranges$name == 'x'
     xavgidx <- row.names(aggs) == 'x.avg'
     if (region == 'centre') {
@@ -385,8 +385,8 @@ abundance_range <- function(fit,
       gg +
       ggplot2::labs(x = nms$x,
                     y = nms$y,
-                    colour = substitute(y%~%distnm,
-                                        list(distnm = toupper(dist))))
+                    colour = 'Summary')#substitute(y%~%distnm,
+                                      #  list(distnm = toupper(dist))))
     print(aggs)
     gg
   } else {

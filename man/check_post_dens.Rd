@@ -9,7 +9,9 @@ check_post_dens(
   pars = attr(spec, "pars"),
   prob_inner = 0.5,
   prob_outer = 0.99,
-  by_chain = FALSE
+  by_chain = FALSE,
+  chain_legend_ncol = 1,
+  plot = TRUE
 )
 }
 \arguments{
@@ -23,6 +25,10 @@ check_post_dens(
 
 \item{by_chain}{plot chains separately to identify multiple modes and mixing
 issues}
+
+\item{chain_legend_ncol}{for the thesis figure}
+
+\item{plot}{boolean, plot together, or return list of individual ggplots}
 }
 \description{
 visual display of chain mixing and prior-data conflicts
