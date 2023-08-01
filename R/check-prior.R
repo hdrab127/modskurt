@@ -219,7 +219,7 @@ check_prior_mskt <- function(spec,
                                     group = .data[['draw']],
                                     alpha = .data[['jp']]),
                        colour = '#DD3300') +
-    ggplot2::scale_alpha_identity(guide = 'none') +
+    ggplot2::scale_alpha_identity(guide = guide_legend('Relative joint\nprior probability')) +
     # scale_x_continuous(expand = c(0.01, 0.01)) +
     # scale_y_continuous(sec.axis = sec_axis(~ .), limits = c(0, sdat$y_max)) +
     ggplot2::labs(y = nms$y, x = nms$x)

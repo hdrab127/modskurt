@@ -1,0 +1,214 @@
+---
+title: "Hierarchy of time"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hierarchy of time}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  # collapse = TRUE,
+  # comment = "#>",
+  message = FALSE, 
+  warning = FALSE, 
+  # eval = identical(Sys.getenv("NOT_CRAN"), "true"),
+  dev = "png",
+  dpi = 120,
+  fig.asp = 0.4,
+  fig.width = 10,
+  out.width = "100%",
+  fig.align = "center"
+)
+options(crayon.enabled = TRUE)
+options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
+
+# eulachon <-
+#   readRDS('../fish/2022-10-02-trawl.rds') |>
+#   dplyr::filter(grepl('Thaleichthys', species)) |>
+#   dplyr::select(-trawl_id, -lat, -lng, -species, -flourescence, -turb, -ld, -rd,
+#                 -date, -cpue_kg, -cpue_count) |>
+#   dplyr::relocate(year, .before = 1)
+# usethis::use_data(eulachon, overwrite = TRUE)
+```
+
+## Overview
+
+This vignette presents a hierarchical Bayesian workflow for modelling temporal (year-to-year) changes n the distribution of discrete **species abundance**, $y$, along an **environmental gradient**, $x$, using the **modskurt** function to predict mean abundance, $\mu$. The model is specified as 
+
+...
+
+## Load packages and stan files
+
+This section assumes you've already got `modskurt` installed and running, if not, jump over to this packages' [home page](../index.html).
+
+```{r load-compile}
+# compile_stanmodels only runs when needed, so it doesn't hurt to keep these
+# lines together in any analysis
+library(modskurt)
+compile_stanmodels()
+
+# everyone loves a good graph
+library(ggplot2)
+library(patchwork)
+theme_set(theme_classic())
+
+# for reproducibility
+set.seed(123456)
+```
+
+## Case study - Eulachon vs. sea temperature over time
+
+Use Northwest Pacific groundfish trawl survey data for *Thaleichthys pacificus* (eulachon, or candlefish) over the ocean temperature gradient - [more info](https://www.fisheries.noaa.gov/west-coast/science-data/us-west-coast-groundfish-bottom-trawl-survey). Key variables are:
+
+- `total_count` the number of individual redstripes caught during each trawl.
+- `temp` average water temperature recorded at the net during the trawl.
+- `area_swept` total area (ha) of water swept during the trawl (trawl length * net mouth diameter), this is the sampling **effort** used to observe `total_count`.
+- `year` year in which the data was collected.
+
+```{r data}
+data(eulachon)
+eulachon
+```
+
+## A. Specify initial model
+
+We'll start with the simplest model that ignores time for now,
+
+$$
+\begin{aligned}
+y_n &\sim \text{NB}\left[\text{area_swept} \cdot \text{Modskurt}(x_n), \kappa\right] \\
+\end{aligned}
+$$
+
+```{r}
+# specify simple model for latest year
+spec <-
+  mskt_spec(data = eulachon[eulachon$year == max(eulachon$year),],
+            y = c('Eulachon (CPUE)' = 'total_count'),
+            x = c('SST (°C)' = 'temp'),
+            effort = c('Area swept (ha)' = 'area_swept'),
+            dist = 'nb',
+            shape = 'rdp',
+            subset_prop = 0.3)
+```
+
+```{r model-spec}
+str(spec)
+```
+
+## B. Verify initial model specification
+
+### Prior probabilities of parameter values
+
+```{r check-prior-dens, fig.asp=0.8, fig.cap=""}
+# check_prior_dens(spec)
+```
+
+### Prior predictions for the `modskurt` mean
+
+```{r check-prior-mskt, fig.cap="TODO: add legend for alpha!"}
+# check_prior_mskt(spec)
+```
+
+### Prior predictions for summary statistics of `y`
+
+```{r check-prior-dist, fig.asp=0.3}
+check_prior_dist(spec)
+```
+
+*OPTIONAL*: refine model spec further
+
+## C. Fit subset model
+
+```{r fit-subset, results='hide'}
+fit_subset <-
+  mskt_fit(spec,
+           # use the subset only
+           use_subset = TRUE,
+           iter_warmup = 200,
+           iter_sampling = 100,
+           chains = 6,
+           parallel_chains = 6,
+           # for testing
+           show_messages = TRUE, show_exceptions = TRUE)
+```
+
+```{r fit-subset-check}
+check_computation(fit_subset)
+```
+
+*OPTIONAL*: refine model spec or fit parameters
+
+### Check subset model
+
+```{r check-post-dens-subset, fig.asp=0.8}
+# visual display of chain mixing and prior-data conflicts
+check_post_dens(fit_subset, by_chain = TRUE)
+```
+
+```{r check-post-calibration-subset}
+# uses test set for discrete pit
+check_post_calibration(fit_subset)
+```
+
+*OPTIONAL*: refine model spec or fit parameters
+
+## D. Fit full model
+
+```{r fit-full, results='hide'}
+fit_full <-
+  mskt_fit(spec,
+           chains = 4,
+           parallel_chains = 4,
+           # for testing
+           show_messages = TRUE, show_exceptions = TRUE)
+```
+
+```{r fit-full-check}
+check_computation(fit_full)
+```
+
+*OPTIONAL*: refine model spec or fit parameters
+
+### Check full model
+
+```{r check-post-influencers-full}
+check_post_influencers(fit_full)
+```
+
+## E. Use the model
+
+### Plot summaries of the abundance distribution
+
+```{r use-full-fit-dist}
+# plot the distribution of abundance along the gradient
+abundance_dist(fit_full, summaries = c('mean', 'median', 'q90')) +
+  scale_y_sqrt()
+```
+
+### Calculate ranges of x for different percentages of abundance measures
+
+```{r use-full-fit-range-plot}
+# compose in row using patchwork
+# (abundance_range(fit_full,
+#                  capture_pct = 50,
+#                  using_range = 'HAZ',
+#                  based_on = 'mean',
+#                  plotted = TRUE,
+#                  range_colour = 'red') +
+#    labs(subtitle = '50% of highest mean counts')) + 
+#   (abundance_range(fit_full,
+#                    capture_pct = 90,
+#                    using_range = 'ADL',
+#                    based_on = 'mean',
+#                    # specify left or right side limit
+#                    region = 'left',
+#                    plotted = TRUE,
+#                    range_colour = 'blue') +
+#      labs(y = NULL, subtitle = '90% limit of mean count density')) +
+#   plot_layout(guides = 'collect')
+```
+
+## Summary

@@ -141,7 +141,7 @@ installed and running, if not, jump over to this packages’ <a href="../index.h
 <span><span class="co"># lines together in any analysis</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hdrab127.github.io/modskurt/">modskurt</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/compile_stanmodels.html">compile_stanmodels</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "Compiling now: discrete.stan"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Already compiled: discrete.stan"</span></span></code></pre>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># everyone loves a good graph</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -199,7 +199,7 @@ for discrete abundance data like these, we recommend first trying a
 <strong>negative binomial</strong> (NB) regression, however there may be
 some cases, particularly for rare and hard to sample species, where it
 might be worth going straight for a <strong>zero-inflated negative
-binomial linked</strong> (ZINBL) extension – see <a href="../linked-zero-inflation.html">the ZINBL article</a> for an
+binomial linked</strong> (ZINBL) extension – see <a href="./linked-zero-inflation.html">the ZINBL article</a> for an
 example.</p>
 <p>Given the negative binomial distribution of abundance, <span class="math inline">\(y\)</span>, the <code>modskurt</code> package
 specifies that the mean of the negative binomial distribution (or
@@ -256,11 +256,10 @@ similar effect to increasing the tail weight of a distribution
 function.</li>
 </ul>
 <p>The effect of each parameter is best described visually, so please
-check out this <a href="https://salt-ecology.shinyapps.io/modskurt-prior-specs/" class="external-link">app</a>
-if you haven’t already and toggle through different parameter values.
-Not all of these parameters are necessary for every analysis, but that
-discussion is best illustrated in a <a href="TODO">separate
-example</a>.</p>
+check out this <a href="https://observablehq.com/@hdrab127/nzm-model" class="external-link">Observable</a> if
+you haven’t already and toggle through different parameter values. Not
+all of these parameters are necessary for every analysis, but that
+discussion is best illustrated in a future example.</p>
 <p>Being a Bayesian model, we get to determine what values of each
 parameter are realistic given the relationship we wish to model, rather
 than whatever potentially unrealistic value fits the data best. This is
@@ -275,13 +274,12 @@ default priors that <em>should</em> just work 🤞:</p>
   \log s &amp;\sim \text{Normal}(-2.0, 0.6) + \log \text{range}~ x \\
   r &amp;\sim \text{Beta}(1.2, 1.2) \\
   \log d &amp;\sim \text{Normal}(0.5, 1.0) \\
-  p &amp;\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05 \\
+  p &amp;\sim \text{Beta}(1.2, 1.2) \cdot 1.95 + 0.05 \\
   \kappa &amp;\sim \text{Exponential}(0.5), \\
 \end{align}
 \]</span></p>
 <p>However, we still need to check these in each and every model and
-will be provide guidance on how to do this in section B. See … for
-technical details.</p>
+will be provide guidance on how to do this in section B.</p>
 <p>Now finally, to specify this model in <code>R</code>, we use the <a href="../reference/mskt_spec.html"><code>mskt_spec</code></a>
 function:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -328,10 +326,10 @@ priors above.</p>
 <span><span class="co">##  $ xrep        : int [1:101] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
 <span><span class="co">##  $ subset      :function ()  </span></span>
 <span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 139 18 139 68 18 68 1878 1878</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001f506943ea8&gt; </span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x00000238a9a2b2d0&gt; </span></span>
 <span><span class="co">##  $ full        :function (prop = 1, seed = NULL)  </span></span>
 <span><span class="co">##   ..- attr(*, "srcref")= 'srcref' int [1:8] 103 17 138 3 17 3 1842 1877</span></span>
-<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x000001f506943ea8&gt; </span></span>
+<span><span class="co">##   .. ..- attr(*, "srcfile")=Classes 'srcfilealias', 'srcfile' &lt;environment: 0x00000238a9a2b2d0&gt; </span></span>
 <span><span class="co">##  - attr(*, "pars")= chr [1:7] "H" "m" "s" "r" ...</span></span>
 <span><span class="co">##  - attr(*, "nms")=List of 3</span></span>
 <span><span class="co">##   ..$ y  : chr "Tuangi (count)"</span></span>
@@ -383,35 +381,35 @@ relationships – more on this <a href="./linked-zero-inflation.html">here</a>
 <h3 id="prior-probabilities-of-parameter-values">Prior probabilities of parameter values<a class="anchor" aria-label="anchor" href="#prior-probabilities-of-parameter-values"></a>
 </h3>
 <p>If you tweaked the default hyperparameters above, then you’ll want to
-check they produce the correct marginal prior here:</p>
+check they produce the correct marginal prior distribution here:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<div class="figure" style="text-align: center">
-<img src="getting-started_files/figure-html/check-prior-dens-1.png" alt="TODO: add legend for median, 50%HDI and 99% line!" width="100%"><p class="caption">
-TODO: add legend for median, 50%HDI and 99% line!
-</p>
-</div>
+<p><img src="getting-started_files/figure-html/check-prior-dens-1.png" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="prior-predictions-for-the-modskurt-mean">Prior predictions for the <code>modskurt</code> mean<a class="anchor" aria-label="anchor" href="#prior-predictions-for-the-modskurt-mean"></a>
 </h3>
-<p>The default looks like a pile of spaghetti, if you have information
-on any of the mean shapes you might expect, then check they are
-reasonably covered here and that impossible shapes are excluded, or at
-leasted weighted very heavily away from:</p>
+<p>The default assumption of prior mean shapes look like a pile of
+spaghetti, if you have information on any of the mean shapes you might
+expect, then check they are reasonably covered here and that impossible
+shapes are excluded, or at least weighted very heavily away from. We
+highly recommend utilising this <a href="./modskurt-priors.html"><code>modskurt</code> prior specification
+tool</a> provided with the package for adjusting and verifying the model
+priors in real time.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_mskt.html">check_prior_mskt</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="getting-started_files/figure-html/check-prior-mskt-1.png" alt="TODO: add legend for alpha!" width="100%"><p class="caption">
-TODO: add legend for alpha!
+<img src="getting-started_files/figure-html/check-prior-mskt-1.png" alt="Line opacity shows the prior probability of jointly observing the parameters that predict that shape" width="100%"><p class="caption">
+Line opacity shows the prior probability of jointly observing the
+parameters that predict that shape
 </p>
 </div>
 </div>
 <div class="section level3">
 <h3 id="prior-predictions-for-summary-statistics-of-y">Prior predictions for summary statistics of <code>y</code><a class="anchor" aria-label="anchor" href="#prior-predictions-for-summary-statistics-of-y"></a>
 </h3>
-<p>Severe tests for the specified distribution of <span class="math inline">\(y\)</span>, idea is to check that the combination
-of mean shapes and overdisperion parameter, kappa, for</p>
+<p>Severe tests for the specified distribution of <span class="math inline">\(y\)</span> are useful to check that the
+combination of mean shapes and overdisperion parameter, <span class="math inline">\(\kappa\)</span>, for</p>
 <ul>
 <li>Maximum observable counts: too much dispersion can produce counts
 that might be unrealistic or even impossible given the sampling
@@ -423,15 +421,18 @@ underestimation of mean counts.</li>
 can restrict the model into overestimating mean counts in order to try
 and capture zero proportions or higher counts.</li>
 </ul>
+<p>Similar to above, we have a another highly recommend tool for
+checking and setting distribution priors on the <a href="./zinbl-priors.html"><code>ZINBL</code> prior specification
+page</a>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/check-prior-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p>TODO: change these to remove the observed lines by default?</p>
-<p>Looks maybe a little too many zeros for these data? Tuangi are pretty
-common and it’d be highly unlikely to not find a few somewhere along the
-mud gradient. The maximum count predictions are quite high as well,
-counting more than 1500 tuangi in a single 250g core would be quite a
-feat (unless all tiny juveniles?).</p>
+<p>In the middle subplot of the figure above, it looks maybe there are a
+little too many zeros for this model? Tuangi are pretty common and it’d
+be highly unlikely to not find a few somewhere along the mud gradient.
+The maximum count predictions are quite high as well, counting more than
+1500 tuangi in a single 250g sediment core would be quite a feat (unless
+they are all tiny juveniles perhaps).</p>
 <p>Lets tweak the rate hyperparameter for the exponentially distributed
 overdispersion parameter, <span class="math inline">\(\kappa \sim
 \text{Exp}[\lambda = \text{hp_kap}]\)</span>, slightly to encourage
@@ -445,19 +446,23 @@ smaller values of overdispersion:</p>
 <p>A little better, and a little is fine, remember the prior model
 should fit knowledge of the tuangi-mud relationship, not specific data
 realisations of it.</p>
-<p><em>OPTIONAL</em>: refine model spec further</p>
+<p><em>OPTIONAL</em>: this whole section is an iterative process, take
+some time and care here to make sure you are happy with the assumptions
+being specified in your model.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="c--fit-subset-model">C. Fit subset model<a class="anchor" aria-label="anchor" href="#c--fit-subset-model"></a>
 </h2>
-<p>The prior model looks okay, so let’s look at a posterior. The idea of
-the subset model is to “fail fast”. That is, if we missed any model
-misspecification above, then instead of wasting your time and computer
-resources fitting a full model right off the bat, we can first fit a
-very quick approximate model that uses a subset of the data and minimal
-posterior samples over maximal chains. Each chain will roughly estimate
-the posterior for the subset of data, and ….</p>
+<p>The prior model looked okay, so it is time to consider the posterior.
+The idea of this subset model section is to “fail fast”. That is, if we
+missed any model misspecifications above, then instead of wasting your
+time and computer resources fitting a full model right off the bat, we
+can first fit a very quick approximate model that uses a subset of the
+data and minimal posterior samples over maximal chains. Each chain will
+roughly estimate the posterior for the subset of data, and hopefully
+identify any issues with any likelihood degeneracies (multimodality
+being a large concern for this highly parametrised model).</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_subset</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
@@ -469,7 +474,9 @@ the posterior for the subset of data, and ….</p>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>           <span class="co"># for testing</span></span>
 <span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>Check computation.</p>
+<p>Check the computation diagnostics and refer to this excellent article
+on <a href="https://mc-stan.org/misc/warnings.html" class="external-link">diagnosing Stan
+runtime problems</a>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## spec: nb[Hmsrdp] using 229 obs out of 762 (30% sample)</span></span>
@@ -488,33 +495,52 @@ the posterior for the subset of data, and ….</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  2.483    1.047 3.530             0                 0 0.9515648</span></span>
-<span><span class="co">## 2        2  2.442    0.797 3.239             0                 0 1.2158109</span></span>
-<span><span class="co">## 3        3  2.252    1.014 3.266             0                 0 0.8885822</span></span>
-<span><span class="co">## 4        4  2.433    0.949 3.382             0                 0 0.8325988</span></span>
-<span><span class="co">## 5        5  2.389    0.964 3.353             0                 0 0.8103148</span></span>
-<span><span class="co">## 6        6  2.485    0.874 3.359             1                 0 0.8126523</span></span></code></pre>
-<p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
+<span><span class="co">## 1        1  2.941    1.299 4.240             0                 0 0.9515648</span></span>
+<span><span class="co">## 2        2  2.942    0.979 3.921             0                 0 1.2158109</span></span>
+<span><span class="co">## 3        3  2.789    1.169 3.958             0                 0 0.8885822</span></span>
+<span><span class="co">## 4        4  2.869    1.148 4.017             0                 0 0.8325988</span></span>
+<span><span class="co">## 5        5  2.942    1.130 4.072             0                 0 0.8103148</span></span>
+<span><span class="co">## 6        6  2.883    1.074 3.957             1                 0 0.8126523</span></span></code></pre>
+<p><em>OPTIONAL</em>: refine the model specification or sampling
+settings.</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
 </h3>
-<p>Computation valid, check posterior.</p>
+<p>The model computation showed no reason for concern, so now we can
+look at marginal posterior distributions for each chain of samples:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># visual display of chain mixing and prior-data conflicts</span></span>
 <span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_subset</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/check-post-dens-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p>Given that each chain appears to find similar posterior solutions
+that do not dramatically contradict the prior information, we can be
+confident that the model is well specified for now.</p>
+<p>Withholding data from the model computation also allows us to test
+the predictive calibration of the posterior. Calibration refers to the
+distance between the empirical distribution of the withheld DAEG data
+and the posterior predictive distribution estimated from the training
+data. For these discrete <code>zinbl</code> abundance distributions, we
+use the randomised probability integral transformation (PIT) test of <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1541-0420.2009.01191.x" class="external-link">Czado,
+C., Gneiting, T. and Held, L., (2009)</a>.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># uses test set for discrete pit</span></span>
 <span><span class="fu"><a href="../reference/check_post_calibration.html">check_post_calibration</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/check-post-calibration-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
+<p>For a model that accurately predicts new data, these PIT scores
+should be uniformly distributed, and given that the PIT scores for the
+posterior predictions of test data are well within the range of the
+random uniform samples, we can be confident for now that the predictive
+capability of the model is well calibrated.</p>
+<p><em>OPTIONAL</em>: this is your last chance to make sure you are
+happy with model assumptions and the samplers ability to compute
+them.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="d--fit-full-model">D. Fit full model<a class="anchor" aria-label="anchor" href="#d--fit-full-model"></a>
 </h2>
-<p>Time for comprehensive inference, using the full dataset and a large
-number of posterior samples.</p>
+<p>Time for comprehensive Bayesian inference, using the full dataset and
+a large number of posterior samples.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_full</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/mskt_fit.html">mskt_fit</a></span><span class="op">(</span><span class="va">spec</span>,</span>
@@ -522,7 +548,7 @@ number of posterior samples.</p>
 <span>           parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>           <span class="co"># for testing</span></span>
 <span>           show_messages <span class="op">=</span> <span class="cn">TRUE</span>, show_exceptions <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>Check again, slightly better.</p>
+<p>Check computation again, and compare to above.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_computation.html">check_computation</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## spec: nb[Hmsrdp] using 762 obs out of 762 (100% sample)</span></span>
@@ -541,11 +567,11 @@ number of posterior samples.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 23.420   22.570 45.990             1                 0 0.9774463</span></span>
-<span><span class="co">## 2        2 25.818   32.508 58.326             0                 0 0.8960095</span></span>
-<span><span class="co">## 3        3 24.601   27.910 52.511             0                 0 0.8544922</span></span>
-<span><span class="co">## 4        4 25.567   29.410 54.977             0                 0 0.8961821</span></span></code></pre>
-<p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
+<span><span class="co">## 1        1 25.724   24.057 49.781             1                 0 0.9774463</span></span>
+<span><span class="co">## 2        2 28.038   34.678 62.716             0                 0 0.8960095</span></span>
+<span><span class="co">## 3        3 26.836   29.871 56.707             0                 0 0.8544922</span></span>
+<span><span class="co">## 4        4 27.686   31.576 59.262             0                 0 0.8961821</span></span></code></pre>
+<p><em>OPTIONAL</em>:</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
 </h3>
@@ -574,7 +600,12 @@ printout shows that there was nothing unusual about that point (count =
 2, mud % = 31.8) so it is safe to ignore. Later plots suggest that maybe
 around 30-34% mud content the data is not as dispersed as the rest, and
 would likely clear up as more data is collected.</p>
-<p><em>OPTIONAL</em>: refine model spec or fit parameters.</p>
+<p><em>OPTIONAL</em>: refine model spec or fit parameters. In some
+cases, the posterior model could be well specified but simply hard to
+estimate, and refining the computation may be necessary to determine
+this. Refinements could include adjusting the length of the warmup
+period, or tuning algorithm parameters such as the size of steps used to
+explore the posterior curvature.</p>
 </div>
 </div>
 <div class="section level2">
@@ -591,7 +622,7 @@ of tuangi.</li>
 <h3 id="plot-summaries-of-the-abundance-distribution">Plot summaries of the abundance distribution<a class="anchor" aria-label="anchor" href="#plot-summaries-of-the-abundance-distribution"></a>
 </h3>
 <p>This is the complete distribution, choose any summaries that are the
-most informative.</p>
+most informative for your analysis.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot the distribution of abundance along the gradient</span></span>
 <span><span class="fu"><a href="../reference/abundance_dist.html">abundance_dist</a></span><span class="op">(</span><span class="va">fit_full</span>, summaries <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'mean'</span>, <span class="st">'median'</span>, <span class="st">'q90'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -690,10 +721,15 @@ less than 60.7% mud content.</p>
 <code>modskurt</code> analysis of species abundance over environmental
 gradients. There are many more checks that can be performed throughout,
 and a whole raft of troubleshooting exercises for when your data doesn’t
-play as nicely as these tuangi abundances did.</p>
+play as nicely as these tuangi abundances did. Have a look through the
+other articles if interested:</p>
 <ul>
-<li>List of more articles</li>
-<li>And resources</li>
+<li><a href="./linked-zero-inflation.html">Linked zero-inflation
+(ZINBL)</a></li>
+<li><a href="./modskurt-priors.html">Modskurt priors</a></li>
+<li><a href="./zinbl-priors.html">ZINBL priors</a></li>
+<li><a href="./stan-model.html">Stan discrete model</a></li>
+<li><a href="./examples.html">Examples</a></li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

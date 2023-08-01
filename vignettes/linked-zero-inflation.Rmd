@@ -26,11 +26,6 @@ knitr::opts_chunk$set(
 options(crayon.enabled = TRUE)
 options(pillar.bold = TRUE, pillar.subtle_num = TRUE)
 
-# eulachon <-
-#   readRDS('../fish/2022-10-02-trawl.rds') |>
-#   dplyr::filter(grepl('Thaleichthys', species), year == max(year)) |>
-#   dplyr::select(-species, -flourescence, -turb, -ld, -rd, -year)
-# usethis::use_data(eulachon, overwrite = TRUE)
 # redstripe <-
 #   readRDS('../fish/2022-10-02-trawl.rds') |>
 #   dplyr::filter(species == 'Sebastes proriger') |>
@@ -135,7 +130,7 @@ This is very much the same as in [getting started](./getting-started.html), exce
 
 ### Prior probabilities of parameter values
 
-```{r check-prior-dens, fig.asp=0.8, fig.cap="TODO: add legend for median, 50%HDI and 99% line!"}
+```{r check-prior-dens, fig.asp=0.8}
 check_prior_dens(spec)
 ```
 
@@ -143,7 +138,7 @@ check_prior_dens(spec)
 
 Note above that values for `m` are by default constrained within the range of `x` that had at least one non-zero abundance, `y`, recorded. The effect of this is quite visible when looking at prior predictions for mean abundance:
 
-```{r check-prior-mskt, fig.cap="TODO: add legend for alpha!"}
+```{r check-prior-mskt, fig.cap="Line opacity shows the prior probability of jointly observing the parameters that predict that shape"}
 check_prior_mskt(spec)
 ```
 

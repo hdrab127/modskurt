@@ -71,7 +71,7 @@ For attribution and technical details of how these data are collected, please co
 
 ## A. Specify initial model
 
-The first step in the analysis of a species' abundance over an environmental gradient is to specify the distribution model. In general for discrete abundance data like these, we recommend first trying a **negative binomial** (NB) regression, however there may be some cases, particularly for rare and hard to sample species, where it might be worth going straight for a **zero-inflated negative binomial linked** (ZINBL) extension -- see [the ZINBL article](../linked-zero-inflation.html) for an example.
+The first step in the analysis of a species' abundance over an environmental gradient is to specify the distribution model. In general for discrete abundance data like these, we recommend first trying a **negative binomial** (NB) regression, however there may be some cases, particularly for rare and hard to sample species, where it might be worth going straight for a **zero-inflated negative binomial linked** (ZINBL) extension -- see [the ZINBL article](./linked-zero-inflation.html) for an example.
 
 Given the negative binomial distribution of abundance, $y$, the `modskurt` package specifies that the mean of the negative binomial distribution (or expected abundance $\mu = \text{E}[y]$) is a non-linear function, $f$ of the environmental gradient, $x$, mud content in this case. Yielding the following generalised non-linear regression model (GNLM):
 
@@ -98,7 +98,7 @@ with parameters:
 - $d \in \mathbb{R}$: controls the peakedness ($d < 0$) or broadness ($d > 0$, e.g. plateau-like shape) of the peak in mean abundance around $m$.
 - $p > 0$: persists higher-levels of abundance in relatively extreme conditions; this is a similar effect to increasing the tail weight of a distribution function.
 
-The effect of each parameter is best described visually, so please check out this [app](https://salt-ecology.shinyapps.io/modskurt-prior-specs/) if you haven't already and toggle through different parameter values. Not all of these parameters are necessary for every analysis, but that discussion is best illustrated in a [separate example](TODO).
+The effect of each parameter is best described visually, so please check out this [Observable](https://observablehq.com/@hdrab127/nzm-model) if you haven't already and toggle through different parameter values. Not all of these parameters are necessary for every analysis, but that discussion is best illustrated in a future example.
 
 Being a Bayesian model, we get to determine what values of each parameter are realistic given the relationship we wish to model, rather than whatever potentially unrealistic value fits the data best. This is a huge benefit of Bayesian modelling, but also a huge hurdle when dealing with complex parameter spaces like that of the model above. To make life easier, the `modskurt` package suggests some default priors that *should* just work 🤞:
 
@@ -109,12 +109,12 @@ $$
   \log s &\sim \text{Normal}(-2.0, 0.6) + \log \text{range}~ x \\
   r &\sim \text{Beta}(1.2, 1.2) \\
   \log d &\sim \text{Normal}(0.5, 1.0) \\
-  p &\sim \text{Beta}(2, 4) \cdot 1.95 + 0.05 \\
+  p &\sim \text{Beta}(1.2, 1.2) \cdot 1.95 + 0.05 \\
   \kappa &\sim \text{Exponential}(0.5), \\
 \end{align}
 $$
 
-However, we still need to check these in each and every model and will be provide guidance on how to do this in section B. See ... for technical details.
+However, we still need to check these in each and every model and will be provide guidance on how to do this in section B.
 
 Now finally, to specify this model in `R`, we use the [`mskt_spec`](../reference/mskt_spec.html) function:
 
@@ -159,35 +159,35 @@ The `modskurt` provides four checking functions:
 
 ### Prior probabilities of parameter values
 
-If you tweaked the default hyperparameters above, then you'll want to check they produce the correct marginal prior here:
+If you tweaked the default hyperparameters above, then you'll want to check they produce the correct marginal prior distribution here:
 
-```{r check-prior-dens, fig.asp=0.8, fig.cap="TODO: add legend for median, 50%HDI and 99% line!"}
+```{r check-prior-dens, fig.asp=0.8}
 check_prior_dens(spec)
 ```
 
 ### Prior predictions for the `modskurt` mean
 
-The default looks like a pile of spaghetti, if you have information on any of the mean shapes you might expect, then check they are reasonably covered here and that impossible shapes are excluded, or at leasted weighted very heavily away from:
+The default assumption of prior mean shapes look like a pile of spaghetti, if you have information on any of the mean shapes you might expect, then check they are reasonably covered here and that impossible shapes are excluded, or at least weighted very heavily away from. We highly recommend utilising this [`modskurt` prior specification tool](./modskurt-priors.html) provided with the package for adjusting and verifying the model priors in real time.
 
-```{r check-prior-mskt, fig.cap="TODO: add legend for alpha!"}
+```{r check-prior-mskt, fig.cap="Line opacity shows the prior probability of jointly observing the parameters that predict that shape"}
 check_prior_mskt(spec)
 ```
 
 ### Prior predictions for summary statistics of `y`
 
-Severe tests for the specified distribution of $y$, idea is to check that the combination of mean shapes and overdisperion parameter, kappa, for
+Severe tests for the specified distribution of $y$ are useful to check that the combination of mean shapes and overdisperion parameter, $\kappa$, for
 
 - Maximum observable counts: too much dispersion can produce counts that might be unrealistic or even impossible given the sampling design.
 - Proportions of zeros: too much dispersion can also inflate the proportion of zeros beyond what might be credible, and cause underestimation of mean counts.
 - Variation of abundance: too little dispersion (the Poisson effect) can restrict the model into overestimating mean counts in order to try and capture zero proportions or higher counts.
 
+Similar to above, we have a another highly recommend tool for checking and setting distribution priors on the [`ZINBL` prior specification page](./zinbl-priors.html).
+
 ```{r check-prior-dist, fig.asp=0.3}
 check_prior_dist(spec)
 ```
 
-TODO: change these to remove the observed lines by default?
-
-Looks maybe a little too many zeros for these data? Tuangi are pretty common and it'd be highly unlikely to not find a few somewhere along the mud gradient. The maximum count predictions are quite high as well, counting more than 1500 tuangi in a single 250g core would be quite a feat (unless all tiny juveniles?).
+In the middle subplot of the figure above, it looks maybe there are a little too many zeros for this model? Tuangi are pretty common and it'd be highly unlikely to not find a few somewhere along the mud gradient. The maximum count predictions are quite high as well, counting more than 1500 tuangi in a single 250g sediment core would be quite a feat (unless they are all tiny juveniles perhaps).
 
 Lets tweak the rate hyperparameter for the exponentially distributed overdispersion parameter, $\kappa \sim \text{Exp}[\lambda = \text{hp_kap}]$, slightly to encourage smaller values of overdispersion:
 
@@ -200,11 +200,11 @@ check_prior_dens(spec, 'kap') +
 
 A little better, and a little is fine, remember the prior model should fit knowledge of the tuangi-mud relationship, not specific data realisations of it.
 
-*OPTIONAL*: refine model spec further
+*OPTIONAL*: this whole section is an iterative process, take some time and care here to make sure you are happy with the assumptions being specified in your model.
 
 ## C. Fit subset model
 
-The prior model looks okay, so let's look at a posterior. The idea of the subset model is to "fail fast". That is, if we missed any model misspecification above, then instead of wasting your time and computer resources fitting a full model right off the bat, we can first fit a very quick approximate model that uses a subset of the data and minimal posterior samples over maximal chains. Each chain will roughly estimate the posterior for the subset of data, and ....
+The prior model looked okay, so it is time to consider the posterior. The idea of this subset model section is to "fail fast". That is, if we missed any model misspecifications above, then instead of wasting your time and computer resources fitting a full model right off the bat, we can first fit a very quick approximate model that uses a subset of the data and minimal posterior samples over maximal chains. Each chain will roughly estimate the posterior for the subset of data, and hopefully identify any issues with any likelihood degeneracies (multimodality being a large concern for this highly parametrised model).
 
 ```{r fit-subset, results='hide'}
 fit_subset <-
@@ -219,33 +219,39 @@ fit_subset <-
            show_messages = TRUE, show_exceptions = TRUE)
 ```
 
-Check computation.
+Check the computation diagnostics and refer to this excellent article on [diagnosing Stan runtime problems](https://mc-stan.org/misc/warnings.html).
 
 ```{r fit-subset-check}
 check_computation(fit_subset)
 ```
 
-*OPTIONAL*: refine model spec or fit parameters
+*OPTIONAL*: refine the model specification or sampling settings.
 
 ### Check subset model
 
-Computation valid, check posterior.
+The model computation showed no reason for concern, so now we can look at marginal posterior distributions for each chain of samples:
 
 ```{r check-post-dens-subset, fig.asp=0.8}
 # visual display of chain mixing and prior-data conflicts
 check_post_dens(fit_subset, by_chain = TRUE)
 ```
 
+Given that each chain appears to find similar posterior solutions that do not dramatically contradict the prior information, we can be confident that the model is well specified for now.
+
+Withholding data from the model computation also allows us to test the predictive calibration of the posterior. Calibration refers to the distance between the empirical distribution of the withheld DAEG data and the posterior predictive distribution estimated from the training data. For these discrete `zinbl` abundance distributions, we use the randomised probability integral transformation (PIT) test of [Czado, C., Gneiting, T. and Held, L., (2009)](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1541-0420.2009.01191.x).
+
 ```{r check-post-calibration-subset}
 # uses test set for discrete pit
 check_post_calibration(fit_subset)
 ```
 
-*OPTIONAL*: refine model spec or fit parameters
+For a model that accurately predicts new data, these PIT scores should be uniformly distributed, and given that the PIT scores for the posterior predictions of test data are well within the range of the random uniform samples, we can be confident for now that the predictive capability of the model is well calibrated.
+
+*OPTIONAL*: this is your last chance to make sure you are happy with model assumptions and the samplers ability to compute them.
 
 ## D. Fit full model
 
-Time for comprehensive inference, using the full dataset and a large number of posterior samples.
+Time for comprehensive Bayesian inference, using the full dataset and a large number of posterior samples.
 
 ```{r fit-full, results='hide'}
 fit_full <-
@@ -256,13 +262,13 @@ fit_full <-
            show_messages = TRUE, show_exceptions = TRUE)
 ```
 
-Check again, slightly better.
+Check computation again, and compare to above.
 
 ```{r fit-full-check}
 check_computation(fit_full)
 ```
 
-*OPTIONAL*: refine model spec or fit parameters
+*OPTIONAL*: 
 
 ### Check full model
 
@@ -276,7 +282,7 @@ check_post_influencers(fit_full)
 
 The model only struggled to predict one point, and the console printout shows that there was nothing unusual about that point (count = 2, mud % = 31.8) so it is safe to ignore. Later plots suggest that maybe around 30-34% mud content the data is not as dispersed as the rest, and would likely clear up as more data is collected.
 
-*OPTIONAL*: refine model spec or fit parameters.
+*OPTIONAL*: refine model spec or fit parameters. In some cases, the posterior model could be well specified but simply hard to estimate, and refining the computation may be necessary to determine this. Refinements could include adjusting the length of the warmup period, or tuning algorithm parameters such as the size of steps used to explore the posterior curvature.
 
 ## E. Use the model
 
@@ -287,7 +293,7 @@ Now we can look at some predictions of specific interest:
 
 ### Plot summaries of the abundance distribution
 
-This is the complete distribution, choose any summaries that are the most informative.
+This is the complete distribution, choose any summaries that are the most informative for your analysis.
 
 ```{r use-full-fit-dist}
 # plot the distribution of abundance along the gradient
@@ -340,7 +346,10 @@ Compare those numbers with the abundance density limit that suggest 90% of predi
 
 ## Summary
 
-This case study lightly stepped through the core steps in the `modskurt` analysis of species abundance over environmental gradients. There are many more checks that can be performed throughout, and a whole raft of troubleshooting exercises for when your data doesn't play as nicely as these tuangi abundances did.
+This case study lightly stepped through the core steps in the `modskurt` analysis of species abundance over environmental gradients. There are many more checks that can be performed throughout, and a whole raft of troubleshooting exercises for when your data doesn't play as nicely as these tuangi abundances did. Have a look through the other articles if interested:
 
-- List of more articles
-- And resources
+- [Linked zero-inflation (ZINBL)](./linked-zero-inflation.html)
+- [Modskurt priors](./modskurt-priors.html)
+- [ZINBL priors](./zinbl-priors.html)
+- [Stan discrete model](./stan-model.html)
+- [Examples](./examples.html)

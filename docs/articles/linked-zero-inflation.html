@@ -300,11 +300,7 @@ excess-zero probabilities they predict.</p>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<div class="figure" style="text-align: center">
-<img src="linked-zero-inflation_files/figure-html/check-prior-dens-1.png" alt="TODO: add legend for median, 50%HDI and 99% line!" width="100%"><p class="caption">
-TODO: add legend for median, 50%HDI and 99% line!
-</p>
-</div>
+<p><img src="linked-zero-inflation_files/figure-html/check-prior-dens-1.png" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="prior-predictions-for-the-modskurt-mean">Prior predictions for the <code>modskurt</code> mean<a class="anchor" aria-label="anchor" href="#prior-predictions-for-the-modskurt-mean"></a>
@@ -316,8 +312,9 @@ when looking at prior predictions for mean abundance:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_mskt.html">check_prior_mskt</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="linked-zero-inflation_files/figure-html/check-prior-mskt-1.png" alt="TODO: add legend for alpha!" width="100%"><p class="caption">
-TODO: add legend for alpha!
+<img src="linked-zero-inflation_files/figure-html/check-prior-mskt-1.png" alt="Line opacity shows the prior probability of jointly observing the parameters that predict that shape" width="100%"><p class="caption">
+Line opacity shows the prior probability of jointly observing the
+parameters that predict that shape
 </p>
 </div>
 </div>
@@ -388,12 +385,12 @@ parameter confirm this, where some of the chains may not have mixed
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  6.678    2.895  9.573             2                 0 0.8508828</span></span>
-<span><span class="co">## 2        2  6.606    2.610  9.216             1                 0 1.1861269</span></span>
-<span><span class="co">## 3        3  5.187    2.323  7.510             5                 0 1.0944825</span></span>
-<span><span class="co">## 4        4  5.379    1.857  7.236            18                 0 0.9643593</span></span>
-<span><span class="co">## 5        5  6.844    3.162 10.006             2                 0 1.0613385</span></span>
-<span><span class="co">## 6        6  6.905    2.544  9.449             1                 0 0.8744557</span></span></code></pre>
+<span><span class="co">## 1        1  6.957    2.858  9.815             2                 0 0.8508828</span></span>
+<span><span class="co">## 2        2  6.832    2.673  9.505             1                 0 1.1861269</span></span>
+<span><span class="co">## 3        3  5.337    2.299  7.636             5                 0 1.0944825</span></span>
+<span><span class="co">## 4        4  5.592    1.917  7.509            18                 0 0.9643593</span></span>
+<span><span class="co">## 5        5  7.099    3.163 10.262             2                 0 1.0613385</span></span>
+<span><span class="co">## 6        6  7.304    2.491  9.795             1                 0 0.8744557</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
@@ -471,10 +468,10 @@ should clear those. The parameter diagnostics all look good:</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
 <span><span class="co">##   chain_id warmup sampling   total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 68.556   58.607 127.163            24                 0 0.9714918</span></span>
-<span><span class="co">## 2        2 62.259   67.172 129.431            18                 0 0.9745719</span></span>
-<span><span class="co">## 3        3 56.399   71.159 127.558            13                 0 0.9514785</span></span>
-<span><span class="co">## 4        4 57.899   71.932 129.831            24                 0 1.0103720</span></span></code></pre>
+<span><span class="co">## 1        1 76.673   77.174 153.847            24                 0 0.9714918</span></span>
+<span><span class="co">## 2        2 69.619   86.683 156.302            18                 0 0.9745719</span></span>
+<span><span class="co">## 3        3 62.849   91.757 154.606            13                 0 0.9514785</span></span>
+<span><span class="co">## 4        4 64.366   92.064 156.430            24                 0 1.0103720</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
