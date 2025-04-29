@@ -142,6 +142,15 @@ mskt_inits <- function(sdat, chains, from_data = TRUE) {
           }
           # TODO: better s from sd?
         }
+        if (!use_r) {
+          init$zr <- NULL
+        }
+        if (!use_d) {
+          init$zd <- NULL
+        }
+        if (!use_p) {
+          init$zp <- NULL
+        }
         init
       })
     })
