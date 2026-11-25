@@ -41,7 +41,11 @@ mskt_fit <- function(spec,
                               fixed = TRUE), 'inst/stan')
   }
 
-  stanexe <- file.path(standir, 'discrete.exe')
+  stanexe <- file.path(standir,
+                       paste0('discrete',
+                              ifelse(.Platform$OS.type == 'windows',
+                                     '.exe',
+                                     '')))
   if (!file.exists(stanexe)) {
     rlang::abort('modskurt models not compiled, see `?compile_stanmodels()')
   }

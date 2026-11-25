@@ -19,7 +19,12 @@ compile_stanmodels <- function(force_recompile = FALSE) {
   csms <- dir(standir, '.stan$', full.names = TRUE)
   lapply(csms, function(nm) {
     short <- gsub('^.*/', '', nm)
-    if (!file.exists(gsub('stan$', 'exe', nm)) | force_recompile) {
+        stanexe <- gsub('\\.stan$',
+                    ifelse(.Platform$OS.type == 'windows',
+                           '.exe',
+                           ''),
+                    nm)
+    if (!file.exists(stanexe) | force_recompile) {
       print(paste('Compiling now:', short))
     } else {
       print(paste('Already compiled:', short))
