@@ -213,13 +213,14 @@ check_prior_mskt <- function(spec,
                mu = do.call(mskt, c(list(x = sdat$xrep), vals[n, ])),
                jp = prob[n])
   }))
+  alpha_leg <- ggplot2::guide_legend('Relative joint\nprior probability')
   ggplot2::ggplot(mus) +
     ggplot2::geom_line(ggplot2::aes(x = .data[['x']],
                                     y = .data[['mu']],
                                     group = .data[['draw']],
                                     alpha = .data[['jp']]),
                        colour = '#DD3300') +
-    ggplot2::scale_alpha_identity(guide = guide_legend('Relative joint\nprior probability')) +
+    ggplot2::scale_alpha_identity(guide = alpha_leg) +
     # scale_x_continuous(expand = c(0.01, 0.01)) +
     # scale_y_continuous(sec.axis = sec_axis(~ .), limits = c(0, sdat$y_max)) +
     ggplot2::labs(y = nms$y, x = nms$x)

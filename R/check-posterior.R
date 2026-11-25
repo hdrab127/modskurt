@@ -237,11 +237,15 @@ check_post_calibration <- function(fit, ndraws = 50) {
                  colour = 'Compared to')
 }
 
+
 #' Check for posterior misspecification by assessing influence data points
+#' 
+#' This method requires the loo package for approximate LOO-CV
 #'
 #' @param fit fitted model object from `mskt_fit`
 #'
 #' @importFrom rlang .data
+#' @importFrom loo loo
 #'
 #' @export
 check_post_influencers <- function(fit) {

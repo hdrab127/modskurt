@@ -17,10 +17,15 @@ export(compile_stanmodels)
 export(mskt_fit)
 export(mskt_sim_nb)
 export(mskt_spec)
+importFrom(loo,loo)
 importFrom(pillar,pillar_shaft)
-importFrom(rlang,.data)
-importFrom(rlang,`%||%`)
-importFrom(stats,sd)
-importFrom(stats,setNames)
-importFrom(stats,weighted.mean)
+importFrom(rlang,
+  "%||%",
+  .data
+)
+importFrom(stats,
+  sd,
+  setNames,
+  weighted.mean
+)
 importFrom(utils,tail)

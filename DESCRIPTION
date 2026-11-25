@@ -13,7 +13,6 @@ Description: Enable best practice Bayesian modelling of distributions of species
     relationships and identifying potential responses to change.
 License: file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown
@@ -24,6 +23,7 @@ Imports:
     cmdstanr (>= 0.5.3),
     crayon (>= 1.5.2),
     ggplot2 (>= 3.4.2),
+    loo,
     patchwork,
     pillar (>= 1.9.0),
     rlang (>= 1.1.1),
@@ -32,3 +32,4 @@ Remotes:
     stan-dev/cmdstanr
 URL: https://hdrab127.github.io/modskurt/
 LazyData: true
+Config/roxygen2/version: 8.1.1

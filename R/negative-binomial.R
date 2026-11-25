@@ -127,7 +127,7 @@ qzinb2 <- function(p, mu, kappa, zi, lower.tail = TRUE, log.p = FALSE) {
 #'
 #' @param q vector of quantiles
 #' @param mu mean of the distribution
-#' @param kappa dispersion (inverse square root size)
+#' @param kap dispersion (inverse square root size)
 #' @param zi vector of (in \eqn{[0, 1]}) zero-inflation parameters
 #' @keywords internal
 pzinb2 <- function(q, mu, kap, zi) {

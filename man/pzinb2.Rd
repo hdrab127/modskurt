@@ -11,9 +11,9 @@ pzinb2(q, mu, kap, zi)
 
 \item{mu}{mean of the distribution}
 
-\item{zi}{vector of (in \eqn{[0, 1]}) zero-inflation parameters}
+\item{kap}{dispersion (inverse square root size)}
 
-\item{kappa}{dispersion (inverse square root size)}
+\item{zi}{vector of (in \eqn{[0, 1]}) zero-inflation parameters}
 }
 \description{
 Zero-inflated Negative Binomial Distribution Function
