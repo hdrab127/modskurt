@@ -1,0 +1,81 @@
+# Assess abundance range along x using distributional measures
+
+Assess abundance range along x using distributional measures
+
+## Usage
+
+``` r
+abundance_range(
+  fit,
+  seed = NULL,
+  ndraws = 50,
+  capture_pct = 80,
+  using_range = "HAZ",
+  based_on = "median",
+  region = "centre",
+  include_zero_inflation = FALSE,
+  plotted = FALSE,
+  point_alpha = 0.2,
+  line_alpha = 0.02,
+  range_colour = "#22CC99"
+)
+```
+
+## Arguments
+
+- fit:
+
+  modskurt_fit object
+
+- seed:
+
+  optional seed for ndraws sample
+
+- ndraws:
+
+  optional subset of posterior draws
+
+- capture_pct:
+
+  percent of total abundance density (most_dens) or percent tolerance
+  from highest abundance summary (high_zone), based on "based_on"
+  summary of abundance
+
+- using_range:
+
+  "ADL" for highest abundance density limit, or "HAZ" for highest
+  abundance zone, see details
+
+- based_on:
+
+  which distribution summary to use for density or high zone, one of
+  "mean", "median", or any quantile proportion as "q" + pecentage (e.g.
+  "q90" = 90% quantile)
+
+- region:
+
+  one-sided threshold ("left", "right") or central range ("centre")
+
+- include_zero_inflation:
+
+  whether to use expectations and quantiles from nb or zinbl
+
+- plotted:
+
+  plot on the abundance distribution
+
+- point_alpha:
+
+  opacity of data points, default 0.1 is good for ~ 1000 obs
+
+- line_alpha:
+
+  opacity of summary lines, default 0.1 is good for ~ 50 draws
+
+- range_colour:
+
+  colour of range geometries
+
+## Value
+
+a matrix of ranges, or a ggplot object if plotted is TRUE

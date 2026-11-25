@@ -5,101 +5,76 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="modskurt">
 <title>Linked zero-inflation • modskurt</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Linked zero-inflation">
-<meta property="og:description" content="modskurt">
-<meta property="og:image" content="https://hdrab127.github.io/modskurt/logo.png">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Linked zero-inflation">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">modskurt</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../index.html" aria-label="msktr">
-    <span class="fa fa-home"></span>
-     
-  </a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../index.html" aria-label="msktr"><span class="fa fa-home"></span></a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/getting-started.html">How to use `modskurt`</a>
-    <a class="dropdown-item" href="../articles/linked-zero-inflation.html">Linked zero-inflation (ZINBL)</a>
-    <a class="dropdown-item" href="../articles/prior-specification.html">Prior specification</a>
-    <a class="dropdown-item" href="../articles/modskurt-priors.html">Modskurt priors</a>
-    <a class="dropdown-item" href="../articles/zinbl-priors.html">ZINBL priors</a>
-    <a class="dropdown-item" href="../articles/discrete-stan.html">Stan discrete model</a>
-    <a class="dropdown-item" href="../articles/examples.html">Examples</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/getting-started.html">How to use `modskurt`</a></li>
+    <li><a class="dropdown-item" href="../articles/linked-zero-inflation.html">Linked zero-inflation (ZINBL)</a></li>
+    <li><a class="dropdown-item" href="../articles/prior-specification.html">Prior specification</a></li>
+    <li><a class="dropdown-item" href="../articles/modskurt-priors.html">Modskurt priors</a></li>
+    <li><a class="dropdown-item" href="../articles/zinbl-priors.html">ZINBL priors</a></li>
+    <li><a class="dropdown-item" href="../articles/discrete-stan.html">Stan discrete model</a></li>
+    <li><a class="dropdown-item" href="../articles/examples.html">Examples</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Functions</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">News</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
 <li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-other-packages">Other packages</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-other-packages">
-    <a class="external-link dropdown-item" href="https://mc-stan.org/bayesplot/">bayesplot</a>
-    <a class="external-link dropdown-item" href="http://paul-buerkner.github.io/brms/index.html">brms</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/cmdstanr">cmdstanr</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/loo">loo</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/posterior">posterior</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/projpred">projpred</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/rstan">rstan</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/rstanarm">rstanarm</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/rstantools">rstantools</a>
-    <a class="external-link dropdown-item" href="https://mc-stan.org/shinystan">shinystan</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-other-packages" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Other packages</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-other-packages">
+<li><a class="external-link dropdown-item" href="https://mc-stan.org/bayesplot/">bayesplot</a></li>
+    <li><a class="external-link dropdown-item" href="http://paul-buerkner.github.io/brms/index.html">brms</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/cmdstanr">cmdstanr</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/loo">loo</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/posterior">posterior</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/projpred">projpred</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/rstan">rstan</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/rstanarm">rstanarm</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/rstantools">rstantools</a></li>
+    <li><a class="external-link dropdown-item" href="https://mc-stan.org/shinystan">shinystan</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://mc-stan.org">Stan</a>
-</li>
+<li class="nav-item"><a class="external-link nav-link" href="https://mc-stan.org">Stan</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/hdrab127/modskurt" aria-label="Github">
-    <span class="fa fa-github"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/hdrab127/modskurt" aria-label="Github"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -111,7 +86,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Linked zero-inflation</h1>
             
       
-      
+
       <div class="d-none name"><code>linked-zero-inflation.Rmd</code></div>
     </div>
 
@@ -161,7 +136,7 @@ later, as we work through another case study.</p>
 <code class="sourceCode R"><span><span class="co"># everyone loves a good graph</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123456</span><span class="op">)</span></span></code></pre></div>
@@ -170,10 +145,11 @@ later, as we work through another case study.</p>
 <h2 id="case-study---sebastes-proriger-vs--water-temperature">Case study - <em>Sebastes proriger</em> vs. water temperature<a class="anchor" aria-label="anchor" href="#case-study---sebastes-proriger-vs--water-temperature"></a>
 </h2>
 <p><code>ZINBL</code> distributions of abundance are typically most
-fruitful when proportions of zeros are very high, like <span class="math inline">\(&gt;0.95\)</span> high. A great example of this is
-the Northwest Pacific groundfish trawl survey data for <em>Sebastes
-proriger</em> (redstripe rockfish) over the ocean temperature gradient -
-<a href="https://www.fisheries.noaa.gov/west-coast/science-data/us-west-coast-groundfish-bottom-trawl-survey" class="external-link">more
+fruitful when proportions of zeros are very high, like
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">&gt;0.95</annotation></semantics></math>
+high. A great example of this is the Northwest Pacific groundfish trawl
+survey data for <em>Sebastes proriger</em> (redstripe rockfish) over the
+ocean temperature gradient - <a href="https://www.fisheries.noaa.gov/west-coast/science-data/us-west-coast-groundfish-bottom-trawl-survey" class="external-link">more
 info</a>. Key variables are:</p>
 <ul>
 <li>
@@ -210,49 +186,51 @@ trawl (trawl length * net mouth diameter), this is the sampling
 </h2>
 <p>The <code>ZINBL</code> distribution is defined as a mixture of the
 negative binomial distribution and a bernoulli process with mixing
-proportion, <span class="math inline">\(\pi\)</span> modelled as a
-decreasing logistic function of <code>modskurt</code> mean abundance,
-<span class="math inline">\(\mu\)</span>,</p>
-<p><span class="math display">\[
+proportion,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math>
+modelled as a decreasing logistic function of <code>modskurt</code> mean
+abundance,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>y</mi><mi>n</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mtext mathvariant="normal">ZINBL</mtext><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>μ</mi><mi>n</mi></msub><mo>=</mo><mtext mathvariant="normal">Modskurt</mtext><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mi>κ</mi><mo>,</mo><msub><mi>π</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>π</mi><mi>n</mi></msub><mo>⋅</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mi>n</mi></msub><mo>=</mo><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><mtext mathvariant="normal">NB</mtext><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>n</mi></msub><mo>,</mo><mi>ϕ</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msup><mtext mathvariant="normal">logit</mtext><mrow><mi>−</mi><mn>1</mn></mrow></msup><mspace width="0.222em"></mspace><msub><mi>π</mi><mi>n</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>−</mo><msub><mi>γ</mi><mn>1</mn></msub><mo>⋅</mo><msub><mi>μ</mi><mi>n</mi></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-y_n &amp;\sim \text{ZINBL}\left[\mu_n = \text{Modskurt}(x_n), \kappa,
-\pi_n\right] \\
-&amp;= \pi_n \cdot (y_n == 0) + (1 - \pi_n) \cdot \text{NB}(\mu_n, \phi)
-\\
+y_n &amp;\sim \text{ZINBL}\left[\mu_n = \text{Modskurt}(x_n), \kappa, \pi_n\right] \\
+&amp;= \pi_n \cdot (y_n == 0) + (1 - \pi_n) \cdot \text{NB}(\mu_n, \phi) \\
 \text{logit}^{-1}~\pi_n &amp;= \gamma_0 - \gamma_1 \cdot \mu_n
 \end{aligned}
-\]</span></p>
+</annotation></semantics></math></p>
 <p>with new parameters:</p>
 <ul>
 <li>
-<span class="math inline">\(\gamma_0 \in \mathbb{R}\)</span>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>0</mn></msub><mo>∈</mo><mi mathvariant="double-struck">ℝ</mi></mrow><annotation encoding="application/x-tex">\gamma_0 \in \mathbb{R}</annotation></semantics></math>:
 log-odds intercept for the probability of observing an excess-zero,</li>
 <li>
-<span class="math inline">\(\gamma_1 &gt; 0\)</span>: describes the
-rate at which the excess-zero probability decreases as the average
-abundance increases. As <span class="math inline">\(\gamma_0 \to
-0\)</span> or <span class="math inline">\(\gamma_1 \to \infty\)</span>,
-<span class="math inline">\(\pi \to 0\)</span> and the ZINBL reduces to
-the NB distribution.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\gamma_1 &gt; 0</annotation></semantics></math>:
+describes the rate at which the excess-zero probability decreases as the
+average abundance increases. As
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>0</mn></msub><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\gamma_0 \to 0</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>→</mo><mi>∞</mi></mrow><annotation encoding="application/x-tex">\gamma_1 \to \infty</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\pi \to 0</annotation></semantics></math>
+and the ZINBL reduces to the NB distribution.</li>
 </ul>
 <p>Muck around with parameters <a href="https://salt-ecology.shinyapps.io/nb-zinbl-prior-specs/" class="external-link">here</a>.</p>
 <p>As with the negative binomial model, the <code>modskurt</code>
 package suggests some default priors that <em>should</em> just work
 🤞🤞:</p>
-<p><span class="math display">\[
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>κ</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mtext mathvariant="normal">Exponential</mtext><mo stretchy="false" form="prefix">(</mo><mn>0.5</mn><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>γ</mi><mn>0</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mtext mathvariant="normal">Normal</mtext><mo stretchy="false" form="prefix">(</mo><mn>3.0</mn><mo>,</mo><mn>1.5</mn><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>γ</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mtext mathvariant="normal">HalfNormal</mtext><mo stretchy="false" form="prefix">(</mo><mn>5.0</mn><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{align}
 \kappa &amp;\sim \text{Exponential}(0.5) \\
 \gamma_0 &amp;\sim \text{Normal}(3.0, 1.5) \\
 \gamma_1 &amp;\sim \text{HalfNormal}(5.0)
 \end{align}
-\]</span></p>
+</annotation></semantics></math></p>
 <p>Note, now that we have sampling effort, we can internally standardise
-counts to catch per unit effort (CPUE), <span class="math inline">\(y /
-\text{area_swept}\)</span>, in the model using</p>
-<p><span class="math display">\[
-y_n \sim \text{ZINBL}\left[\text{area_swept} \cdot \mu_n, \kappa,
-\pi_n\right]
-\]</span></p>
+counts to catch per unit effort (CPUE),
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mi>/</mi><mtext mathvariant="normal">area_swept</mtext></mrow><annotation encoding="application/x-tex">y / \text{area_swept}</annotation></semantics></math>,
+in the model using</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>n</mi></msub><mo>∼</mo><mtext mathvariant="normal">ZINBL</mtext><mrow><mo stretchy="true" form="prefix">[</mo><mtext mathvariant="normal">area_swept</mtext><mo>⋅</mo><msub><mi>μ</mi><mi>n</mi></msub><mo>,</mo><mi>κ</mi><mo>,</mo><msub><mi>π</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+y_n \sim \text{ZINBL}\left[\text{area_swept} \cdot \mu_n, \kappa, \pi_n\right]
+</annotation></semantics></math></p>
 <p>Specifying the model in <code>R</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span></span>
@@ -265,8 +243,8 @@ y_n \sim \text{ZINBL}\left[\text{area_swept} \cdot \mu_n, \kappa,
 <span>            shape <span class="op">=</span> <span class="st">'rdp'</span>,</span>
 <span>            subset_prop <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></code></pre></div>
 <p>A quick look at the model spec for the full dataset shows that the
-zero proportion is about <span class="math inline">\(2252 / 2330 =
-0.97\)</span>:</p>
+zero proportion is about
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2252</mn><mi>/</mi><mn>2330</mn><mo>=</mo><mn>0.97</mn></mrow><annotation encoding="application/x-tex">2252 / 2330 = 0.97</annotation></semantics></math>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">spec</span><span class="op">$</span><span class="fu">full</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## List of 4</span></span>
@@ -300,7 +278,7 @@ excess-zero probabilities they predict.</p>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dens.html">check_prior_dens</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/check-prior-dens-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/check-prior-dens-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="prior-predictions-for-the-modskurt-mean">Prior predictions for the <code>modskurt</code> mean<a class="anchor" aria-label="anchor" href="#prior-predictions-for-the-modskurt-mean"></a>
@@ -312,22 +290,24 @@ when looking at prior predictions for mean abundance:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_mskt.html">check_prior_mskt</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="linked-zero-inflation_files/figure-html/check-prior-mskt-1.png" alt="Line opacity shows the prior probability of jointly observing the parameters that predict that shape" width="100%"><p class="caption">
+<img src="linked-zero-inflation_files/figure-html/check-prior-mskt-1.png" class="r-plt" alt="Line opacity shows the prior probability of jointly observing the parameters that predict that shape" width="100%"><p class="caption">
 Line opacity shows the prior probability of jointly observing the
 parameters that predict that shape
 </p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="prior-predictions-for-summary-statistics-of-y">Prior predictions for summary statistics of <span class="math inline">\(y\)</span><a class="anchor" aria-label="anchor" href="#prior-predictions-for-summary-statistics-of-y"></a>
+<h3 id="prior-predictions-for-summary-statistics-of-y">Prior predictions for summary statistics of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#prior-predictions-for-summary-statistics-of-y"></a>
 </h3>
 <p>Dispersion is a little high again?</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_dist.html">check_prior_dist</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/check-prior-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/check-prior-dist-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
-<h3 id="prior-predictions-for-probability-of-excess-zero-pi">Prior predictions for probability of excess zero <span class="math inline">\(\pi\)</span><a class="anchor" aria-label="anchor" href="#prior-predictions-for-probability-of-excess-zero-pi"></a>
+<h3 id="prior-predictions-for-probability-of-excess-zero-pi">Prior predictions for probability of excess zero
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#prior-predictions-for-probability-of-excess-zero-pi"></a>
 </h3>
 <p>This is a new test, showing how excess-zero probabilities interact
 with mean abundances using a simple bell-shaped mean shape (black line).
@@ -340,7 +320,7 @@ while the <code>zinbl</code> model keeps it a lot higher till mean
 abundances almost reach their peak:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_prior_zero.html">check_prior_zero</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/check-prior-zero-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/check-prior-zero-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 <p><em>OPTIONAL</em>: refine model spec further</p>
 </div>
 </div>
@@ -371,36 +351,38 @@ parameter confirm this, where some of the chains may not have mixed
 <pre><code><span><span class="co">## $summary</span></span>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 9 × 10</span></span></span>
 <span><span class="co">##   <span style="font-weight: bold;">variable</span>    <span style="font-weight: bold;">mean</span>  <span style="font-weight: bold;">median</span>      <span style="font-weight: bold;">sd</span>     <span style="font-weight: bold;">mad</span>     <span style="font-weight: bold;">q5</span>     <span style="font-weight: bold;">q95</span>   <span style="font-weight: bold;">rhat</span>  <span style="font-weight: bold;">ess_bulk</span></span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        277.    221.    194.    130.    94.7   657.      1.02 203 (0.3)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m          6.70    6.67    <span style="color: #949494;">0.</span>200   <span style="color: #949494;">0.</span>201  6.40    7.07    <span style="background-color: #BBBB00;">1.05</span> 101 (0.2)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s          <span style="color: #949494;">0.</span>389   <span style="color: #949494;">0.</span>348   <span style="color: #949494;">0.</span>172   <span style="color: #949494;">0.</span>156  <span style="color: #949494;">0.</span>168   <span style="color: #949494;">0.</span>712   1.03 182 (0.3)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r          <span style="color: #949494;">0.</span>672   <span style="color: #949494;">0.</span>704   <span style="color: #949494;">0.</span>191   <span style="color: #949494;">0.</span>199  <span style="color: #949494;">0.</span>317   <span style="color: #949494;">0.</span>934   1.02 242 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d          2.65    1.98    2.18    1.58   <span style="color: #949494;">0.</span>449   7.07    1.02 197 (0.3)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p          1.07    1.07    <span style="color: #949494;">0.</span>515   <span style="color: #949494;">0.</span>653  <span style="color: #949494;">0.</span>246   1.85    1.02 335 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap        2.10    2.08    <span style="color: #949494;">0.</span>238   <span style="color: #949494;">0.</span>233  1.74    2.55    1.01 282 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">8</span> g0[1]      3.94    3.89    <span style="color: #949494;">0.</span>345   <span style="color: #949494;">0.</span>359  3.42    4.51    1.04 171 (0.3)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">9</span> g1[1]      1.05    1.05    <span style="color: #949494;">0.</span>276   <span style="color: #949494;">0.</span>291  <span style="color: #949494;">0.</span>596   1.50    1.04 161 (0.3)</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        269.    206.    196.    116.    90.6   665.      1.02 427 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m          6.71    6.69    <span style="color: #949494;">0.</span>202   <span style="color: #949494;">0.</span>211  6.40    7.05    1.02 240 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s          <span style="color: #949494;">0.</span>394   <span style="color: #949494;">0.</span>366   <span style="color: #949494;">0.</span>165   <span style="color: #949494;">0.</span>137  <span style="color: #949494;">0.</span>195   <span style="color: #949494;">0.</span>684   1.02 326 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r          <span style="color: #949494;">0.</span>665   <span style="color: #949494;">0.</span>676   <span style="color: #949494;">0.</span>179   <span style="color: #949494;">0.</span>197  <span style="color: #949494;">0.</span>363   <span style="color: #949494;">0.</span>923   1.01 380 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d          2.34    1.88    1.69    1.40   <span style="color: #949494;">0.</span>455   5.91    1.01 290 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p          1.04    1.05    <span style="color: #949494;">0.</span>524   <span style="color: #949494;">0.</span>629  <span style="color: #949494;">0.</span>189   1.88    1.02 429 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap        2.09    2.07    <span style="color: #949494;">0.</span>256   <span style="color: #949494;">0.</span>273  1.70    2.52    1.01 502 (0.8)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">8</span> g0[1]      3.92    3.89    <span style="color: #949494;">0.</span>354   <span style="color: #949494;">0.</span>317  3.39    4.55    1.02 304 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">9</span> g1[1]      1.06    1.06    <span style="color: #949494;">0.</span>287   <span style="color: #949494;">0.</span>289  <span style="color: #949494;">0.</span>601   1.54    1.03 228 (0.4)</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 1 more variable: </span><span style="color: #949494; font-weight: bold;">ess_tail</span><span style="color: #949494;"> &lt;ess&gt;</span></span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
-<span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1  6.957    2.858  9.815             2                 0 0.8508828</span></span>
-<span><span class="co">## 2        2  6.832    2.673  9.505             1                 0 1.1861269</span></span>
-<span><span class="co">## 3        3  5.337    2.299  7.636             5                 0 1.0944825</span></span>
-<span><span class="co">## 4        4  5.592    1.917  7.509            18                 0 0.9643593</span></span>
-<span><span class="co">## 5        5  7.099    3.163 10.262             2                 0 1.0613385</span></span>
-<span><span class="co">## 6        6  7.304    2.491  9.795             1                 0 0.8744557</span></span></code></pre>
+<span><span class="co">##   chain_id warmup sampling total num_divergent num_max_treedepth     ebfmi</span></span>
+<span><span class="co">## 1        1  1.646    0.589 2.235             4                 0 0.8299444</span></span>
+<span><span class="co">## 2        2  1.578    0.624 2.202             1                 0 0.7685627</span></span>
+<span><span class="co">## 3        3  1.784    0.609 2.393             1                 0 1.1386688</span></span>
+<span><span class="co">## 4        4  1.812    0.681 2.493             3                 0 0.9649392</span></span>
+<span><span class="co">## 5        5  1.672    0.755 2.427             3                 0 0.8333944</span></span>
+<span><span class="co">## 6        6  1.764    0.705 2.469             4                 0 0.8922780</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-subset-model">Check subset model<a class="anchor" aria-label="anchor" href="#check-subset-model"></a>
 </h3>
-<p>To dig deeper into the high <code>rhat</code>, <span class="math inline">\(\hat{R}\)</span>, values for <code>m</code> we can
-look at the marginal posterior distributions for each chain:</p>
+<p>To dig deeper into the high <code>rhat</code>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>R</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{R}</annotation></semantics></math>,
+values for <code>m</code> we can look at the marginal posterior
+distributions for each chain:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># visual display of chain mixing and prior-data conflicts</span></span>
 <span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_subset</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/check-post-dens-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/check-post-dens-subset-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 <p>The <code>m</code> issue isn’t apparent visually, there’s something
 with <code>m</code> and <code>r</code> discussed in thesis.</p>
 <p>Moving forward, we can compare the CDF of the posterior predictive
@@ -409,7 +391,7 @@ a discrete probability integral transform plot:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># uses test set for discrete pit</span></span>
 <span><span class="fu"><a href="../reference/check_post_calibration.html">check_post_calibration</a></span><span class="op">(</span><span class="va">fit_subset</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/check-post-calibration-subset-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/check-post-calibration-subset-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 <p>The little uptick at the end suggests that the posterior distribution
 predicts both training (subset, seen) data and test (unseen) data well
 up until the very highest counts, where it might be slightly
@@ -420,7 +402,7 @@ with the <code>bayesplot</code> package using similar methods as
 <code class="sourceCode R"><span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/PPC-test-statistics.html" class="external-link">ppc_stat</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">spec</span><span class="op">$</span><span class="fu">subset</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">train</span><span class="op">$</span><span class="va">y</span>,</span>
 <span>                    yrep <span class="op">=</span> <span class="va">fit_subset</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="st">'y_rep'</span>, format <span class="op">=</span> <span class="st">'matrix'</span><span class="op">)</span>,</span>
 <span>                    stat <span class="op">=</span> <span class="st">'max'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-1-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 </div>
 </div>
@@ -455,23 +437,23 @@ should clear those. The parameter diagnostics all look good:</p>
 <pre><code><span><span class="co">## $summary</span></span>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 9 × 8</span></span></span>
 <span><span class="co">##   <span style="font-weight: bold;">variable</span>  <span style="font-weight: bold;">median</span>     <span style="font-weight: bold;">mad</span>      <span style="font-weight: bold;">q5</span>      <span style="font-weight: bold;">q95</span>   <span style="font-weight: bold;">rhat</span>   <span style="font-weight: bold;">ess_bulk</span>   <span style="font-weight: bold;">ess_tail</span></span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;num&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;num&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        792.    257.    476.    <span style="text-decoration: underline;">1</span>48<span style="color: #949494;">4</span>.         1 3132 (0.8) 2272 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> m          6.60    <span style="color: #949494;">0.</span>157   6.39     6.87       1 1651 (0.4) 1593 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> s          <span style="color: #949494;">0.</span>513   <span style="color: #949494;">0.</span>135   <span style="color: #949494;">0.</span>346    <span style="color: #949494;">0.</span>844      1 1998 (0.5) 2290 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> r          <span style="color: #949494;">0.</span>822   <span style="color: #949494;">0.</span>132   <span style="color: #949494;">0.</span>527    <span style="color: #949494;">0.</span>962      1 1703 (0.4) 2434 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d          1.70    <span style="color: #949494;">0.</span>852   <span style="color: #949494;">0.</span>596    3.57       1 1890 (0.5) 1929 (0.5)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> p          <span style="color: #949494;">0.</span>693   <span style="color: #949494;">0.</span>611   <span style="color: #949494;">0.</span>106    1.76       1 2598 (0.6) 1744 (0.4)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap        2.32    <span style="color: #949494;">0.</span>144   2.10     2.57       1 3055 (0.8) 2570 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">8</span> g0[1]      4.39    <span style="color: #949494;">0.</span>255   4.01     4.83       1 2288 (0.6) 2303 (0.6)</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">9</span> g1[1]      1.21    <span style="color: #949494;">0.</span>189   <span style="color: #949494;">0.</span>908    1.53       1 2271 (0.6) 1789 (0.4)</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;rhat&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;ess&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> H        789.    264.    471.    <span style="text-decoration: underline;">1</span>43<span style="color: #949494;">6</span>.         1 3236 (0.8) 2279 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> m          6.59    <span style="color: #949494;">0.</span>154   6.39     6.88       1 1698 (0.4) 1420 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> s          <span style="color: #949494;">0.</span>512   <span style="color: #949494;">0.</span>142   <span style="color: #949494;">0.</span>347    <span style="color: #949494;">0.</span>827      1 1519 (0.4) 2581 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> r          <span style="color: #949494;">0.</span>825   <span style="color: #949494;">0.</span>130   <span style="color: #949494;">0.</span>538    <span style="color: #949494;">0.</span>963      1 1836 (0.5) 2253 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> d          1.72    <span style="color: #949494;">0.</span>828   <span style="color: #949494;">0.</span>555    3.61       1 1288 (0.3) 1591 (0.4)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> p          <span style="color: #949494;">0.</span>718   <span style="color: #949494;">0.</span>616   <span style="color: #949494;">0.</span>116    1.76       1 2542 (0.6) 1819 (0.5)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span> kap        2.33    <span style="color: #949494;">0.</span>143   2.10     2.59       1 3720 (0.9) 2581 (0.6)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">8</span> g0[1]      4.38    <span style="color: #949494;">0.</span>253   4.00     4.81       1 2578 (0.6) 2659 (0.7)</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">9</span> g1[1]      1.20    <span style="color: #949494;">0.</span>186   <span style="color: #949494;">0.</span>914    1.52       1 2272 (0.6) 2246 (0.6)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $diagnostics</span></span>
-<span><span class="co">##   chain_id warmup sampling   total num_divergent num_max_treedepth     ebfmi</span></span>
-<span><span class="co">## 1        1 76.673   77.174 153.847            24                 0 0.9714918</span></span>
-<span><span class="co">## 2        2 69.619   86.683 156.302            18                 0 0.9745719</span></span>
-<span><span class="co">## 3        3 62.849   91.757 154.606            13                 0 0.9514785</span></span>
-<span><span class="co">## 4        4 64.366   92.064 156.430            24                 0 1.0103720</span></span></code></pre>
+<span><span class="co">##   chain_id warmup sampling  total num_divergent num_max_treedepth     ebfmi</span></span>
+<span><span class="co">## 1        1 18.104   20.751 38.855            18                 0 0.9752564</span></span>
+<span><span class="co">## 2        2 17.878   20.385 38.263            20                 0 0.9312918</span></span>
+<span><span class="co">## 3        3 21.817   19.346 41.163            18                 0 0.9686105</span></span>
+<span><span class="co">## 4        4 16.733   20.122 36.855            21                 0 0.9457264</span></span></code></pre>
 <p><em>OPTIONAL</em>: refine model spec or fit parameters</p>
 <div class="section level3">
 <h3 id="check-full-model">Check full model<a class="anchor" aria-label="anchor" href="#check-full-model"></a>
@@ -480,19 +462,18 @@ should clear those. The parameter diagnostics all look good:</p>
 again:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_post_dens.html">check_post_dens</a></span><span class="op">(</span><span class="va">fit_full</span>, by_chain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-2-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 <p>Much more certain, or precise. Using approximate leave-one-out
 cross-validation (LOO-CV) we can identify data points the posterior
 struggles to predict:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># can be slow for large N</span></span>
 <span><span class="fu"><a href="../reference/check_post_influencers.html">check_post_influencers</a></span><span class="op">(</span><span class="va">fit_full</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##               pareto_khat Sebastes proriger (CPUE) SST (°C) Area swept (ha)</span></span>
-<span><span class="co">## log_lik[1723]        0.50                        0      9.2             1.7</span></span>
-<span><span class="co">## log_lik[1986]        0.55                        0      6.4             1.9</span></span>
-<span><span class="co">## log_lik[2287]        0.69                        0      6.3             1.8</span></span>
-<span><span class="co">## log_lik[2330]        1.63                        0      6.1             1.5</span></span></code></pre>
-<p><img src="linked-zero-inflation_files/figure-html/check-post-influencers-full-1.png" width="100%" style="display: block; margin: auto;"></p>
+<pre><code><span><span class="co">##      pareto_khat Sebastes proriger (CPUE) SST (°C) Area swept (ha)</span></span>
+<span><span class="co">## 1986        0.52                        0      6.4             1.9</span></span>
+<span><span class="co">## 2287        0.71                        0      6.3             1.8</span></span>
+<span><span class="co">## 2330        1.14                        0      6.1             1.5</span></span></code></pre>
+<p><img src="linked-zero-inflation_files/figure-html/check-post-influencers-full-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 <p>A few zero-counts in mid-range temperatures, possibly the complex
 interaction between mean shape, dispersion, and linked zero-inflation
 struggling ever so slightly.</p>
@@ -515,7 +496,7 @@ excess-zeros:</p>
 <span>               include_zero_inflation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>               summaries <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'mean'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_sqrt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="linked-zero-inflation_files/figure-html/use-full-fit-dist-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="linked-zero-inflation_files/figure-html/use-full-fit-dist-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="calculate-ranges-of-x-for-different-percentages-of-abundance-measures">Calculate ranges of x for different percentages of abundance
@@ -535,13 +516,16 @@ the highest predicted mean CPUE:</p>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Species range (see x.avg row) calculated as the region of x where the NB mean abundance (NB mean) is within 50% of the highest value of NB mean along x (averaged across posterior draws):</span></span>
 <span><span class="co">##                  left       centre        right</span></span>
-<span><span class="co">## mean.avg 670.44891756 904.81914000 474.51893029</span></span>
-<span><span class="co">## mean.se   49.18261339  53.03304984  27.64652351</span></span>
-<span><span class="co">## x.avg      6.33893171   6.61184220   7.51756997</span></span>
-<span><span class="co">## x.se       0.02492162   0.01915691   0.02178029</span></span></code></pre>
-<p><img src="linked-zero-inflation_files/figure-html/use-full-fit-range-plot-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p>About <span class="math inline">\(6.3\)</span> to <span class="math inline">\(7.5\)</span> degree celsius, this may be useful,
-somewhere?</p>
+<span><span class="co">## mean.avg 562.56833971 800.29209800 414.59239958</span></span>
+<span><span class="co">## mean.se   35.07234158  41.24081152  23.52962282</span></span>
+<span><span class="co">## x.avg      6.30041427   6.61926922   7.55058097</span></span>
+<span><span class="co">## x.se       0.02242914   0.02134568   0.02648499</span></span></code></pre>
+<p><img src="linked-zero-inflation_files/figure-html/use-full-fit-range-plot-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<p>About
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>6.3</mn><annotation encoding="application/x-tex">6.3</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>7.5</mn><annotation encoding="application/x-tex">7.5</annotation></semantics></math>
+degree celsius, this may be useful, somewhere?</p>
 </div>
 </div>
 <div class="section level2">
@@ -555,28 +539,26 @@ powerful, but possibly limited to very sparse data and careful prior
 specification to reliably estimate a credible posterior over a more
 complex likelihood surface.</p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Hayden Rabel, Adam Smith, Marti Anderson, the team at PRIMER-e.</p>
+  <p>Developed by Hayden Rabel, Adam Smith, Marti Anderson, the team at PRIMER-e.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
